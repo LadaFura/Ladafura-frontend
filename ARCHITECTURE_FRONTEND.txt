@@ -1,0 +1,225 @@
+================================================================================
+          PROPOSITION D'ARCHITECTURE FRONTEND FLUTTER - PROJET LADAFURA
+                 Conforme au Cahier des Charges Officiel (INRMPT Mali)
+================================================================================
+Architecture modulaire : CORE / SHARED / FEATURES
+Gestionnaire d'état : Riverpod (recommandé) ou Bloc
+Client HTTP : Dio (avec Intercepteur Firebase JWT & retry réseau)
+Navigation : GoRouter (déclarative, avec RouteGuard par rôle)
+
+RÉPARTITION STRUCTURELLE :
+- CORE/     : Infrastructure, configuration technique, réseau, routage, services de base
+- SHARED/   : Modèles transversaux, énumérations, widgets et composants UI partagés
+- FEATURES/ : Modules métiers spécifiques aux 3 acteurs mobiles (Population, Agent, Pharmacopée)
+
+NOTE D'ARCHITECTURE MAJEURE :
+Le rôle ADMINISTRATEUR (US-25 à US-32) est géré sur un portail Web dédié ANGULAR.
+L'application FLUTTER implémente EXCLUSIVEMENT les 3 acteurs mobiles :
+  1. POPULATION (Citoyens)           : US-01 à US-12
+  2. AGENT DE COLLECTE (Terrain)     : US-13 à US-17
+  3. PHARMACOPÉE (Officines)         : US-18 à US-24
+================================================================================
+
+lib/
+│
+├── main.dart                                   # Point d'entrée, initialisation Firebase & configuration système
+├── app.dart                                    # Racine MaterialApp, thème Ladafura, injection GoRouter
+│
+│
+├── core/                                       # ======================================================
+│   │                                           # 1. INFRASTRUCTURE & FONDATIONS TECHNIQUES DU PROJET
+│   │                                           # ======================================================
+│   ├── constants/
+│   │   ├── api_endpoints.dart                  # URLs de base (http://localhost:8080/api/v1/...) et routes REST
+│   │   ├── app_colors.dart                     # Palette : Vert médicinal, Ocre terre, Or, Neutres
+│   │   ├── app_text_styles.dart                # Typographie lisible et hiérarchisée
+│   │   ├── app_assets.dart                     # Logos INRMPT / Ladafura, icônes botaniques SVG
+│   │   └── app_dimensions.dart                 # Marges, espacements et rayons standardisés
+│   │
+│   ├── theme/
+│   │   ├── app_theme.dart                      # Thème Material 3 adaptatif (Clair / Sombre)
+│   │   ├── button_theme.dart                   # Styles des boutons d'action
+│   │   └── input_theme.dart                    # Styles des champs de formulaire
+│   │
+│   ├── network/
+│   │   ├── api_client.dart                     # Client HTTP Dio singleton (timeout 15s adapté réseau Mali)
+│   │   ├── auth_interceptor.dart               # Injection automatique du Bearer Token Firebase JWT
+│   │   ├── error_handler.dart                  # Décodage des erreurs HTTP et messages utilisateur clairs
+│   │   └── api_response.dart                   # Structure générique réponse (success, data, message, errors)
+│   │
+│   ├── routing/
+│   │   ├── app_router.dart                     # Configuration centrale GoRouter
+│   │   ├── route_names.dart                    # Définition unique des URLs et identifiants de routes
+│   │   └── route_guard.dart                    # Redirection automatique selon le rôle (Population/Agent/Pharmacopée)
+│   │
+│   └── services/
+│       ├── storage_service.dart                # Stockage sécurisé des préférences et jetons de session
+│       ├── location_service.dart               # Capture des coordonnées GPS (pour cartographie et collectes)
+│       ├── audio_recorder_service.dart         # Enregistrement audio des récits traditionnels (US-15)
+│       └── notification_service.dart           # Réception des alertes in-app et push (EF32)
+│
+│
+├── shared/                                     # ======================================================
+│   │                                           # 2. RESSOURCES & COMPOSANTS TRANSVERSAUX (SHARED)
+│   │                                           # ======================================================
+│   ├── models/                                 # Modèles de données partagés entre plusieurs features
+│   │   ├── utilisateur_model.dart              # Utilisateur courant, profil, téléphone, rôle
+│   │   ├── localisation_mali_model.dart        # Découpage administratif : Région, Cercle, Commune, GPS (US-16)
+│   │   ├── plante_sommaire_model.dart          # Résumé d'une plante (nom scientifique, nom local, photo)
+│   │   ├── produit_sommaire_model.dart         # Résumé d'un produit (nom, prix, disponibilité)
+│   │   └── page_response.dart                  # Wrapper générique de pagination Spring Data
+│   │
+│   ├── enums/                                  # Énumérations métier globales
+│   │   ├── user_role.dart                      # POPULATION, AGENT_COLLECTE, PHARMACOPEE (Note: ADMIN sur Angular)
+│   │   ├── statut_collecte.dart                # BROUILLON, SOUMISE, VALIDEE, REJETEE, CORRECTION_DEMANDEE
+│   │   ├── statut_commande.dart                # EN_ATTENTE, VALIDEE, PREPAREE, EXPEDIEE, LIVREE, ANNULEE
+│   │   ├── methode_paiement.dart               # MOBILE_MONEY (Orange/Wave), ESPECES (Cash), CARTE_BANCAIRE
+│   │   └── mode_retrait_type.dart              # RETRAIT_OFFICINE (Gratuit), LIVRAISON_DOMICILE (Payant)
+│   │
+│   ├── widgets/                                # Composants d'interface réutilisables dans toute l'application
+│   │   ├── buttons/
+│   │   │   ├── primary_button.dart             # Bouton d'action principal avec gestion du loading
+│   │   │   └── secondary_button.dart           # Bouton secondaire borduré
+│   │   ├── inputs/
+│   │   │   ├── custom_text_field.dart          # Champ de saisie stylisé avec validation intégrée
+│   │   │   └── search_bar_widget.dart          # Barre de recherche commune avec suggestions
+│   │   ├── cards/
+│   │   │   ├── plante_card.dart                # Carte plante réutilisable (Population & Agent)
+│   │   │   ├── produit_card.dart               # Carte remède traditionnel réutilisable (Population & Pharmacopée)
+│   │   │   └── status_badge.dart               # Badge coloré dynamique pour statuts (commandes, collectes)
+│   │   ├── feedback/
+│   │   │   ├── app_loading_indicator.dart      # Spinner / skeleton loaders
+│   │   │   ├── app_empty_state.dart            # Illustration d'état vide avec message
+│   │   │   ├── app_error_widget.dart           # Vue d'erreur réseau avec bouton 'Réessayer'
+│   │   │   └── medical_disclaimer_banner.dart  # Avertissement légal ENF11 (Pas de diagnostic médical)
+│   │   └── media/
+│   │       ├── app_cached_image.dart           # Image avec mise en cache locale et placeholder
+│   │       └── audio_player_widget.dart        # Lecteur audio partagé pour écoute des récits et prononciations
+│   │
+│   └── utils/                                  # Fonctions utilitaires transversales
+│       ├── validators.dart                     # Validateurs formulaires (téléphone malien, mot de passe)
+│       ├── formatters.dart                     # Formatage des montants en Franc CFA (ex: 2 500 FCFA)
+│       └── date_utils.dart                     # Formatage des dates et heures locales
+│
+│
+└── features/                                   # ======================================================
+    │                                           # 3. MODULES MÉTIER DÉDIÉS AUX 3 ACTEURS FLUTTER
+    │                                           # ======================================================
+    ├── auth/                                   # MODULE A : AUTHENTIFICATION & SÉLECTION DE RÔLE
+    │   ├── data/
+    │   │   └── auth_repository.dart            # Inscription autonome (EF01), Connexion (EF02), Sync Firebase
+    │   ├── providers/
+    │   │   └── auth_state.dart                 # Gestion de session active, profil, déconnexion
+    │   └── presentation/
+    │       ├── splash_screen.dart              # Contrôle du token Firebase et aiguillage vers l'espace concerné
+    │       ├── onboarding_screen.dart          # Présentation du projet Ladafura et de ses missions
+    │       ├── login_screen.dart               # Connexion par numéro de téléphone / mot de passe
+    │       ├── register_screen.dart            # Inscription Citoyen, Agent ou Pharmacopée
+    │       └── role_selection_screen.dart      # Aiguillage initial vers l'espace dédié de l'utilisateur
+    │
+    ├── population/                             # MODULE B : ACTEUR 1 - CITOYEN / POPULATION (US-01 à US-12)
+    │   ├── data/
+    │   │   ├── population_repository.dart      # API client /api/v1/population/**
+    │   │   └── models/
+    │   │       ├── plante_model.dart           # Fiche plante, noms vernaculaires, usages, sources, études (US-02)
+    │   │       ├── maladie_model.dart          # Pathologies documentées (US-03)
+    │   │       ├── produit_model.dart          # Remède traditionnel, composition plantes, prix (US-04)
+    │   │       ├── pharmacopee_fiche_model.dart# Profil officine, coordonnées, horaires, modes retrait (US-05)
+    │   │       ├── panier_model.dart           # Panier client, quantité, calcul du total (US-07)
+    │   │       ├── commande_model.dart         # Commande, identifiant, statut, mode retrait, paiement (US-08 à 11)
+    │   │       └── avis_model.dart             # Notation et commentaire vérifié post-achat (US-12)
+    │   ├── providers/
+    │   │   ├── recherche_provider.dart         # Moteur de recherche multicritère : plante, maladie, produit (US-01/03/04)
+    │   │   ├── panier_provider.dart            # Gestion d'état du panier (ajout, mise à jour, suppression) (US-07)
+    │   │   ├── commande_provider.dart          # Suivi du cycle de vie des commandes de l'utilisateur (US-11)
+    │   │   └── favoris_provider.dart           # Sauvegarde locale/serveur des plantes et produits favoris (EF30)
+    │   └── presentation/
+    │       ├── home_screen.dart                # Accueil citoyen : recherche rapide, plantes phares, catégories
+    │       ├── recherche/
+    │       │   ├── recherche_screen.dart       # Saisie par nom scientifique, local ou maladie (US-01, US-03, US-04)
+    │       │   └── filtres_recherche_modal.dart# Filtres par région du Mali, forme de produit, disponibilité
+    │       ├── plante/
+    │       │   └── plante_detail_screen.dart   # Fiche plante complète avec distinction Tradition vs Science (US-02)
+    │       ├── produit/
+    │       │   ├── produit_detail_screen.dart  # Fiche produit, composition en plantes, pharmacopée vendeuse
+    │       │   └── widgets/panier_bottom_bar.dart # Bouton rapide d'ajout au panier avec choix quantité
+    │       ├── marketplace/
+    │       │   └── marketplace_screen.dart     # Catalogue des remèdes disponibles auprès des officines (US-06)
+    │       ├── cartographie/
+    │       │   ├── carte_officines_screen.dart # Carte interactive avec calcul de proximité GPS (US-05, EF23)
+    │       │   └── widgets/officine_card.dart  # Carte résumé de l'officine avec boutons itinéraire & contact
+    │       ├── panier/
+    │       │   ├── panier_screen.dart          # Consultation et ajustement des articles du panier (US-07)
+    │       │   ├── mode_retrait_selection_screen.dart # Choix Livraison (avec frais) ou Pickup (gratuit) (US-09)
+    │       │   └── paiement_screen.dart        # Choix : Mobile Money (Orange/Wave), Espèces, Carte (US-10)
+    │       ├── commandes/
+    │       │   ├── commandes_list_screen.dart  # Historique chronologique des commandes (US-11)
+    │       │   ├── commande_detail_screen.dart # Détail commande, statut en temps réel et justificatif
+    │       │   └── rediger_avis_screen.dart    # Formulaire de notation et commentaire vérifié (US-12)
+    │       ├── favoris/
+    │       │   └── favoris_screen.dart         # Gestion des plantes et remèdes favoris
+    │       └── profil/
+    │           ├── profil_screen.dart          # Coordonnées du citoyen, gestion du compte
+    │           └── historique_depenses_screen.dart # Récapitulatif personnel des achats et dépenses
+    │
+    ├── agent/                                  # MODULE C : ACTEUR 2 - AGENT DE COLLECTE TERRAIN (US-13 à US-17)
+    │   ├── data/
+    │   │   ├── agent_repository.dart           # API client /api/v1/agent/**
+    │   │   └── models/
+    │   │       ├── collecte_form_model.dart    # Données complètes de la collecte terrain (US-13)
+    │   │       ├── source_terrain_model.dart   # Tradipraticien / Informateur (nom, type, localité) (US-14)
+    │   │       └── media_collecte_model.dart   # Fichiers photos et enregistrements audio (US-15)
+    │   ├── providers/
+    │   │   ├── agent_collectes_provider.dart   # Liste des collectes de l'agent et statuts
+    │   │   ├── audio_recording_provider.dart   # Enregistreur audio intégré avec pré-écoute (US-15)
+    │   │   └── offline_sync_provider.dart      # File d'attente locale pour saisies hors réseau (Mali rural)
+    │   └── presentation/
+    │       ├── agent_dashboard_screen.dart     # Tableau de bord agent : métriques, collectes en attente
+    │       ├── collectes/
+    │       │   ├── collectes_list_screen.dart  # Liste avec onglets : Brouillons, Soumises, Validées, À corriger
+    │       │   ├── nouvelle_collecte_wizard.dart # Formulaire pas-à-pas :
+    │       │   │   ├── etape1_identification_plante.dart # Plante existante ou proposition nouvelle plante
+    │       │   │   ├── etape2_connaissances_usages.dart  # Usages, partie utilisée, préparation, précautions
+    │       │   │   ├── etape3_source_information.dart    # Choix ou saisie tradipraticien/herboriste (US-14)
+    │       │   │   ├── etape4_localisation_mali.dart     # Région, Cercle, Commune, Localité, GPS (US-16)
+    │       │   │   └── etape5_medias_audio_photos.dart   # Photos géotaguées et enregistrement audio (US-15)
+    │       │   ├── collecte_detail_screen.dart # Consultation fiche soumise et remarques du modérateur (US-17)
+    │       │   └── modifier_collecte_screen.dart# Ajustement suite à demande de correction
+    │       └── sources/
+    │           ├── sources_list_screen.dart    # Annuaire terrain des informateurs et guérisseurs
+    │           └── ajouter_source_dialog.dart  # Saisie rapide d'un nouveau contact tradipraticien
+    │
+    └── pharmacopee/                            # MODULE D : ACTEUR 3 - OFFICINE / VENDEUR (US-18 à US-24)
+        ├── data/
+        │   ├── pharmacopee_repository.dart     # API client /api/v1/pharmacopee/**
+        │   └── models/
+        │       ├── referencement_form_model.dart # Demande d'adhésion et pièces justificatives (US-18)
+        │       ├── stock_produit_model.dart    # Produit référencé, prix, quantité en stock (US-20, US-21)
+        │       └── commande_officine_model.dart# Commande reçue, statut, mode retrait sélectionné (US-23)
+        ├── providers/
+        │   ├── stock_gestion_provider.dart     # Mise à jour des stocks et statut disponible/indisponible
+        │   ├── pharmacopee_orders_provider.dart# Réception et préparation des commandes clients
+        │   └── retrait_config_provider.dart    # Configuration Livraison et/ou Pickup + Frais (US-22)
+        └── presentation/
+            ├── referencement/
+            │   ├── demande_referencement_screen.dart # Formulaire d'agrément officiel (US-18)
+            │   └── statut_demande_screen.dart        # Suivi de la validation de la structure par l'INRMPT
+            ├── pharmacopee_dashboard_screen.dart     # Vue globale : commandes du jour, alertes stock
+            ├── stock/
+            │   ├── catalogue_stock_screen.dart       # Liste des produits avec badge disponible/indisponible (US-21)
+            │   ├── ajouter_produit_screen.dart       # Création produit : nom, catégorie, plantes, prix (US-20)
+            │   └── ajuster_quantite_dialog.dart      # Modification rapide des quantités en réserve
+            ├── modes_retrait/
+            │   └── config_retrait_screen.dart        # Switchs Livraison / Pickup et définition frais (US-22)
+            ├── commandes/
+            │   ├── commandes_recues_screen.dart      # Liste filtrable : À préparer, Prête, Expédiée (US-23)
+            │   ├── commande_officine_detail_screen.dart # Fiche de préparation de commande client
+            │   └── valider_pickup_screen.dart        # Validation du retrait client par code ou QR Code
+            ├── avis/
+            │   └── avis_clients_screen.dart          # Consultation des retours clients vérifiés (US-24)
+            └── profil/
+                └── profil_officine_screen.dart       # Horaires, coordonnées, localisation sur carte (US-19)
+
+================================================================================
+FIN DU DESCRIPTIF D'ARCHITECTURE FLUTTER (CORE / SHARED / FEATURES)
+================================================================================
