@@ -1,0 +1,1 @@
+import ladafura_frontend_flutter/core/constants/app_images.dart';
