@@ -3,14 +3,18 @@
                  Conforme au Cahier des Charges Officiel (INRMPT Mali)
 ================================================================================
 Architecture modulaire : CORE / SHARED / FEATURES
-Gestionnaire d'état : Riverpod (recommandé) ou Bloc
+Gestionnaire d'état officiel : Riverpod (flutter_riverpod)
 Client HTTP : Dio (avec Intercepteur Firebase JWT & retry réseau)
 Navigation : GoRouter (déclarative, avec RouteGuard par rôle)
+Organisation Presentation : Découpage systématique en screens/ et widgets/
 
 RÉPARTITION STRUCTURELLE :
 - CORE/     : Infrastructure, configuration technique, réseau, routage, services de base
 - SHARED/   : Modèles transversaux, énumérations, widgets et composants UI partagés
 - FEATURES/ : Modules métiers spécifiques aux 3 acteurs mobiles (Population, Agent, Pharmacopée)
+              Chaque sous-domaine de presentation/ contient :
+                * screens/ : Les pages et vues complètes (écrans)
+                * widgets/ : Les composants graphiques internes spécifiques au domaine
 
 NOTE D'ARCHITECTURE MAJEURE :
 Le rôle ADMINISTRATEUR (US-25 à US-32) est géré sur un portail Web dédié ANGULAR.
@@ -105,21 +109,40 @@ lib/
 └── features/                                   # ======================================================
     │                                           # 3. MODULES MÉTIER DÉDIÉS AUX 3 ACTEURS FLUTTER
     │                                           # ======================================================
+    │
     ├── auth/                                   # MODULE A : AUTHENTIFICATION & SÉLECTION DE RÔLE
     │   ├── data/
-    │   │   └── auth_repository.dart            # Inscription autonome (EF01), Connexion (EF02), Sync Firebase
+    │   │   ├── repositories/
+    │   │   │   └── auth_repository.dart        # Inscription autonome (EF01), Connexion (EF02), Sync Firebase
+    │   │   └── models/
+    │   │       ├── login_request_model.dart    # Identifiants de connexion
+    │   │       └── register_request_model.dart # Formulaire d'inscription avec sélection du rôle
     │   ├── providers/
-    │   │   └── auth_state.dart                 # Gestion de session active, profil, déconnexion
+    │   │   └── auth_state_provider.dart        # Riverpod StateNotifierProvider de session active
     │   └── presentation/
-    │       ├── splash_screen.dart              # Contrôle du token Firebase et aiguillage vers l'espace concerné
-    │       ├── onboarding_screen.dart          # Présentation du projet Ladafura et de ses missions
-    │       ├── login_screen.dart               # Connexion par numéro de téléphone / mot de passe
-    │       ├── register_screen.dart            # Inscription Citoyen, Agent ou Pharmacopée
-    │       └── role_selection_screen.dart      # Aiguillage initial vers l'espace dédié de l'utilisateur
+    │       ├── screens/
+    │       │   ├── splash_screen.dart          # Contrôle du token Firebase et aiguillage vers l'espace concerné
+    │       │   ├── onboarding_screen.dart      # Présentation du projet Ladafura et de ses missions
+    │       │   ├── login_screen.dart           # Connexion par numéro de téléphone / mot de passe
+    │       │   ├── register_screen.dart        # Inscription Citoyen, Agent ou Pharmacopée
+    │       │   └── role_selection_screen.dart  # Aiguillage initial vers l'espace dédié de l'utilisateur
+    │       └── widgets/
+    │           ├── auth_header_widget.dart     # Logo INRMPT et titre d'accueil
+    │           ├── phone_input_field.dart      # Saisie avec indicateur de pays (+223 Mali)
+    │           └── role_card_selector.dart     # Cartes de sélection du rôle (Citoyen / Agent / Pharmacopée)
+    │
     │
     ├── population/                             # MODULE B : ACTEUR 1 - CITOYEN / POPULATION (US-01 à US-12)
     │   ├── data/
-    │   │   ├── population_repository.dart      # API client /api/v1/population/**
+    │   │   ├── repositories/
+    │   │   │   ├── population_recherche_repository.dart # Recherche multicritère plante/maladie/produit (US-01, US-03, US-04)
+    │   │   │   ├── population_plante_repository.dart    # Fiches détaillées plantes & études (US-02)
+    │   │   │   ├── population_produit_repository.dart   # Fiches produits & marketplace (US-04, US-06)
+    │   │   │   ├── population_carte_repository.dart     # Cartographie interactive & officines à proximité (US-05, EF23)
+    │   │   │   ├── population_panier_repository.dart    # Panier d'achat & synchronisation (US-07)
+    │   │   │   ├── population_commande_repository.dart  # Passage de commande, retraits & paiements (US-08 à US-11)
+    │   │   │   ├── population_avis_repository.dart      # Avis et notations vérifiées (US-12)
+    │   │   │   └── population_favori_repository.dart    # Sauvegarde des favoris (EF30)
     │   │   └── models/
     │   │       ├── plante_model.dart           # Fiche plante, noms vernaculaires, usages, sources, études (US-02)
     │   │       ├── maladie_model.dart          # Pathologies documentées (US-03)
@@ -129,97 +152,192 @@ lib/
     │   │       ├── commande_model.dart         # Commande, identifiant, statut, mode retrait, paiement (US-08 à 11)
     │   │       └── avis_model.dart             # Notation et commentaire vérifié post-achat (US-12)
     │   ├── providers/
-    │   │   ├── recherche_provider.dart         # Moteur de recherche multicritère : plante, maladie, produit (US-01/03/04)
-    │   │   ├── panier_provider.dart            # Gestion d'état du panier (ajout, mise à jour, suppression) (US-07)
-    │   │   ├── commande_provider.dart          # Suivi du cycle de vie des commandes de l'utilisateur (US-11)
-    │   │   └── favoris_provider.dart           # Sauvegarde locale/serveur des plantes et produits favoris (EF30)
+    │   │   ├── recherche_provider.dart         # Riverpod : état de recherche multicritère (US-01/03/04)
+    │   │   ├── panier_provider.dart            # Riverpod : gestion d'état du panier (ajout, quantité, total) (US-07)
+    │   │   ├── commande_provider.dart          # Riverpod : suivi du cycle de vie des commandes (US-11)
+    │   │   └── favoris_provider.dart           # Riverpod : favoris synchronisés (EF30)
     │   └── presentation/
-    │       ├── home_screen.dart                # Accueil citoyen : recherche rapide, plantes phares, catégories
+    │       ├── home/
+    │       │   ├── screens/
+    │       │   │   └── home_screen.dart        # Accueil citoyen : recherche rapide, plantes phares, catégories
+    │       │   └── widgets/
+    │       │       ├── home_header_banner.dart # Message de bienvenue & rappel institutionnel INRMPT
+    │       │       ├── categories_chips_bar.dart # Filtres rapides par forme (Tisane, Poudre, Huile, Décoction)
+    │       │       └── plantes_vedettes_slider.dart # Carrousel des plantes médicinales populaires
     │       ├── recherche/
-    │       │   ├── recherche_screen.dart       # Saisie par nom scientifique, local ou maladie (US-01, US-03, US-04)
-    │       │   └── filtres_recherche_modal.dart# Filtres par région du Mali, forme de produit, disponibilité
+    │       │   ├── screens/
+    │       │   │   └── recherche_screen.dart   # Saisie par nom scientifique, local ou maladie (US-01, US-03, US-04)
+    │       │   └── widgets/
+    │       │       ├── filtres_recherche_modal.dart # Filtres par région du Mali, vertus, disponibilité
+    │       │       └── recherche_result_tile.dart   # Ligne de résultat enrichie (icône plante/produit, nom local)
     │       ├── plante/
-    │       │   └── plante_detail_screen.dart   # Fiche plante complète avec distinction Tradition vs Science (US-02)
+    │       │   ├── screens/
+    │       │   │   └── plante_detail_screen.dart# Fiche plante complète avec distinction Tradition vs Science (US-02)
+    │       │   └── widgets/
+    │       │       ├── savoir_traditionnel_box.dart # Encadré usages ancestraux & informateurs
+    │       │       ├── etudes_scientifiques_accordion.dart # Liste dépliable des validations scientifiques
+    │       │       └── audio_prononciation_button.dart # Bouton d'écoute du nom en langue locale (Bambara, Peul, etc.)
     │       ├── produit/
-    │       │   ├── produit_detail_screen.dart  # Fiche produit, composition en plantes, pharmacopée vendeuse
-    │       │   └── widgets/panier_bottom_bar.dart # Bouton rapide d'ajout au panier avec choix quantité
+    │       │   ├── screens/
+    │       │   │   └── produit_detail_screen.dart # Fiche produit, composition en plantes, pharmacopée vendeuse
+    │       │   └── widgets/
+    │       │       ├── composition_plantes_chips.dart # Badges des plantes entrant dans la composition
+    │       │       ├── officines_disponibles_list.dart# Liste des officines ayant ce produit en stock
+    │       │       └── panier_bottom_bar.dart      # Barre inférieure flottante avec sélecteur de quantité & ajout
     │       ├── marketplace/
-    │       │   └── marketplace_screen.dart     # Catalogue des remèdes disponibles auprès des officines (US-06)
+    │       │   ├── screens/
+    │       │   │   └── marketplace_screen.dart # Catalogue des remèdes disponibles auprès des officines (US-06)
+    │       │   └── widgets/
+    │       │       ├── marketplace_filter_row.dart # Tri par prix, disponibilité, officine
+    │       │       └── produit_grid_item.dart      # Carte produit avec bouton d'achat direct
     │       ├── cartographie/
-    │       │   ├── carte_officines_screen.dart # Carte interactive avec calcul de proximité GPS (US-05, EF23)
-    │       │   └── widgets/officine_card.dart  # Carte résumé de l'officine avec boutons itinéraire & contact
+    │       │   ├── screens/
+    │       │   │   └── carte_officines_screen.dart # Carte interactive avec calcul de proximité GPS (US-05, EF23)
+    │       │   └── widgets/
+    │       │       ├── officine_map_marker.dart    # Marqueur dynamique sur la carte
+    │       │       ├── officine_preview_card.dart  # Fiche en bas d'écran avec horaires, distance et itinéraire
+    │       │       └── distance_slider_widget.dart # Curseur pour ajuster le rayon de recherche (5 km, 10 km, etc.)
     │       ├── panier/
-    │       │   ├── panier_screen.dart          # Consultation et ajustement des articles du panier (US-07)
-    │       │   ├── mode_retrait_selection_screen.dart # Choix Livraison (avec frais) ou Pickup (gratuit) (US-09)
-    │       │   └── paiement_screen.dart        # Choix : Mobile Money (Orange/Wave), Espèces, Carte (US-10)
+    │       │   ├── screens/
+    │       │   │   ├── panier_screen.dart          # Consultation et ajustement des articles du panier (US-07)
+    │       │   │   ├── mode_retrait_screen.dart    # Choix Livraison (avec frais) ou Pickup (gratuit) (US-09)
+    │       │   │   └── paiement_screen.dart        # Choix : Mobile Money (Orange/Wave), Espèces, Carte (US-10)
+    │       │   └── widgets/
+    │       │       ├── panier_item_tile.dart       # Ligne d'article avec boutons + / - et suppression
+    │       │       ├── recap_prix_card.dart        # Récapitulatif sous-total, frais de livraison et total FCFA
+    │       │       └── methode_paiement_tile.dart  # Carte cliquable avec logo de la méthode (Orange Money, Wave, etc.)
     │       ├── commandes/
-    │       │   ├── commandes_list_screen.dart  # Historique chronologique des commandes (US-11)
-    │       │   ├── commande_detail_screen.dart # Détail commande, statut en temps réel et justificatif
-    │       │   └── rediger_avis_screen.dart    # Formulaire de notation et commentaire vérifié (US-12)
+    │       │   ├── screens/
+    │       │   │   ├── commandes_list_screen.dart  # Historique chronologique des commandes (US-11)
+    │       │   │   ├── commande_detail_screen.dart # Détail commande, statut en temps réel et justificatif
+    │       │   │   └── rediger_avis_screen.dart    # Formulaire de notation et commentaire vérifié (US-12)
+    │       │   └── widgets/
+    │       │       ├── commande_timeline_stepper.dart # Progression graphique (En attente -> Préparée -> Livrée)
+    │       │       ├── commande_summary_card.dart  # Résumé des articles et adresse de retrait/livraison
+    │       │       └── star_rating_bar.dart        # Sélecteur d'étoiles pour la note (1 à 5 étoiles)
     │       ├── favoris/
-    │       │   └── favoris_screen.dart         # Gestion des plantes et remèdes favoris
+    │       │   ├── screens/
+    │       │   │   └── favoris_screen.dart         # Gestion des plantes et remèdes favoris
+    │       │   └── widgets/
+    │       │       └── favori_toggle_button.dart   # Bouton cœur animé pour ajouter/retirer des favoris
     │       └── profil/
-    │           ├── profil_screen.dart          # Coordonnées du citoyen, gestion du compte
-    │           └── historique_depenses_screen.dart # Récapitulatif personnel des achats et dépenses
+    │           ├── screens/
+    │           │   ├── profil_screen.dart          # Coordonnées du citoyen, gestion du compte
+    │           │   └── historique_depenses_screen.dart # Récapitulatif personnel des achats et dépenses
+    │           └── widgets/
+    │               ├── profil_info_row.dart        # Ligne d'information personnelle éditable
+    │               └── depenses_summary_chart.dart # Graphique simple de synthèse des dépenses en santé
+    │
     │
     ├── agent/                                  # MODULE C : ACTEUR 2 - AGENT DE COLLECTE TERRAIN (US-13 à US-17)
     │   ├── data/
-    │   │   ├── agent_repository.dart           # API client /api/v1/agent/**
+    │   │   ├── repositories/
+    │   │   │   ├── agent_collecte_repository.dart      # Cycle de vie des collectes (brouillon, soumission, suivi) (US-13, US-17)
+    │   │   │   ├── agent_source_repository.dart        # Enregistrement et consultation des sources/tradipraticiens (US-14)
+    │   │   │   ├── agent_media_repository.dart         # Upload des photos géotaguées et notes audio (US-15)
+    │   │   │   ├── agent_localisation_repository.dart   # Enregistrement des données géographiques et GPS (US-16)
+    │   │   │   └── agent_dashboard_repository.dart     # Métriques et statistiques d'activité terrain
     │   │   └── models/
     │   │       ├── collecte_form_model.dart    # Données complètes de la collecte terrain (US-13)
     │   │       ├── source_terrain_model.dart   # Tradipraticien / Informateur (nom, type, localité) (US-14)
-    │   │       └── media_collecte_model.dart   # Fichiers photos et enregistrements audio (US-15)
+    │   │       ├── media_collecte_model.dart   # Fichiers photos et enregistrements audio (US-15)
+    │   │       └── agent_dashboard_model.dart  # Synthèse d'activité et compteurs
     │   ├── providers/
-    │   │   ├── agent_collectes_provider.dart   # Liste des collectes de l'agent et statuts
-    │   │   ├── audio_recording_provider.dart   # Enregistreur audio intégré avec pré-écoute (US-15)
-    │   │   └── offline_sync_provider.dart      # File d'attente locale pour saisies hors réseau (Mali rural)
+    │   │   ├── agent_collectes_provider.dart   # Riverpod : liste et filtres des collectes de l'agent
+    │   │   ├── audio_recording_provider.dart   # Riverpod : enregistreur audio intégré avec pré-écoute (US-15)
+    │   │   └── offline_sync_provider.dart      # Riverpod : file d'attente locale pour saisies hors réseau (Mali rural)
     │   └── presentation/
-    │       ├── agent_dashboard_screen.dart     # Tableau de bord agent : métriques, collectes en attente
+    │       ├── dashboard/
+    │       │   ├── screens/
+    │       │   │   └── agent_dashboard_screen.dart # Tableau de bord agent : métriques, collectes en attente
+    │       │   └── widgets/
+    │       │       ├── stat_kpi_card.dart          # Compteur de collectes validées / en cours / à corriger
+    │       │       └── synchronisation_banner.dart # Statut du cache hors-ligne et bouton 'Synchroniser'
     │       ├── collectes/
-    │       │   ├── collectes_list_screen.dart  # Liste avec onglets : Brouillons, Soumises, Validées, À corriger
-    │       │   ├── nouvelle_collecte_wizard.dart # Formulaire pas-à-pas :
-    │       │   │   ├── etape1_identification_plante.dart # Plante existante ou proposition nouvelle plante
-    │       │   │   ├── etape2_connaissances_usages.dart  # Usages, partie utilisée, préparation, précautions
-    │       │   │   ├── etape3_source_information.dart    # Choix ou saisie tradipraticien/herboriste (US-14)
-    │       │   │   ├── etape4_localisation_mali.dart     # Région, Cercle, Commune, Localité, GPS (US-16)
-    │       │   │   └── etape5_medias_audio_photos.dart   # Photos géotaguées et enregistrement audio (US-15)
-    │       │   ├── collecte_detail_screen.dart # Consultation fiche soumise et remarques du modérateur (US-17)
-    │       │   └── modifier_collecte_screen.dart# Ajustement suite à demande de correction
+    │       │   ├── screens/
+    │       │   │   ├── collectes_list_screen.dart  # Liste avec onglets : Brouillons, Soumises, Validées, À corriger
+    │       │   │   ├── nouvelle_collecte_wizard.dart # Formulaire pas-à-pas de saisie terrain
+    │       │   │   ├── collecte_detail_screen.dart # Consultation fiche soumise et remarques du modérateur (US-17)
+    │       │   │   └── modifier_collecte_screen.dart# Ajustement suite à demande de correction
+    │       │   └── widgets/
+    │       │       ├── etape1_plante_form.dart     # Sélection plante ou saisie proposition nouvelle plante
+    │       │       ├── etape2_usages_form.dart     # Formulaire usages, parties utilisées, préparations, précautions
+    │       │       ├── etape3_source_selector.dart # Sélecteur ou formulaire rapide tradipraticien (US-14)
+    │       │       ├── etape4_geo_mali_picker.dart # Dropdowns Région -> Cercle -> Commune -> Localité + GPS (US-16)
+    │       │       ├── etape5_media_capture.dart   # Prise de photo géotaguée & enregistreur vocal (US-15)
+    │       │       └── motif_correction_box.dart   # Encadré affichant les consignes du modérateur si rejet
     │       └── sources/
-    │           ├── sources_list_screen.dart    # Annuaire terrain des informateurs et guérisseurs
-    │           └── ajouter_source_dialog.dart  # Saisie rapide d'un nouveau contact tradipraticien
+    │           ├── screens/
+    │           │   └── sources_list_screen.dart    # Annuaire terrain des informateurs et guérisseurs
+    │           └── widgets/
+    │               ├── source_item_card.dart       # Fiche contact guérisseur / tradipraticien
+    │               └── ajouter_source_dialog.dart  # Fenêtre modale d'ajout rapide d'un informateur
+    │
     │
     └── pharmacopee/                            # MODULE D : ACTEUR 3 - OFFICINE / VENDEUR (US-18 à US-24)
         ├── data/
-        │   ├── pharmacopee_repository.dart     # API client /api/v1/pharmacopee/**
+        │   ├── repositories/
+        │   │   ├── pharmacopee_referencement_repository.dart # Demande d'adhésion officielle INRMPT (US-18)
+        │   │   ├── pharmacopee_profil_repository.dart        # Profil officine, coordonnées et localisation (US-19)
+        │   │   ├── pharmacopee_stock_repository.dart         # Gestion des stocks et produits (US-20, US-21)
+        │   │   ├── pharmacopee_retrait_repository.dart       # Configuration Livraison / Pickup et frais (US-22)
+        │   │   ├── pharmacopee_commande_repository.dart      # Traitement des commandes clients reçues (US-23)
+        │   │   └── pharmacopee_avis_repository.dart          # Consultation des retours clients vérifiés (US-24)
         │   └── models/
         │       ├── referencement_form_model.dart # Demande d'adhésion et pièces justificatives (US-18)
         │       ├── stock_produit_model.dart    # Produit référencé, prix, quantité en stock (US-20, US-21)
         │       └── commande_officine_model.dart# Commande reçue, statut, mode retrait sélectionné (US-23)
         ├── providers/
-        │   ├── stock_gestion_provider.dart     # Mise à jour des stocks et statut disponible/indisponible
-        │   ├── pharmacopee_orders_provider.dart# Réception et préparation des commandes clients
-        │   └── retrait_config_provider.dart    # Configuration Livraison et/ou Pickup + Frais (US-22)
+        │   ├── stock_gestion_provider.dart     # Riverpod : mise à jour des stocks et statut disponible/indisponible
+        │   ├── pharmacopee_orders_provider.dart# Riverpod : réception et préparation des commandes clients
+        │   └── retrait_config_provider.dart    # Riverpod : configuration Livraison et/ou Pickup + Frais (US-22)
         └── presentation/
+            ├── dashboard/
+            │   ├── screens/
+            │   │   └── pharmacopee_dashboard_screen.dart # Vue globale : commandes du jour, alertes stock
+            │   └── widgets/
+            │       ├── alertes_stock_list.dart     # Liste des produits dont le stock est faible ou épuisé
+            │       └── kpi_chiffre_affaires_card.dart # Synthèse des ventes et commandes du jour
             ├── referencement/
-            │   ├── demande_referencement_screen.dart # Formulaire d'agrément officiel (US-18)
-            │   └── statut_demande_screen.dart        # Suivi de la validation de la structure par l'INRMPT
-            ├── pharmacopee_dashboard_screen.dart     # Vue globale : commandes du jour, alertes stock
+            │   ├── screens/
+            │   │   ├── demande_referencement_screen.dart # Formulaire d'agrément officiel (US-18)
+            │   │   └── statut_demande_screen.dart  # Suivi de la validation de la structure par l'INRMPT
+            │   └── widgets/
+            │       ├── document_upload_tile.dart   # Téléversement de l'agrément ou registre de commerce
+            │       └── validation_stepper.dart     # Étapes de traitement du dossier par l'administration
             ├── stock/
-            │   ├── catalogue_stock_screen.dart       # Liste des produits avec badge disponible/indisponible (US-21)
-            │   ├── ajouter_produit_screen.dart       # Création produit : nom, catégorie, plantes, prix (US-20)
-            │   └── ajuster_quantite_dialog.dart      # Modification rapide des quantités en réserve
+            │   ├── screens/
+            │   │   ├── catalogue_stock_screen.dart # Liste des produits avec badge disponible/indisponible (US-21)
+            │   │   └── ajouter_produit_screen.dart # Création produit : nom, catégorie, plantes, prix (US-20)
+            │   └── widgets/
+            │       ├── stock_item_card.dart        # Carte produit avec switch rapide Disponible/Indisponible
+            │       └── ajuster_quantite_dialog.dart# Boîte de dialogue pour incrémenter/décrémenter le stock
             ├── modes_retrait/
-            │   └── config_retrait_screen.dart        # Switchs Livraison / Pickup et définition frais (US-22)
+            │   ├── screens/
+            │   │   └── config_retrait_screen.dart  # Switchs Livraison / Pickup et définition frais (US-22)
+            │   └── widgets/
+            │       ├── toggle_mode_retrait_card.dart # Carte interrupteur avec description du mode
+            │       └── frais_livraison_input.dart  # Champ de saisie du montant de livraison en FCFA
             ├── commandes/
-            │   ├── commandes_recues_screen.dart      # Liste filtrable : À préparer, Prête, Expédiée (US-23)
-            │   ├── commande_officine_detail_screen.dart # Fiche de préparation de commande client
-            │   └── valider_pickup_screen.dart        # Validation du retrait client par code ou QR Code
+            │   ├── screens/
+            │   │   ├── commandes_recues_screen.dart# Liste filtrable : À préparer, Prête, Expédiée (US-23)
+            │   │   ├── commande_officine_detail_screen.dart # Fiche de préparation de commande client
+            │   │   └── valider_pickup_screen.dart  # Validation du retrait client par code ou QR Code
+            │   └── widgets/
+            │       ├── statut_action_button.dart   # Bouton d'avancement rapide (ex: 'Marquer prête au retrait')
+            │       └── client_contact_card.dart    # Coordonnées du client et heure de retrait souhaitée
             ├── avis/
-            │   └── avis_clients_screen.dart          # Consultation des retours clients vérifiés (US-24)
+            │   ├── screens/
+            │   │   └── avis_clients_screen.dart    # Consultation des retours clients vérifiés (US-24)
+            │   └── widgets/
+            │       └── avis_client_tile.dart       # Commentaire client avec note étoilée
             └── profil/
-                └── profil_officine_screen.dart       # Horaires, coordonnées, localisation sur carte (US-19)
+                ├── screens/
+                │   └── profil_officine_screen.dart # Horaires, coordonnées, localisation sur carte (US-19)
+                └── widgets/
+                    ├── horaires_table_widget.dart  # Tableau d'édition des heures d'ouverture par jour
+                    └── map_picker_widget.dart      # Sélecteur de position de l'officine sur la carte
 
 ================================================================================
-FIN DU DESCRIPTIF D'ARCHITECTURE FLUTTER (CORE / SHARED / FEATURES)
+FIN DU DESCRIPTIF D'ARCHITECTURE FLUTTER (SCREENS / WIDGETS PAR DOMAINE)
 ================================================================================
