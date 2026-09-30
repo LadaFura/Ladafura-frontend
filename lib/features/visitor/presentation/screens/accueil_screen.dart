@@ -1,62 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ladafura_frontend_flutter/core/constants/app_colors.dart';
-import 'package:ladafura_frontend_flutter/core/constants/app_dimensions.dart';
-import 'package:ladafura_frontend_flutter/core/constants/app_text_styles.dart';
-import 'package:ladafura_frontend_flutter/core/routing/route_names.dart';
-import 'package:ladafura_frontend_flutter/core/theme/theme_provider.dart';
-import 'package:ladafura_frontend_flutter/shared/widgets/buttons/secondary_button.dart';
-import 'package:ladafura_frontend_flutter/shared/widgets/media/app_logo.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/routing/route_names.dart';
+import '../../../../core/theme/theme_provider.dart';
+import '../../../../shared/widgets/media/app_logo.dart';
+import '../../../population/presentation/home/widgets/home_banner_widget.dart';
+import '../../../population/presentation/home/widgets/home_quick_categories.dart';
+import '../../../population/presentation/home/widgets/pharmacopee_home_card.dart';
+import '../../../population/presentation/home/widgets/plante_home_card.dart';
+import '../../../population/presentation/home/widgets/produit_home_card.dart';
+import '../../../population/providers/home_discovery_provider.dart';
 
-/// Page d'accueil publique officielle de LADAFURA (Mode Visiteur & Découverte).
-class AccueilScreen extends ConsumerStatefulWidget {
+/// Page d'accueil officielle de LADAFURA (Mode Visiteur & Découverte).
+///
+/// Conforme à l'interface moderne avec bannière nature, catégories rapides (Pharmacopée,
+/// Fura, Plante, Maladie), officines proches géolocalisées, médicaments et plantes populaires.
+class AccueilScreen extends ConsumerWidget {
   const AccueilScreen({super.key});
 
   @override
-  ConsumerState<AccueilScreen> createState() => _AccueilScreenState();
-}
-
-class _AccueilScreenState extends ConsumerState<AccueilScreen> {
-  final PageController _carouselController = PageController();
-  int _currentCarouselIndex = 0;
-
-  final List<_CarouselSlideData> _slides = const [
-    _CarouselSlideData(
-      tag: 'Patrimoine Médicinal',
-      title: 'Découvrez les connaissances de la pharmacopée malienne',
-      description:
-          'Consultez les informations disponibles sur les plantes, les maladies et les produits de la pharmacopée malienne.',
-      gradientColors: [AppColors.primaryDark, AppColors.primary],
-      icon: Icons.eco_rounded,
-    ),
-    _CarouselSlideData(
-      tag: 'Savoirs Ancestraux',
-      title: 'Plantes Médicinales & Traitements',
-      description:
-          'Explorez les remèdes traditionnels transmis de génération en génération au Mali pour préserver notre patrimoine médical.',
-      gradientColors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
-      icon: Icons.spa_rounded,
-    ),
-    _CarouselSlideData(
-      tag: 'Documentation Terrain',
-      title: 'Collecte Botanique & Préservation',
-      description:
-          'Centralisation et sauvegarde des recettes et pratiques de nos tradithérapeutes à travers toutes les régions du Mali.',
-      gradientColors: [Color(0xFF0D5C3A), Color(0xFF198754)],
-      icon: Icons.menu_book_rounded,
-    ),
-  ];
-
-  @override
-  void dispose() {
-    _carouselController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final userLocationAsync = ref.watch(userLocationProvider);
+    final userLocation = userLocationAsync.valueOrNull;
+
+    final pharmacopeesAsync = ref.watch(nearbyPharmacopeesProvider);
+    final produitsAsync = ref.watch(popularProduitsProvider);
+    final plantesAsync = ref.watch(popularPlantesProvider);
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
@@ -77,26 +49,162 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
                   .toggleTheme(currentIsDark: isDark);
             },
           ),
+
+          // Icône cloche de notifications
+          IconButton(
+            tooltip: 'Notifications',
+            icon: Icon(
+              Icons.notifications_none_rounded,
+              color: isDark ? Colors.white70 : const Color(0xFF1E272E),
+              size: 26,
+            ),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Aucune nouvelle notification pour le moment.'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
           const SizedBox(width: AppDimensions.space8),
         ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: AppDimensions.paddingScreenWithNavBar,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.space16,
+            vertical: AppDimensions.space12,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Carrousel de découverte (remplace la carte statique, sans logo)
-              _buildCarouselSection(isDark),
+              // 1. Bannière Hero "La nature pour une meilleure santé"
+              HomeBannerWidget(
+                onTap: () => context.go(RouteNames.visitorRecherchePath),
+              ),
+              const SizedBox(height: AppDimensions.space20),
+
+              // 2. Accès rapides aux 4 catégories (Pharmacopée, Fura, Plante, Maladie)
+              HomeQuickCategories(
+                onPharmacopeeTap: () => context.go(RouteNames.visitorCartePath),
+                onFuraTap: () => context.go(RouteNames.visitorRecherchePath),
+                onPlanteTap: () => context.go(RouteNames.visitorRecherchePath),
+                onMaladieTap: () => context.go(RouteNames.visitorRecherchePath),
+              ),
+              const SizedBox(height: AppDimensions.space20),
+
+              // 3. Section "Pharmacopée près de vous"
+              _buildSectionHeader(
+                context: context,
+                title: 'Pharmacopée près de vous',
+                onSeeAll: () => context.go(RouteNames.visitorCartePath),
+                isDark: isDark,
+              ),
+              const SizedBox(height: AppDimensions.space12),
+
+              pharmacopeesAsync.when(
+                data: (pharmacopees) {
+                  if (pharmacopees.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  // Affiche la pharmacopée la plus proche en grand format (conforme à l'image)
+                  final nearest = pharmacopees.first;
+                  return PharmacopeeHomeCard(
+                    pharmacopee: nearest,
+                    userCoordinates: userLocation,
+                    onTap: () => context.go(RouteNames.visitorCartePath),
+                  );
+                },
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(AppDimensions.space20),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
               const SizedBox(height: AppDimensions.space24),
 
-              // 2. Section Accès Rapides (Plantes, Maladies, Produits, Recherche)
-              _buildQuickAccessSection(isDark),
+              // 4. Section "Produits populaires" (Médicaments Fura)
+              _buildSectionHeader(
+                context: context,
+                title: 'Produits populaires',
+                onSeeAll: () => context.go(RouteNames.visitorRecherchePath),
+                isDark: isDark,
+              ),
+              const SizedBox(height: AppDimensions.space12),
+
+              produitsAsync.when(
+                data: (produits) {
+                  if (produits.isEmpty) return const SizedBox.shrink();
+                  return SizedBox(
+                    height: 230,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: produits.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(width: AppDimensions.space12),
+                      itemBuilder: (context, index) {
+                        final produit = produits[index];
+                        return ProduitHomeCard(
+                          produit: produit,
+                          onTap: () => context.go(RouteNames.visitorRecherchePath),
+                        );
+                      },
+                    ),
+                  );
+                },
+                loading: () => const SizedBox(
+                  height: 200,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
               const SizedBox(height: AppDimensions.space24),
 
-              // 3. Section Agent de Collecte Terrain
-              _buildAgentSection(isDark),
+              // 5. Section "Plantes les plus consultées"
+              _buildSectionHeader(
+                context: context,
+                title: 'Plantes les plus consultées',
+                onSeeAll: () => context.go(RouteNames.visitorRecherchePath),
+                isDark: isDark,
+              ),
+              const SizedBox(height: AppDimensions.space12),
+
+              plantesAsync.when(
+                data: (plantes) {
+                  if (plantes.isEmpty) return const SizedBox.shrink();
+                  return SizedBox(
+                    height: 230,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: plantes.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(width: AppDimensions.space12),
+                      itemBuilder: (context, index) {
+                        final plante = plantes[index];
+                        return PlanteHomeCard(
+                          plante: plante,
+                          onTap: () => context.go(
+                            RouteNames.visitorPlanteDetailUrl(plante.id.toString()),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+                loading: () => const SizedBox(
+                  height: 200,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
               const SizedBox(height: AppDimensions.space24),
+
+              // 6. Section Agent de Collecte Terrain
+              _buildAgentSection(context, isDark),
+              const SizedBox(height: AppDimensions.space32),
             ],
           ),
         ),
@@ -104,336 +212,124 @@ class _AccueilScreenState extends ConsumerState<AccueilScreen> {
     );
   }
 
-  /// Carrousel interactif avec diapositives thématiques et indicateurs de pagination
-  Widget _buildCarouselSection(bool isDark) {
-    return Column(
-      children: [
-        SizedBox(
-          height: 185,
-          child: PageView.builder(
-            controller: _carouselController,
-            itemCount: _slides.length,
-            onPageChanged: (index) {
-              setState(() {
-                _currentCarouselIndex = index;
-              });
-            },
-            itemBuilder: (context, index) {
-              final slide = _slides[index];
-              return Container(
-                width: double.infinity,
-                margin: const EdgeInsets.symmetric(horizontal: 2),
-                padding: const EdgeInsets.all(AppDimensions.space20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isDark
-                        ? const [
-                            AppColors.darkSurfaceVariant,
-                            AppColors.darkPrimaryContainer,
-                          ]
-                        : slide.gradientColors,
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-                  border: isDark
-                      ? Border.all(color: AppColors.darkBorder, width: 1.0)
-                      : null,
-                  boxShadow: [
-                    BoxShadow(
-                      color:
-                          (isDark ? Colors.black : slide.gradientColors.first)
-                              .withValues(alpha: 0.15),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Badge du thème de la slide
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppDimensions.space12,
-                            vertical: AppDimensions.space4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.18),
-                            borderRadius: BorderRadius.circular(
-                                AppDimensions.radiusBadge),
-                          ),
-                          child: Text(
-                            slide.tag.toUpperCase(),
-                            style: AppTextStyles.caption.copyWith(
-                              color:
-                                  isDark ? AppColors.darkPrimary : Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 10,
-                              letterSpacing: 1.0,
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          slide.icon,
-                          color: Colors.white.withValues(alpha: 0.35),
-                          size: 26,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppDimensions.space8),
-                    // Titre
-                    Text(
-                      slide.title,
-                      style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                          .copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17,
-                        height: 1.25,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: AppDimensions.space8),
-                    // Description
-                    Text(
-                      slide.description,
-                      style:
-                          (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
-                              .copyWith(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 13,
-                        height: 1.35,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: AppDimensions.space12),
-
-        // Indicateurs de pagination (dots)
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            _slides.length,
-            (index) => AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              margin: const EdgeInsets.symmetric(horizontal: 3),
-              width: _currentCarouselIndex == index ? 22 : 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: _currentCarouselIndex == index
-                    ? (isDark ? AppColors.darkPrimary : AppColors.primary)
-                    : (isDark ? AppColors.darkBorder : AppColors.border),
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Accès rapides vers les sections principales
-  Widget _buildQuickAccessSection(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  /// En-tête générique de section avec bouton "Voir tout >"
+  Widget _buildSectionHeader({
+    required BuildContext context,
+    required String title,
+    required VoidCallback onSeeAll,
+    required bool isDark,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Explorer par catégorie',
-          style: isDark ? AppTextStyles.h4Dark : AppTextStyles.h4,
+          title,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : const Color(0xFF1E272E),
+          ),
         ),
-        const SizedBox(height: AppDimensions.space12),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: AppDimensions.space12,
-          crossAxisSpacing: AppDimensions.space12,
-          childAspectRatio: 1.45,
-          children: [
-            _buildAccessCard(
-              title: 'Plantes',
-              description: 'Flore médicinale malienne',
-              icon: Icons.eco_rounded,
-              iconColor: AppColors.primary,
-              isDark: isDark,
-              onTap: () => context.go(RouteNames.visitorRecherchePath),
+        InkWell(
+          onTap: onSeeAll,
+          borderRadius: BorderRadius.circular(4),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Voir tout',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2E7D32),
+                  ),
+                ),
+                SizedBox(width: 2),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: Color(0xFF2E7D32),
+                ),
+              ],
             ),
-            _buildAccessCard(
-              title: 'Maladies',
-              description: 'Traitements traditionnels',
-              icon: Icons.healing_rounded,
-              iconColor: AppColors.accent,
-              isDark: isDark,
-              onTap: () => context.go(RouteNames.visitorRecherchePath),
-            ),
-            _buildAccessCard(
-              title: 'Produits',
-              description: 'Remèdes & formulations',
-              icon: Icons.medication_liquid_rounded,
-              iconColor: AppColors.primaryDark,
-              isDark: isDark,
-              onTap: () => context.go(RouteNames.visitorRecherchePath),
-            ),
-            _buildAccessCard(
-              title: 'Recherche',
-              description: 'Recherche avancée',
-              icon: Icons.manage_search_rounded,
-              iconColor: AppColors.darkAccent,
-              isDark: isDark,
-              onTap: () => context.go(RouteNames.visitorRecherchePath),
-            ),
-          ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildAccessCard({
-    required String title,
-    required String description,
-    required IconData icon,
-    required Color iconColor,
-    required bool isDark,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-        child: Ink(
-          padding: const EdgeInsets.all(AppDimensions.space16),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkSurface : Colors.white,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-            border: Border.all(
-              color: isDark ? AppColors.darkBorder : AppColors.border,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppDimensions.space8),
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: iconColor, size: 22),
-              ),
-              const SizedBox(height: AppDimensions.space8),
-              Text(
-                title,
-                style: (isDark ? AppTextStyles.h4Dark : AppTextStyles.h4)
-                    .copyWith(fontSize: 15),
-              ),
-              Text(
-                description,
-                style:
-                    (isDark ? AppTextStyles.captionDark : AppTextStyles.caption)
-                        .copyWith(fontSize: 11),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Section dédiée à l'Agent de Collecte
-  Widget _buildAgentSection(bool isDark) {
+  /// Bannière d'accès direct pour les agents de collecte
+  Widget _buildAgentSection(BuildContext context, bool isDark) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.space20),
+      padding: const EdgeInsets.all(AppDimensions.space16),
       decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.darkSurfaceVariant
-            : AppColors.badgeInstitutionnelBg.withValues(alpha: 0.5),
+        color: isDark ? AppColors.darkSurface : const Color(0xFFF1F8E9),
         borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
         border: Border.all(
-          color: isDark
-              ? AppColors.darkBorder
-              : AppColors.badgeInstitutionnelText.withValues(alpha: 0.3),
+          color: isDark ? AppColors.darkBorder : const Color(0xFFC8E6C9),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppDimensions.space8),
-                decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.assignment_ind_rounded,
-                  color: AppColors.accent,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: AppDimensions.space12),
-              Expanded(
-                child: Text(
-                  'Vous êtes agent de collecte ?',
-                  style: (isDark ? AppTextStyles.h4Dark : AppTextStyles.h4)
-                      .copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppDimensions.space12),
-          Text(
-            'Accédez à votre espace pour documenter les informations recueillies sur le terrain (géolocalisation GPS, enregistrements oraux, spécimens botaniques).',
-            style:
-                (isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
-              color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.textSecondary,
-              fontSize: 13,
-              height: 1.4,
+          Container(
+            padding: const EdgeInsets.all(AppDimensions.space12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2E7D32).withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.assignment_ind_rounded,
+              color: Color(0xFF2E7D32),
+              size: 26,
             ),
           ),
-          const SizedBox(height: AppDimensions.space16),
-          SecondaryButton(
-            label: 'Se connecter à l\'espace Agent',
-            icon: const Icon(Icons.login_rounded),
+          const SizedBox(width: AppDimensions.space12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Vous êtes agent de collecte ?',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : const Color(0xFF1E272E),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Connectez-vous pour enregistrer vos collectes sur le terrain.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.grey[400] : const Color(0xFF616161),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppDimensions.space8),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2E7D32),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.space12,
+                vertical: AppDimensions.space8,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppDimensions.radiusButton),
+              ),
+            ),
             onPressed: () => context.go(RouteNames.loginPath),
+            child: const Text(
+              'Connexion',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
     );
   }
-}
-
-class _CarouselSlideData {
-  final String tag;
-  final String title;
-  final String description;
-  final List<Color> gradientColors;
-  final IconData icon;
-
-  const _CarouselSlideData({
-    required this.tag,
-    required this.title,
-    required this.description,
-    required this.gradientColors,
-    required this.icon,
-  });
 }

@@ -8,6 +8,10 @@ import 'package:ladafura_frontend_flutter/core/routing/route_names.dart';
 import 'package:ladafura_frontend_flutter/core/theme/theme_provider.dart';
 import 'package:ladafura_frontend_flutter/features/auth/providers/auth_state_provider.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/navigation/navigation_provider.dart';
+import '../widgets/pharmacopee_home_card.dart';
+import '../widgets/plante_home_card.dart';
+import '../widgets/produit_home_card.dart';
+import '../../../providers/home_discovery_provider.dart';
 
 /// Écran d'accueil principal de l'Espace Citoyen / Population LADAFURA.
 class CitizenHomeScreen extends ConsumerWidget {
@@ -86,6 +90,12 @@ class CitizenHomeScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final authState = ref.watch(authStateProvider);
     final user = authState.user;
+    final userLocationAsync = ref.watch(userLocationProvider);
+    final userLocation = userLocationAsync.valueOrNull;
+
+    final pharmacopeesAsync = ref.watch(nearbyPharmacopeesProvider);
+    final produitsAsync = ref.watch(popularProduitsProvider);
+    final plantesAsync = ref.watch(popularPlantesProvider);
 
     final citizenName = user != null && user.nomComplet.trim().isNotEmpty
         ? user.nomComplet
@@ -368,6 +378,111 @@ class CitizenHomeScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: AppDimensions.space24),
+
+              // 4. Section Pharmacopée près de vous
+              _buildSectionHeader(
+                context: context,
+                title: 'Pharmacopée près de vous',
+                onSeeAll: () => context.go(RouteNames.citizenCartePath),
+                isDark: isDark,
+              ),
+              const SizedBox(height: AppDimensions.space12),
+
+              pharmacopeesAsync.when(
+                data: (pharmacopees) {
+                  if (pharmacopees.isEmpty) return const SizedBox.shrink();
+                  final nearest = pharmacopees.first;
+                  return PharmacopeeHomeCard(
+                    pharmacopee: nearest,
+                    userCoordinates: userLocation,
+                    onTap: () => context.go(RouteNames.citizenCartePath),
+                  );
+                },
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(AppDimensions.space16),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
+              const SizedBox(height: AppDimensions.space24),
+
+              // 5. Section Médicaments (Fura) populaires
+              _buildSectionHeader(
+                context: context,
+                title: 'Médicaments (Fura) populaires',
+                onSeeAll: () => context.go(RouteNames.citizenRecherchePath),
+                isDark: isDark,
+              ),
+              const SizedBox(height: AppDimensions.space12),
+
+              produitsAsync.when(
+                data: (produits) {
+                  if (produits.isEmpty) return const SizedBox.shrink();
+                  return SizedBox(
+                    height: 230,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: produits.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(width: AppDimensions.space12),
+                      itemBuilder: (context, index) {
+                        final produit = produits[index];
+                        return ProduitHomeCard(
+                          produit: produit,
+                          onTap: () => context.go(RouteNames.citizenRecherchePath),
+                        );
+                      },
+                    ),
+                  );
+                },
+                loading: () => const SizedBox(
+                  height: 200,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
+              const SizedBox(height: AppDimensions.space24),
+
+              // 6. Section Plantes les plus consultées
+              _buildSectionHeader(
+                context: context,
+                title: 'Plantes les plus consultées',
+                onSeeAll: () => context.go(RouteNames.citizenRecherchePath),
+                isDark: isDark,
+              ),
+              const SizedBox(height: AppDimensions.space12),
+
+              plantesAsync.when(
+                data: (plantes) {
+                  if (plantes.isEmpty) return const SizedBox.shrink();
+                  return SizedBox(
+                    height: 230,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: plantes.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(width: AppDimensions.space12),
+                      itemBuilder: (context, index) {
+                        final plante = plantes[index];
+                        return PlanteHomeCard(
+                          plante: plante,
+                          onTap: () => context.go(
+                            RouteNames.citizenPlanteDetailUrl(plante.id.toString()),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+                loading: () => const SizedBox(
+                  height: 200,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
               const SizedBox(height: AppDimensions.space32),
             ],
           ),
@@ -428,6 +543,53 @@ class CitizenHomeScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required BuildContext context,
+    required String title,
+    required VoidCallback onSeeAll,
+    required bool isDark,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : const Color(0xFF1E272E),
+          ),
+        ),
+        InkWell(
+          onTap: onSeeAll,
+          borderRadius: BorderRadius.circular(4),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Voir tout',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2E7D32),
+                  ),
+                ),
+                SizedBox(width: 2),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: Color(0xFF2E7D32),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -95,20 +95,19 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Vérifie le titre Hero
-    expect(
-      find.text('Découvrez les connaissances de la pharmacopée malienne'),
-      findsOneWidget,
-    );
+    // Vérifie les 4 catégories rapides conformes à la maquette
+    expect(find.text('Pharmacopée'), findsWidgets);
+    expect(find.text('Fura'), findsOneWidget);
+    expect(find.text('Plante'), findsOneWidget);
+    expect(find.text('Maladie'), findsOneWidget);
 
-    // Vérifie les cartes d'accès rapides
-    expect(find.text('Plantes'), findsOneWidget);
-    expect(find.text('Maladies'), findsOneWidget);
-    expect(find.text('Produits'), findsOneWidget);
-    expect(find.text('Recherche'), findsWidgets);
+    // Vérifie les sections de découverte
+    expect(find.text('Pharmacopée près de vous'), findsOneWidget);
+    expect(find.text('Produits populaires'), findsOneWidget);
+    expect(find.text('Plantes les plus consultées'), findsOneWidget);
 
     // Vérifie la section Agent de collecte
     expect(find.text('Vous êtes agent de collecte ?'), findsOneWidget);
-    expect(find.text('Se connecter à l\'espace Agent'), findsOneWidget);
+    expect(find.text('Connexion'), findsOneWidget);
   });
 }

@@ -17,7 +17,8 @@ void main() {
     StorageService(prefs);
   });
 
-  GoRouter createTestRouter({String initialLocation = RouteNames.visitorHomePath}) {
+  GoRouter createTestRouter(
+      {String initialLocation = RouteNames.visitorHomePath}) {
     return GoRouter(
       initialLocation: initialLocation,
       routes: [
@@ -37,8 +38,8 @@ void main() {
             ),
             GoRoute(
               path: RouteNames.visitorCartePath,
-              builder: (context, state) =>
-                  const RoutePlaceholderScreen(title: 'Carte de la Flore Malienne'),
+              builder: (context, state) => const RoutePlaceholderScreen(
+                  title: 'Carte de la Flore Malienne'),
             ),
             GoRoute(
               path: RouteNames.visitorPanierPath,
