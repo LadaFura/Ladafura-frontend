@@ -18,7 +18,7 @@ void main() {
       expect(AppValidators.email('test@'), isNotNull);
       expect(AppValidators.email('@domain.com'), isNotNull);
       expect(AppValidators.email('fatoumata.diarra@gmail.com'), isNull);
-      expect(AppValidators.email('agent@inrmpt.ml'), isNull);
+      expect(AppValidators.email('agent@ladafura.ml'), isNull);
     });
 
     test('password validator enforces minimum length', () {

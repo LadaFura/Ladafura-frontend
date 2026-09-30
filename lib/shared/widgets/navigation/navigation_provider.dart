@@ -15,16 +15,16 @@ class NavigationNotifier extends Notifier<int> {
   /// Raccourci vers l'onglet Accueil (0)
   void goToHome() => state = 0;
 
-  /// Raccourci vers l'onglet Flore & Plantes Médicinales (1)
-  void goToFlora() => state = 1;
-  void goToMap() => state = 1;
+  /// Raccourci vers l'onglet Recherche (1)
+  void goToSearch() => state = 1;
 
-  /// Raccourci vers l'onglet Recherche (2)
-  void goToSearch() => state = 2;
+  /// Raccourci vers l'onglet Carte (2)
+  void goToMap() => state = 2;
+  void goToFlora() => state = 2;
 
-  /// Raccourci vers l'onglet Favoris (3)
-  void goToFavorites() => state = 3;
+  /// Raccourci vers l'onglet Panier (3)
   void goToCart() => state = 3;
+  void goToFavorites() => state = 3;
 
   /// Raccourci vers l'onglet Profil (4)
   void goToProfile() => state = 4;

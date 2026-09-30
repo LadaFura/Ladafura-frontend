@@ -62,20 +62,20 @@ void main() {
       expect(service.isMockMode, isTrue);
 
       final result = await service.signInWithEmailAndPassword(
-        email: 'test@inrmpt.ml',
+        email: 'test@ladafura.ml',
         password: 'Password123',
       );
 
-      expect(result.email, 'test@inrmpt.ml');
+      expect(result.email, 'test@ladafura.ml');
       expect(result.idToken, startsWith('mock-firebase-id-token'));
       expect(result.uid, startsWith('uid-'));
       expect(result.expiresIn, 3600);
 
       final signUpResult = await service.signUpWithEmailAndPassword(
-        email: 'new@inrmpt.ml',
+        email: 'new@ladafura.ml',
         password: 'Password123',
       );
-      expect(signUpResult.email, 'new@inrmpt.ml');
+      expect(signUpResult.email, 'new@ladafura.ml');
     });
   });
 
@@ -171,8 +171,7 @@ void main() {
       expect(controller.text, '70123456');
     });
 
-    testWidgets(
-        'RoleCardSelector allows selecting between Citoyen and Agent',
+    testWidgets('RoleCardSelector allows selecting between Citoyen and Agent',
         (tester) async {
       UserRole selected = UserRole.population;
 

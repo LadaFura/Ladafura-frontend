@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Palette de couleurs officielle du Design System LADAFURA.
 ///
 /// Comprend la palette Thème Clair (Light Mode) et Thème Sombre (Dark Mode),
-/// conçue pour la plateforme nationale de pharmacopée et médecine traditionnelle du Mali (INRMPT).
+/// conçue pour la plateforme nationale de pharmacopée et médecine traditionnelle du Mali.
 /// Respecte les contrastes d'accessibilité WCAG AA/AAA.
 class AppColors {
   AppColors._();
@@ -86,7 +86,7 @@ class AppColors {
   // 🌙 THÈME SOMBRE (DARK MODE) - VERT FORÊT BOTANIQUE / MIDNIGHT FOREST
   // Conçu pour un confort visuel optimal, éliminant le noir agressif au profit
   // d'un vert forêt / médicinal profond ("vert qui se rapproche du noir"), reposant
-  // pour les yeux et en parfaite harmonie avec la pharmacopée malienne (INRMPT).
+  // pour les yeux et en parfaite harmonie avec la pharmacopée malienne.
   // ===========================================================================
 
   // --- Couleurs Principales (Dark) ---

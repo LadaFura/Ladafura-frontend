@@ -40,6 +40,9 @@ class ApiEndpoints {
   static const String populationAuthMe = '/population/auth/me';
   static const String populationMe = populationAuthMe;
 
+  // --- Route neutre (résolution automatique du rôle) ---
+  static const String authMe = '/auth/me';
+
   // --- Agent de Collecte ---
   static const String agentAuthMe = '/agent/auth/me';
   static const String agentMe = agentAuthMe;

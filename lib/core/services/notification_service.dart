@@ -11,7 +11,7 @@ enum AppNotificationType {
   /// Alerte de seuil de stock ou rupture pour une officine (US-20).
   stock,
 
-  /// Information institutionnelle émise par l'INRMPT.
+  /// Information émise par la plateforme LADAFURA.
   systeme,
 }
 

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ladafura_frontend_flutter/core/constants/app_assets.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_colors.dart';
+import 'package:ladafura_frontend_flutter/shared/widgets/media/app_logo.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_dimensions.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_text_styles.dart';
 import 'package:ladafura_frontend_flutter/core/routing/route_names.dart';
@@ -43,7 +42,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     if (!hasCompletedOnboarding) {
       context.go(RouteNames.onboardingPath);
     } else {
-      context.go(RouteNames.roleSelectionPath);
+      context.go(RouteNames.visitorHomePath);
     }
   }
 
@@ -60,22 +59,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Hero(
+              const Hero(
                 tag: 'ladafura-logo',
-                child: Container(
-                  width: 110,
-                  height: 110,
-                  padding: const EdgeInsets.all(AppDimensions.space16),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? AppColors.darkPrimaryContainer
-                        : AppColors.badgeTraditionnelBg,
-                    shape: BoxShape.circle,
-                  ),
-                  child: SvgPicture.asset(
-                    AppAssets.logoEmbleme,
-                    semanticsLabel: 'Logo LADAFURA',
-                  ),
+                child: AppLogo.icon(
+                  size: 96,
                 ),
               ),
               const SizedBox(height: AppDimensions.space24),

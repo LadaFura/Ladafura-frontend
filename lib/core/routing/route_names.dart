@@ -34,6 +34,15 @@ class RouteNames {
   static const String visitorRecherche = 'visitor-recherche';
   static const String visitorRecherchePath = '/visitor/recherche';
 
+  static const String visitorCarte = 'visitor-carte';
+  static const String visitorCartePath = '/visitor/carte';
+
+  static const String visitorPanier = 'visitor-panier';
+  static const String visitorPanierPath = '/visitor/panier';
+
+  static const String visitorProfil = 'visitor-profil';
+  static const String visitorProfilPath = '/visitor/profil';
+
   static const String visitorPlanteDetail = 'visitor-plante-detail';
   static const String visitorPlanteDetailPath = '/visitor/plantes/:id';
   static String visitorPlanteDetailUrl(String id) => '/visitor/plantes/$id';

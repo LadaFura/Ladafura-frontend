@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:ladafura_frontend_flutter/core/constants/app_assets.dart';
-import 'package:ladafura_frontend_flutter/core/constants/app_colors.dart';
-import 'package:ladafura_frontend_flutter/core/constants/app_dimensions.dart';
-import 'package:ladafura_frontend_flutter/core/constants/app_text_styles.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../../../../shared/widgets/media/app_logo.dart';
 
 /// En-tête officiel des écrans d'authentification LADAFURA.
 ///
-/// Met en valeur le logo vectoriel institutionnel et la tutelle de l'INRMPT.
+/// Met en valeur le logo vectoriel officiel de LADAFURA sans fond, adapté aux modes clair et sombre.
 class AuthHeaderWidget extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -26,23 +25,11 @@ class AuthHeaderWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Logo emblème officiel LADAFURA
-        Hero(
+        // Logo emblème officiel LADAFURA sans fond (adapté clair/sombre)
+        const Hero(
           tag: 'ladafura-logo',
-          child: Container(
-            width: 80,
-            height: 80,
-            padding: const EdgeInsets.all(AppDimensions.space12),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? AppColors.darkPrimaryContainer
-                  : AppColors.badgeTraditionnelBg,
-              shape: BoxShape.circle,
-            ),
-            child: SvgPicture.asset(
-              AppAssets.logoEmbleme,
-              semanticsLabel: 'Logo LADAFURA',
-            ),
+          child: AppLogo.icon(
+            size: 76,
           ),
         ),
         const SizedBox(height: AppDimensions.space16),
@@ -58,7 +45,7 @@ class AuthHeaderWidget extends StatelessWidget {
         // Mention institutionnelle ou sous-titre
         Text(
           subtitle ??
-              'Plateforme Nationale de la Pharmacopée Traditionnelle • INRMPT Mali',
+              'Plateforme Nationale de la Pharmacopée Traditionnelle Malienne',
           style: (isDark
                   ? AppTextStyles.bodySecondaryDark
                   : AppTextStyles.bodySecondary)

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../features/agent/presentation/dashboard/screens/agent_dashboard_screen.dart';
 import '../../features/auth/auth.dart';
+import '../../features/visitor/presentation/screens/accueil_screen.dart';
 import '../../shared/enums/user_role.dart';
+import '../../shared/widgets/navigation/app_shell.dart';
+import '../../shared/widgets/navigation/navigation_provider.dart';
 import 'route_guard.dart';
 import 'route_names.dart';
 
@@ -80,20 +85,12 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: RouteNames.loginPath,
         name: RouteNames.login,
-        builder: (context, state) {
-          final roleStr = state.uri.queryParameters['role'];
-          final role = UserRole.fromString(roleStr) ?? UserRole.population;
-          return LoginScreen(initialRole: role);
-        },
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: RouteNames.registerPath,
         name: RouteNames.register,
-        builder: (context, state) {
-          final roleStr = state.uri.queryParameters['role'];
-          final role = UserRole.fromString(roleStr) ?? UserRole.population;
-          return RegisterScreen(initialRole: role);
-        },
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: RouteNames.roleSelectionPath,
@@ -101,21 +98,42 @@ GoRouter appRouter(AppRouterRef ref) {
         builder: (context, state) => const RoleSelectionScreen(),
       ),
 
-      // 3. Espace Visiteur (Public libre)
-      GoRoute(
-        path: RouteNames.visitorHomePath,
-        name: RouteNames.visitorHome,
-        builder: (context, state) =>
-            const _RoutePlaceholder(title: 'Accueil Visiteur'),
+      // 3. Espace Visiteur (Public libre avec barre de navigation)
+      ShellRoute(
+        builder: (context, state, child) =>
+            AppShell(location: state.matchedLocation, child: child),
         routes: [
           GoRoute(
-            path: 'recherche',
-            name: RouteNames.visitorRecherche,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Recherche Publique'),
+            path: RouteNames.visitorHomePath,
+            name: RouteNames.visitorHome,
+            builder: (context, state) => const AccueilScreen(),
           ),
           GoRoute(
-            path: 'plantes/:id',
+            path: RouteNames.visitorRecherchePath,
+            name: RouteNames.visitorRecherche,
+            builder: (context, state) =>
+                const _RoutePlaceholder(title: 'Recherche Universelle'),
+          ),
+          GoRoute(
+            path: RouteNames.visitorCartePath,
+            name: RouteNames.visitorCarte,
+            builder: (context, state) =>
+                const _RoutePlaceholder(title: 'Carte de la Flore Malienne'),
+          ),
+          GoRoute(
+            path: RouteNames.visitorPanierPath,
+            name: RouteNames.visitorPanier,
+            builder: (context, state) =>
+                const _RoutePlaceholder(title: 'Mon Panier'),
+          ),
+          GoRoute(
+            path: RouteNames.visitorProfilPath,
+            name: RouteNames.visitorProfil,
+            builder: (context, state) =>
+                const _RoutePlaceholder(title: 'Mon Profil'),
+          ),
+          GoRoute(
+            path: RouteNames.visitorPlanteDetailPath,
             name: RouteNames.visitorPlanteDetail,
             builder: (context, state) => _RoutePlaceholder(
               title: 'Détail Plante (${state.pathParameters['id']})',
@@ -163,8 +181,7 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: RouteNames.agentDashboardPath,
         name: RouteNames.agentDashboard,
-        builder: (context, state) =>
-            const _RoutePlaceholder(title: 'Tableau de bord Agent'),
+        builder: (context, state) => const AgentDashboardScreen(),
         routes: [
           GoRoute(
             path: 'collectes',
@@ -237,20 +254,58 @@ GoRouter appRouter(AppRouterRef ref) {
 }
 
 /// Widget temporaire utilisé comme placeholder pour les routes avant intégration des écrans features.
-class _RoutePlaceholder extends StatelessWidget {
+class _RoutePlaceholder extends ConsumerWidget {
   final String title;
   const _RoutePlaceholder({required this.title});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isHome = title == 'Accueil' || title == 'Accueil Citoyen';
+
+    final auth = ref.read(authStateProvider);
+    final homeRoute = (auth.isAuthenticated &&
+            auth.role == UserRole.population)
+        ? RouteNames.citizenHomePath
+        : (auth.isAuthenticated &&
+                auth.role == UserRole.agentCollecte)
+            ? RouteNames.agentDashboardPath
+            : RouteNames.visitorHomePath;
+
+    void goBackToHome() {
+      ref.read(navigationIndexProvider.notifier).setIndex(0);
+      context.go(homeRoute);
+    }
+
+    final scaffold = Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        leading: isHome
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                tooltip: 'Retour à l\'accueil',
+                onPressed: goBackToHome,
+              ),
+      ),
       body: Center(
         child: Text(
           title,
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
+    );
+
+    if (isHome) {
+      return scaffold;
+    }
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        goBackToHome();
+      },
+      child: scaffold,
     );
   }
 }

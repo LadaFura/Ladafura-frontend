@@ -8,7 +8,7 @@ import 'package:ladafura_frontend_flutter/core/routing/route_names.dart';
 import 'package:ladafura_frontend_flutter/core/services/services_providers.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/buttons/primary_button.dart';
 
-/// Écran d'accueil et d'introduction aux missions de LADAFURA et de l'INRMPT.
+/// Écran d'accueil et d'introduction aux missions de LADAFURA.
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -25,7 +25,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       icon: Icons.eco_outlined,
       title: 'Patrimoine Médicinal Malien',
       description:
-          'Explorez le répertoire officiel des plantes médicinales du Mali validées scientifiquement par l\'INRMPT (Kinkéliba, N\'Golo, Zaban...).',
+          'Explorez le répertoire officiel des plantes médicinales de la flore malienne (Kinkéliba, N\'Golo, Zaban...).',
       accentColor: AppColors.primary,
     ),
     _OnboardingSlideData(
@@ -48,7 +48,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final storage = ref.read(storageServiceProvider);
     await storage.setOnboardingCompleted(true);
     if (!mounted) return;
-    context.go(RouteNames.roleSelectionPath);
+    context.go(RouteNames.visitorHomePath);
   }
 
   @override

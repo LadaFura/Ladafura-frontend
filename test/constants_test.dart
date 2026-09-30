@@ -11,14 +11,17 @@ void main() {
       expect(ApiEndpoints.connectionTimeout.inSeconds, 15);
       expect(ApiEndpoints.receiveTimeout.inSeconds, 15);
 
+      // Routes Authentification & Session
+      expect(ApiEndpoints.authMe, '/auth/me');
+
       // Routes Population
       expect(ApiEndpoints.populationRecherche, '/population/recherche');
       expect(ApiEndpoints.populationPlantes, '/population/plantes');
       expect(ApiEndpoints.populationPlanteDetail('123'),
           '/population/plantes/123');
       expect(ApiEndpoints.populationFavoris, '/population/favoris');
-      expect(ApiEndpoints.populationFavorisPlantes,
-          '/population/favoris/plantes');
+      expect(
+          ApiEndpoints.populationFavorisPlantes, '/population/favoris/plantes');
 
       // Routes Agent
       expect(ApiEndpoints.agentDashboardStats, '/agent/dashboard/stats');

@@ -149,8 +149,7 @@ void main() {
   });
 
   group('Shared Widgets - Cards & Badges', () {
-    testWidgets(
-        'StatusBadge renders for Collecte and ENF11 cert levels',
+    testWidgets('StatusBadge renders for Collecte and ENF11 cert levels',
         (tester) async {
       await tester.pumpWidget(
         MaterialApp(

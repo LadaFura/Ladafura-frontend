@@ -9,16 +9,19 @@ import 'package:ladafura_frontend_flutter/shared/enums/user_role.dart';
 import 'package:ladafura_frontend_flutter/shared/utils/validators.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/buttons/primary_button.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/inputs/custom_text_field.dart';
+import 'package:ladafura_frontend_flutter/shared/widgets/navigation/navigation_provider.dart';
 import '../../providers/auth_state_provider.dart';
 import '../widgets/auth_header_widget.dart';
 
-/// Écran de connexion unifié (Firebase Auth Email + Mot de passe & synchronisation Spring Boot).
+/// Écran de connexion unifié et neutre.
+/// L'utilisateur ne choisit pas son rôle : le rôle est automatiquement résolu
+/// par le backend via le jeton d'authentification et redirigé de façon transparente.
 class LoginScreen extends ConsumerStatefulWidget {
-  final UserRole initialRole;
+  final UserRole? initialRole;
 
   const LoginScreen({
     super.key,
-    this.initialRole = UserRole.population,
+    this.initialRole,
   });
 
   @override
@@ -29,13 +32,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  late UserRole _selectedRole;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedRole = widget.initialRole;
-  }
 
   @override
   void dispose() {
@@ -50,17 +46,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final success = await ref.read(authStateProvider.notifier).login(
           email: _emailController.text.trim(),
           password: _passwordController.text,
-          role: _selectedRole,
         );
 
     if (success && mounted) {
-      // Redirection selon le rôle connecté
-      switch (_selectedRole) {
-        case UserRole.population:
-          context.go(RouteNames.citizenHomePath);
-          break;
+      final userRole = ref.read(authStateProvider).role;
+      // Redirection automatique et transparente selon le rôle résolu par le backend
+      switch (userRole) {
         case UserRole.agentCollecte:
-          context.go(RouteNames.agentHomePath);
+          context.go(RouteNames.agentDashboardPath);
+          break;
+        case UserRole.population:
+        default:
+          context.go(RouteNames.citizenHomePath);
           break;
       }
     }
@@ -82,10 +79,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
           ),
           onPressed: () {
+            ref.read(navigationIndexProvider.notifier).setIndex(0);
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go(RouteNames.roleSelectionPath);
+              context.go(RouteNames.visitorHomePath);
             }
           },
         ),
@@ -101,33 +99,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                AuthHeaderWidget(
-                  title: 'Connexion (${_selectedRole.label})',
+                const AuthHeaderWidget(
+                  title: 'Connexion',
                   subtitle:
-                      'Authentification sécurisée par Firebase Auth & synchronisation INRMPT',
-                ),
-                const SizedBox(height: AppDimensions.space24),
-
-                // Onglets de bascule rapide de rôle
-                SegmentedButton<UserRole>(
-                  segments: const [
-                    ButtonSegment(
-                      value: UserRole.population,
-                      label: Text('Citoyen'),
-                      icon: Icon(Icons.person, size: 16),
-                    ),
-                    ButtonSegment(
-                      value: UserRole.agentCollecte,
-                      label: Text('Agent'),
-                      icon: Icon(Icons.edit_location_alt, size: 16),
-                    ),
-                  ],
-                  selected: {_selectedRole},
-                  onSelectionChanged: (Set<UserRole> newSelection) {
-                    setState(() {
-                      _selectedRole = newSelection.first;
-                    });
-                  },
+                      'Entrez vos identifiants pour accéder à votre espace sécurisé',
                 ),
                 const SizedBox(height: AppDimensions.space24),
 
@@ -211,9 +186,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        context.push(
-                          '${RouteNames.registerPath}?role=${_selectedRole.backendValue}',
-                        );
+                        context.push(RouteNames.registerPath);
                       },
                       child: Text(
                         'S\'inscrire',

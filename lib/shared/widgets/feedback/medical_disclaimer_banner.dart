@@ -46,7 +46,7 @@ class MedicalDisclaimerBanner extends StatelessWidget {
             const SizedBox(width: AppDimensions.space8),
             Expanded(
               child: Text(
-                'Usage informatif (INRMPT). Ne remplace pas une consultation médicale.',
+                'Usage informatif. Ne remplace pas une consultation médicale.',
                 style: AppTextStyles.caption.copyWith(
                   color: textColor,
                   fontSize: 11,
@@ -81,7 +81,7 @@ class MedicalDisclaimerBanner extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Avertissement Médical Officiel (INRMPT)',
+                  'Avertissement Médical Officiel',
                   style: AppTextStyles.label.copyWith(
                     color: textColor,
                     fontWeight: FontWeight.bold,

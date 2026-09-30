@@ -7,6 +7,7 @@ import 'package:ladafura_frontend_flutter/shared/models/utilisateur_model.dart';
 import '../data/models/register_request_model.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/services/firebase_auth_service.dart';
+import '../../../core/config/firebase_options.dart';
 
 /// Statut de l'état d'authentification de l'utilisateur.
 enum AuthStatus {
@@ -60,9 +61,12 @@ class AuthState {
   UserRole? get role => user?.role;
 }
 
-/// Fournisseur du service Firebase Auth.
+/// Fournisseur du service Firebase Auth officiel.
 final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
-  return FirebaseAuthService(mockMode: true);
+  return FirebaseAuthService(
+    firebaseApiKey: DefaultFirebaseOptions.firebaseApiKey,
+    mockMode: false,
+  );
 });
 
 /// Fournisseur du dépôt d'authentification.
@@ -132,7 +136,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> login({
     required String email,
     required String password,
-    UserRole role = UserRole.population,
+    UserRole? role,
   }) async {
     state = const AuthState.loading();
 

@@ -98,6 +98,8 @@ void main() {
           RouteNames.agentDashboardPath,
           RouteNames.agentCollectesPath,
           RouteNames.agentNouvelleCollectePath,
+          RouteNames.visitorPanierPath,
+          RouteNames.visitorProfilPath,
         ];
 
         for (final path in protectedPaths) {

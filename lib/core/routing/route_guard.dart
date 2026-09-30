@@ -45,7 +45,11 @@ class RouteGuard {
       }
 
       // Si le visiteur tente d'accéder à un espace nécessitant un compte
-      if (isCitizenRoute || isAgentRoute) {
+      final isProtectedVisitorRoute =
+          currentPath.startsWith(RouteNames.visitorPanierPath) ||
+              currentPath.startsWith(RouteNames.visitorProfilPath);
+
+      if (isCitizenRoute || isAgentRoute || isProtectedVisitorRoute) {
         return RouteNames.loginPath;
       }
 

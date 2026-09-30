@@ -1,6 +1,6 @@
 ================================================================================
           PROPOSITION D'ARCHITECTURE FRONTEND FLUTTER - PROJET LADAFURA
-                 Conforme au Cahier des Charges Officiel (INRMPT Mali)
+                 Conforme au Cahier des Charges Officiel 
 ================================================================================
 Architecture modulaire : CORE / SHARED / FEATURES
 Gestionnaire d'état officiel : Riverpod (flutter_riverpod)
@@ -127,7 +127,7 @@ lib/
     │       │   ├── register_screen.dart        # Inscription Citoyen, Agent ou Pharmacopée
     │       │   └── role_selection_screen.dart  # Aiguillage initial vers l'espace dédié de l'utilisateur
     │       └── widgets/
-    │           ├── auth_header_widget.dart     # Logo INRMPT et titre d'accueil
+    │           ├── auth_header_widget.dart     # Logo LADAFURA et titre d'accueil
     │           ├── phone_input_field.dart      # Saisie avec indicateur de pays (+223 Mali)
     │           └── role_card_selector.dart     # Cartes de sélection du rôle (Citoyen / Agent / Pharmacopée)
     │
@@ -161,7 +161,7 @@ lib/
     │       │   ├── screens/
     │       │   │   └── home_screen.dart        # Accueil citoyen : recherche rapide, plantes phares, catégories
     │       │   └── widgets/
-    │       │       ├── home_header_banner.dart # Message de bienvenue & rappel institutionnel INRMPT
+    │       │       ├── home_header_banner.dart # Message de bienvenue & rappel institutionnel LADAFURA
     │       │       ├── categories_chips_bar.dart # Filtres rapides par forme (Tisane, Poudre, Huile, Décoction)
     │       │       └── plantes_vedettes_slider.dart # Carrousel des plantes médicinales populaires
     │       ├── recherche/
@@ -277,7 +277,7 @@ lib/
     └── pharmacopee/                            # MODULE D : ACTEUR 3 - OFFICINE / VENDEUR (US-18 à US-24)
         ├── data/
         │   ├── repositories/
-        │   │   ├── pharmacopee_referencement_repository.dart # Demande d'adhésion officielle INRMPT (US-18)
+        │   │   ├── pharmacopee_referencement_repository.dart # Demande d'adhésion officielle LADAFURA (US-18)
         │   │   ├── pharmacopee_profil_repository.dart        # Profil officine, coordonnées et localisation (US-19)
         │   │   ├── pharmacopee_stock_repository.dart         # Gestion des stocks et produits (US-20, US-21)
         │   │   ├── pharmacopee_retrait_repository.dart       # Configuration Livraison / Pickup et frais (US-22)
@@ -301,7 +301,7 @@ lib/
             ├── referencement/
             │   ├── screens/
             │   │   ├── demande_referencement_screen.dart # Formulaire d'agrément officiel (US-18)
-            │   │   └── statut_demande_screen.dart  # Suivi de la validation de la structure par l'INRMPT
+            │   │   └── statut_demande_screen.dart  # Suivi de la validation de la structure par l'LADAFURA
             │   └── widgets/
             │       ├── document_upload_tile.dart   # Téléversement de l'agrément ou registre de commerce
             │       └── validation_stepper.dart     # Étapes de traitement du dossier par l'administration

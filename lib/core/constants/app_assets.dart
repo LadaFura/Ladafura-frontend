@@ -45,9 +45,6 @@ class AppAssets {
   static const String logoHorizontalDarkPng =
       'assets/images/ladafura-logo-horizontal-darkmode.png';
 
-  /// Logo partenaire INRMPT (Institut National de Recherche sur la Médecine et la Pharmacopée Traditionnelle)
-  static const String logoInrmpt = 'assets/images/logo_inrmpt.png';
-
   // ==========================================
   // ILLUSTRATIONS & PLACEHOLDERS
   // ==========================================

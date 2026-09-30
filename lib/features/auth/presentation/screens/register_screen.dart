@@ -10,6 +10,7 @@ import 'package:ladafura_frontend_flutter/shared/utils/validators.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/buttons/primary_button.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/feedback/medical_disclaimer_banner.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/inputs/custom_text_field.dart';
+import 'package:ladafura_frontend_flutter/shared/widgets/navigation/navigation_provider.dart';
 import '../../data/models/register_request_model.dart';
 import '../../providers/auth_state_provider.dart';
 import '../widgets/auth_header_widget.dart';
@@ -37,14 +38,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  late UserRole _selectedRole;
   bool _acceptTerms = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedRole = widget.initialRole;
-  }
 
   @override
   void dispose() {
@@ -79,21 +73,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       telephone: _phoneController.text.trim().isNotEmpty
           ? '+223 ${_phoneController.text.trim()}'
           : null,
-      role: _selectedRole,
+      role: UserRole.population,
     );
 
     final success =
         await ref.read(authStateProvider.notifier).register(request);
 
     if (success && mounted) {
-      switch (_selectedRole) {
-        case UserRole.population:
-          context.go(RouteNames.citizenHomePath);
-          break;
-        case UserRole.agentCollecte:
-          context.go(RouteNames.agentHomePath);
-          break;
-      }
+      context.go(RouteNames.citizenHomePath);
     }
   }
 
@@ -113,10 +100,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
           ),
           onPressed: () {
+            ref.read(navigationIndexProvider.notifier).setIndex(0);
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go(RouteNames.roleSelectionPath);
+              context.go(RouteNames.visitorHomePath);
             }
           },
         ),
@@ -132,8 +120,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                AuthHeaderWidget(
-                  title: 'Créer un compte (${_selectedRole.label})',
+                const AuthHeaderWidget(
+                  title: 'Créer un compte',
                   subtitle:
                       'Rejoignez la communauté de valorisation de la pharmacopée malienne',
                 ),
@@ -210,7 +198,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 // Téléphone malien
                 PhoneInputField(
                   controller: _phoneController,
-                  isRequired: _selectedRole != UserRole.population,
+                  isRequired: false,
                 ),
                 const SizedBox(height: AppDimensions.space16),
 
@@ -256,7 +244,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     Expanded(
                       child: Text(
-                        'J\'accepte les conditions d\'utilisation et l\'avertissement médical de l\'INRMPT.',
+                        'J\'accepte les conditions d\'utilisation et l\'avertissement médical de LADAFURA.',
                         style: (isDark
                                 ? AppTextStyles.captionDark
                                 : AppTextStyles.caption)
@@ -297,9 +285,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        context.push(
-                          '${RouteNames.loginPath}?role=${_selectedRole.backendValue}',
-                        );
+                        context.push(RouteNames.loginPath);
                       },
                       child: Text(
                         'Se connecter',

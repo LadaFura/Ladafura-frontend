@@ -29,8 +29,10 @@ class NavItemData {
     this.badgeCount = 0,
   });
 
-  /// Liste officielle des 5 onglets de la plateforme LADAFURA (Population & Agent)
-  static List<NavItemData> defaultItems({int badgeCount = 0, int? cartBadgeCount}) => [
+  /// Liste officielle des 5 onglets de la plateforme LADAFURA
+  static List<NavItemData> defaultItems(
+          {int badgeCount = 0, int? cartBadgeCount}) =>
+      [
         const NavItemData(
           index: 0,
           label: 'Accueil',
@@ -40,24 +42,24 @@ class NavItemData {
         ),
         const NavItemData(
           index: 1,
-          label: 'Flore',
-          activeIcon: Icons.eco_rounded,
-          inactiveIcon: Icons.eco_outlined,
-          tooltip: 'Flore & Plantes Médicinales',
-        ),
-        const NavItemData(
-          index: 2,
           label: 'Recherche',
           activeIcon: Icons.search_rounded,
           inactiveIcon: Icons.search_rounded,
           tooltip: 'Recherche',
         ),
+        const NavItemData(
+          index: 2,
+          label: 'Carte',
+          activeIcon: Icons.map_rounded,
+          inactiveIcon: Icons.map_outlined,
+          tooltip: 'Carte interactive',
+        ),
         NavItemData(
           index: 3,
-          label: 'Favoris',
-          activeIcon: Icons.bookmark_rounded,
-          inactiveIcon: Icons.bookmark_border_rounded,
-          tooltip: 'Favoris',
+          label: 'Panier',
+          activeIcon: Icons.shopping_bag_rounded,
+          inactiveIcon: Icons.shopping_bag_outlined,
+          tooltip: 'Panier',
           badgeCount: cartBadgeCount ?? badgeCount,
         ),
         const NavItemData(

@@ -24,7 +24,7 @@ enum UserRole {
   String get label {
     switch (this) {
       case UserRole.population:
-        return 'Citoyen / Chercheur';
+        return 'Citoyen';
       case UserRole.agentCollecte:
         return 'Agent de collecte';
     }

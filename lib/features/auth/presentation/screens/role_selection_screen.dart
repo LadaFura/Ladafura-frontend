@@ -83,9 +83,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                 label: 'Créer un compte',
                 icon: Icons.person_add_outlined,
                 onPressed: () {
-                  context.push(
-                    '${RouteNames.registerPath}?role=${_selectedRole.backendValue}',
-                  );
+                  context.push(RouteNames.registerPath);
                 },
               ),
               const SizedBox(height: AppDimensions.space24),
