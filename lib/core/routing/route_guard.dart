@@ -6,15 +6,14 @@ import 'route_names.dart';
 /// Garde de navigation (RouteGuard) centralisé pour LADAFURA Mobile.
 ///
 /// Implémente rigoureusement l'organigramme décisionnel du parcours utilisateur :
-/// 1. Splash / Flash : initialisation et contrôle d'état de session.
+/// 1. Splash : initialisation et contrôle d'état de session.
 /// 2. Session absente (Mode Visiteur) :
 ///    - Accès libre aux routes publiques (`/visitor/**`).
 ///    - Redirection vers `/auth/login` si l'utilisateur tente d'accéder à un espace réservé.
 /// 3. Session présente :
 ///    - Rôle [UserRole.population] -> Espace Citoyen (`/citizen/**`).
 ///    - Rôle [UserRole.agentCollecte] -> Espace Agent de Collecte (`/agent/**`).
-///    - Rôle [UserRole.pharmacopee] -> Espace Pharmacopée Officine (`/pharmacopee/**`).
-///    - Cloisonnement strict : un acteur ne peut pas naviguer dans l'espace d'un autre acteur.
+///    - Cloisonnement strict : un citoyen ne peut pas accéder aux routes de l'agent et inversement.
 class RouteGuard {
   RouteGuard._();
 
@@ -38,7 +37,6 @@ class RouteGuard {
     final isVisitorRoute = currentPath.startsWith('/visitor');
     final isCitizenRoute = currentPath.startsWith('/citizen');
     final isAgentRoute = currentPath.startsWith('/agent');
-    final isPharmacopeeRoute = currentPath.startsWith('/pharmacopee');
 
     // 2. Utilisateur NON authentifié (Visiteur)
     if (!isAuthenticated) {
@@ -47,7 +45,7 @@ class RouteGuard {
       }
 
       // Si le visiteur tente d'accéder à un espace nécessitant un compte
-      if (isCitizenRoute || isAgentRoute || isPharmacopeeRoute) {
+      if (isCitizenRoute || isAgentRoute) {
         return RouteNames.loginPath;
       }
 
@@ -61,28 +59,21 @@ class RouteGuard {
       return _getDefaultHomeForRole(role);
     }
 
-    // Vérification du cloisonnement des rôles
+    // Vérification du cloisonnement des 2 rôles
     switch (role) {
       case UserRole.population:
-        if (isAgentRoute || isPharmacopeeRoute) {
+        if (isAgentRoute) {
           return RouteNames.citizenHomePath;
         }
         break;
 
       case UserRole.agentCollecte:
-        if (isCitizenRoute || isPharmacopeeRoute) {
+        if (isCitizenRoute) {
           return RouteNames.agentDashboardPath;
         }
         break;
 
-      case UserRole.pharmacopee:
-        if (isCitizenRoute || isAgentRoute) {
-          return RouteNames.pharmacopeeDashboardPath;
-        }
-        break;
-
       default:
-        // Rôle indéterminé ou non supporté sur mobile
         return RouteNames.loginPath;
     }
 
@@ -97,8 +88,6 @@ class RouteGuard {
         return RouteNames.citizenHomePath;
       case UserRole.agentCollecte:
         return RouteNames.agentDashboardPath;
-      case UserRole.pharmacopee:
-        return RouteNames.pharmacopeeDashboardPath;
       default:
         return RouteNames.visitorHomePath;
     }

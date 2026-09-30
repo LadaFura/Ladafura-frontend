@@ -1,8 +1,9 @@
 /// Constantes officielles des URLs et routes REST du backend Spring Boot LADAFURA.
 ///
-/// L'application Flutter communique avec l'API REST exposée sur le préfixe `/api/v1`.
-/// Les routes sont réparties par acteur mobile (Population, Agent de Collecte, Pharmacopée)
-/// conformément à la conception du backend Java 21 / Spring Boot 3.
+/// L'application Flutter mobile communique avec l'API REST exposée sur le préfixe `/api/v1`.
+/// Les routes sont réparties strictement selon les deux acteurs mobiles du projet :
+/// 1. Population (Citoyens, Chercheurs, Visiteurs - US-01 à US-06)
+/// 2. Agent de Collecte Terrain (Botanistes, Enquêteurs - US-13 à US-17)
 class ApiEndpoints {
   ApiEndpoints._();
 
@@ -43,70 +44,34 @@ class ApiEndpoints {
   static const String agentAuthMe = '/agent/auth/me';
   static const String agentMe = agentAuthMe;
 
-  // --- Pharmacopée ---
-  static const String pharmacopeeAuthMe = '/pharmacopee/auth/me';
-  static const String pharmacopeeMe = pharmacopeeAuthMe;
-
   // ===========================================================================
-  // 👥 MODULE POPULATION (Citoyens & Visiteurs - US-01 à US-12)
+  // 👥 MODULE POPULATION (Citoyens & Visiteurs)
   // ===========================================================================
 
-  // --- Recherche & Découverte ---
+  // --- Recherche & Découverte Flore ---
   static const String populationRecherche = '/population/recherche';
-  static const String populationRechercheSuggestions =
-      '/population/recherche/suggestions';
+  static const String populationRecherchePlantes =
+      '/population/recherche/plantes';
+  static const String populationRechercheVernaculaires =
+      '/population/recherche/vernaculaires';
+  static const String populationRechercheMaladies =
+      '/population/recherche/maladies';
 
-  // --- Plantes Médicinales ---
+  // --- Plantes Médicinales Maliennes ---
   static const String populationPlantes = '/population/plantes';
   static String populationPlanteDetail(String id) => '/population/plantes/$id';
+  static String populationPlanteConnaissances(String id) =>
+      '/population/plantes/$id/connaissances';
+  static String populationPlanteEtudes(String id) =>
+      '/population/plantes/$id/etudes';
 
-  // --- Produits & Remèdes Traditionnels ---
-  static const String populationProduits = '/population/produits';
-  static String populationProduitDetail(String id) =>
-      '/population/produits/$id';
-
-  // --- Pharmacopées & Officines ---
-  static const String populationPharmacopees = '/population/pharmacopees';
-  static String populationPharmacopeeDetail(String id) =>
-      '/population/pharmacopees/$id';
-
-  // --- Cartographie & Géolocalisation ---
-  static const String populationCarte = '/population/carte';
-  static const String populationCarteProximite = '/population/carte/proximite';
-
-  // --- Panier d'Achat ---
-  static const String populationPanier = '/population/panier';
-  static const String populationPanierItems = '/population/panier/items';
-  static String populationPanierItem(String itemId) =>
-      '/population/panier/items/$itemId';
-  static const String populationPanierClear = '/population/panier/clear';
-
-  // --- Commandes ---
-  static const String populationCommandes = '/population/commandes';
-  static String populationCommandeDetail(String id) =>
-      '/population/commandes/$id';
-  static String populationCommandeAnnuler(String id) =>
-      '/population/commandes/$id/annuler';
-
-  // --- Paiements ---
-  static const String populationPaiements = '/population/paiements';
-  static const String populationPaiementInitier =
-      '/population/paiements/initier';
-  static String populationPaiementStatut(String id) =>
-      '/population/paiements/$id/statut';
-
-  // --- Modes de Retrait & Livraison ---
-  static const String populationRetraitsModes = '/population/retraits/modes';
-
-  // --- Favoris ---
+  // --- Favoris (Bookmarks personnels) ---
   static const String populationFavoris = '/population/favoris';
-  static String populationFavoriToggle(String id) =>
-      '/population/favoris/toggle/$id';
-
-  // --- Avis & Évaluations ---
-  static const String populationAvis = '/population/avis';
-  static String populationAvisProduit(String produitId) =>
-      '/population/avis/produit/$produitId';
+  static const String populationFavorisPlantes = '/population/favoris/plantes';
+  static String populationFavoriPlanteToggle(String planteId) =>
+      '/population/favoris/plantes/$planteId';
+  static const String populationFavorisCheck = '/population/favoris/check';
+  static const String populationFavorisCount = '/population/favoris/count';
 
   // --- Profil Citoyen ---
   static const String populationProfile = '/population/profile';
@@ -120,29 +85,31 @@ class ApiEndpoints {
   // 🌿 MODULE AGENT DE COLLECTE (Terrain - US-13 à US-17)
   // ===========================================================================
 
-  // --- Tableau de bord & KPIs ---
+  // --- Tableau de bord & Activités ---
   static const String agentDashboardStats = '/agent/dashboard/stats';
   static const String agentDashboardSummary = '/agent/dashboard/summary';
 
   // --- Collectes Botaniques ---
   static const String agentCollectes = '/agent/collectes';
   static String agentCollecteDetail(String id) => '/agent/collectes/$id';
-  static const String agentCollectesBrouillons = '/agent/collectes/brouillons';
-  static const String agentCollectesSoumissions = '/agent/submissions';
-  static String agentSuiviCollecte(String id) => '/agent/suivi/$id';
+  static const String agentCollectesDraft = '/agent/collectes/draft';
+  static String agentCollecteRecapitulatif(String id) =>
+      '/agent/collectes/$id/recapitulatif';
+  static String agentCollecteSoumettre(String id) =>
+      '/agent/collectes/$id/soumettre';
 
-  // --- Médias Terrain (Photos, Enregistrements Audio des récits traditionnels) ---
+  // --- Médias Terrain & Enregistrement Audio des récits (US-15) ---
   static const String agentMediasUpload = '/agent/medias/upload';
   static String agentMediaDetail(String id) => '/agent/medias/$id';
 
   // --- Connaissances & Usages Traditionnels ---
   static const String agentConnaissances = '/agent/connaissances';
 
-  // --- Sources & Informateurs (Tradipraticiens, Herboristes, Anciens) ---
+  // --- Sources & Informateurs (Tradipraticiens, Herboristes) ---
   static const String agentSources = '/agent/sources';
   static String agentSourceDetail(String id) => '/agent/sources/$id';
 
-  // --- Noms Vernaculaires (Bambara, Peul, Soninké, etc.) ---
+  // --- Noms Vernaculaires en langues locales du Mali ---
   static const String agentNomsVernaculaires = '/agent/noms-vernaculaires';
 
   // --- Localisation & Découpage Territorial Malien (Région, Cercle, Commune, GPS) ---
@@ -156,46 +123,4 @@ class ApiEndpoints {
   // --- Notifications & Profil Agent ---
   static const String agentNotifications = '/agent/notifications';
   static const String agentProfile = '/agent/profile';
-
-  // ===========================================================================
-  // 🏪 MODULE PHARMACOPÉE (Officines & Vendeurs - US-18 à US-24)
-  // ===========================================================================
-
-  // --- Tableau de bord Officine ---
-  static const String pharmacopeeDashboardStats =
-      '/pharmacopee/dashboard/stats';
-
-  // --- Gestion du Catalogue Produits ---
-  static const String pharmacopeeProduits = '/pharmacopee/produits';
-  static String pharmacopeeProduitDetail(String id) =>
-      '/pharmacopee/produits/$id';
-
-  // --- Gestion des Stocks & Alertes ---
-  static const String pharmacopeeStock = '/pharmacopee/stock';
-  static String pharmacopeeStockAjuster(String id) =>
-      '/pharmacopee/stock/$id/ajuster';
-  static const String pharmacopeeStockAlertes = '/pharmacopee/stock/alertes';
-
-  // --- Traitement des Commandes Reçues ---
-  static const String pharmacopeeCommandes = '/pharmacopee/commandes';
-  static String pharmacopeeCommandeDetail(String id) =>
-      '/pharmacopee/commandes/$id';
-  static String pharmacopeeCommandeStatut(String id) =>
-      '/pharmacopee/commandes/$id/statut';
-
-  // --- Retraits en Officine ---
-  static const String pharmacopeeRetraits = '/pharmacopee/retraits';
-
-  // --- Demande de Référencement ---
-  static const String pharmacopeeReferencement =
-      '/pharmacopee/referencement/demander';
-
-  // --- Paiements Reçus ---
-  static const String pharmacopeePaiements = '/pharmacopee/paiements';
-
-  // --- Profil Officine, Avis & Notifications ---
-  static const String pharmacopeeProfile = '/pharmacopee/profile';
-  static const String pharmacopeeLocalisations = '/pharmacopee/localisations';
-  static const String pharmacopeeAvis = '/pharmacopee/avis';
-  static const String pharmacopeeNotifications = '/pharmacopee/notifications';
 }

@@ -4,5 +4,4 @@ library;
 export 'localisation_mali_model.dart';
 export 'page_response.dart';
 export 'plante_sommaire_model.dart';
-export 'produit_sommaire_model.dart';
 export 'utilisateur_model.dart';

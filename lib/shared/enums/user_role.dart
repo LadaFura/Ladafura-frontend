@@ -1,17 +1,11 @@
-/// Énumération des rôles utilisateurs de l'écosystème LADAFURA.
+/// Énumération des rôles utilisateurs de l'application mobile LADAFURA.
 ///
-/// Conforme à `com.pharmacopee.ladafura.enums.Role` du backend Spring Boot.
-/// L'application mobile cible en priorité :
-/// - [population] : Citoyen consultant la flore, achetant des remèdes (US-01 à US-12).
-/// - [agentCollecte] : Agent de terrain collectant les savoirs traditionnels et plantes (US-13 à US-17).
-/// - [pharmacopee] : Officine / vendeuse gérant les stocks et commandes (US-18 à US-24).
+/// L'application mobile cible exclusivement les 2 acteurs suivants :
+/// - [population] : Citoyen, chercheur ou visiteur consultant la flore et les savoirs traditionnels.
+/// - [agentCollecte] : Agent de terrain collectant les spécimens et savoirs botaniques.
 enum UserRole {
   population,
-  agentCollecte,
-  pharmacopee,
-  administrateur,
-  therapeute,
-  herboriste;
+  agentCollecte;
 
   /// Valeur textuelle exacte attendue par les APIs Spring Boot et les jetons JWT.
   String get value {
@@ -20,14 +14,6 @@ enum UserRole {
         return 'POPULATION';
       case UserRole.agentCollecte:
         return 'AGENT_COLLECTE';
-      case UserRole.pharmacopee:
-        return 'PHARMACOPEE';
-      case UserRole.administrateur:
-        return 'ADMINISTRATEUR';
-      case UserRole.therapeute:
-        return 'THERAPEUTE';
-      case UserRole.herboriste:
-        return 'HERBORISTE';
     }
   }
 
@@ -38,25 +24,20 @@ enum UserRole {
   String get label {
     switch (this) {
       case UserRole.population:
-        return 'Citoyen';
+        return 'Citoyen / Chercheur';
       case UserRole.agentCollecte:
         return 'Agent de collecte';
-      case UserRole.pharmacopee:
-        return 'Officine / Pharmacopée';
-      case UserRole.administrateur:
-        return 'Administrateur (Web)';
-      case UserRole.therapeute:
-        return 'Thérapeute';
-      case UserRole.herboriste:
-        return 'Herboriste';
     }
   }
 
-  /// Indique si le rôle fait partie des 3 acteurs mobiles principaux.
-  bool get isMobileActor =>
-      this == UserRole.population ||
-      this == UserRole.agentCollecte ||
-      this == UserRole.pharmacopee;
+  /// Indique si le rôle fait partie des acteurs mobiles autorisés.
+  bool get isMobileActor => true;
+
+  /// Liste des rôles autorisés sur l'application mobile.
+  static List<UserRole> get mobileRoles => [
+        UserRole.population,
+        UserRole.agentCollecte,
+      ];
 
   /// Parse un rôle depuis une chaîne de caractères (insensible à la casse).
   static UserRole? fromString(String? roleStr) {

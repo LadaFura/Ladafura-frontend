@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ladafura_frontend_flutter/shared/enums/statut_collecte.dart';
-import 'package:ladafura_frontend_flutter/shared/enums/statut_commande.dart';
 import 'package:ladafura_frontend_flutter/shared/models/plante_sommaire_model.dart';
-import 'package:ladafura_frontend_flutter/shared/models/produit_sommaire_model.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/widgets.dart';
 
 void main() {
@@ -152,7 +150,7 @@ void main() {
 
   group('Shared Widgets - Cards & Badges', () {
     testWidgets(
-        'StatusBadge renders for Collecte, Commande, and ENF11 cert levels',
+        'StatusBadge renders for Collecte and ENF11 cert levels',
         (tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -160,7 +158,6 @@ void main() {
             body: Column(
               children: [
                 StatusBadge.collecte(StatutCollecte.validee),
-                StatusBadge.commande(StatutCommande.confirmee),
                 const StatusBadge.traditionnel(),
                 const StatusBadge.scientifique(),
                 const StatusBadge.institutionnel(),
@@ -206,47 +203,6 @@ void main() {
 
       await tester.tap(find.text('Kinkeliba'));
       expect(tapped, isTrue);
-    });
-
-    testWidgets('ProduitCard displays remedy info and triggers order action',
-        (tester) async {
-      bool cardTapped = false;
-      bool orderTapped = false;
-
-      const produit = ProduitSommaireModel(
-        id: 10,
-        nom: 'Sirop Kinkeliba Bio',
-        forme: 'Flacon 200ml',
-        prixIndicatif: 2500,
-        disponibleEnPharmacie: true,
-        nombrePharmacopees: 1,
-        noteMoyenne: 4.8,
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ProduitCard(
-              produit: produit,
-              onTap: () => cardTapped = true,
-              onAddToCart: () => orderTapped = true,
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text('Sirop Kinkeliba Bio'), findsOneWidget);
-      expect(find.text('FLACON 200ML'), findsOneWidget);
-      expect(find.text('2 500 FCFA'), findsOneWidget);
-      expect(find.text('En stock'), findsOneWidget);
-      expect(find.text('4.8 / 5'), findsOneWidget);
-      expect(find.byIcon(Icons.add_shopping_cart), findsOneWidget);
-
-      await tester.tap(find.text('Sirop Kinkeliba Bio'));
-      expect(cardTapped, isTrue);
-
-      await tester.tap(find.byIcon(Icons.add_shopping_cart));
-      expect(orderTapped, isTrue);
     });
   });
 

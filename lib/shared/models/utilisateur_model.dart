@@ -54,9 +54,6 @@ class UtilisateurModel {
   /// Indique si l'utilisateur est un agent de collecte terrain.
   bool get isAgent => role == UserRole.agentCollecte;
 
-  /// Indique si l'utilisateur est une officine / pharmacopée.
-  bool get isPharmacopee => role == UserRole.pharmacopee;
-
   UtilisateurModel copyWith({
     int? id,
     String? nom,

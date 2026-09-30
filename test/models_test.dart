@@ -3,7 +3,7 @@ import 'package:ladafura_frontend_flutter/shared/enums/user_role.dart';
 import 'package:ladafura_frontend_flutter/shared/models/models.dart';
 
 void main() {
-  group('Shared Models Tests - LADAFURA', () {
+  group('Shared Models Tests - LADAFURA (Périmètre 2 Rôles)', () {
     // =========================================================================
     // 1. UTILISATEUR MODEL TESTS
     // =========================================================================
@@ -33,7 +33,6 @@ void main() {
       expect(user.isActif, isTrue);
       expect(user.isCitizen, isTrue);
       expect(user.isAgent, isFalse);
-      expect(user.isPharmacopee, isFalse);
 
       final serialized = user.toJson();
       expect(serialized['role'], 'POPULATION');
@@ -52,6 +51,7 @@ void main() {
       );
 
       expect(user.isAgent, isTrue);
+      expect(user.isCitizen, isFalse);
       expect(user.matricule, 'AGT-2026-004');
       expect(user.zoneCouverture, 'Région de Sikasso');
     });
@@ -113,45 +113,13 @@ void main() {
     });
 
     // =========================================================================
-    // 4. PRODUIT SOMMAIRE MODEL TESTS
-    // =========================================================================
-    test(
-        'ProduitSommaireModel formats FCFA prices and checks pharmacy availability',
-        () {
-      final json = {
-        'id': 5,
-        'nom': 'Tisane Kinkéliba Bio',
-        'description': 'Infusion détoxifiante',
-        'forme': 'Sachet de tisane',
-        'prixIndicatif': 2500.0,
-        'photoUrl': 'https://ladafura.ml/uploads/produits/tisane.jpg',
-        'categorieId': 1,
-        'categorieNom': 'Tisanes',
-        'plantesPrincipales': ['Combretum micranthum'],
-        'nombrePharmacopees': 3,
-        'disponibleEnPharmacie': true,
-        'noteMoyenne': 4.5,
-        'nombreAvis': 12,
-      };
-
-      final produit = ProduitSommaireModel.fromJson(json);
-
-      expect(produit.id, 5);
-      expect(produit.nom, 'Tisane Kinkéliba Bio');
-      expect(produit.prixFormate, '2 500 FCFA');
-      expect(produit.noteFormatee, '4.5 / 5');
-      expect(produit.isDisponible, isTrue);
-      expect(produit.hasPhoto, isTrue);
-    });
-
-    // =========================================================================
-    // 5. PAGE RESPONSE TESTS (SPRING DATA PAGINATION)
+    // 4. PAGE RESPONSE TESTS (SPRING DATA PAGINATION)
     // =========================================================================
     test('PageResponse parses Spring Data Page JSON wrapper', () {
       final springPageJson = {
         'content': [
-          {'id': 1, 'nom': 'Tisane A'},
-          {'id': 2, 'nom': 'Tisane B'},
+          {'id': 1, 'nom': 'Kinkéliba'},
+          {'id': 2, 'nom': 'N\'Golo'},
         ],
         'number': 0,
         'size': 20,
@@ -169,7 +137,7 @@ void main() {
       );
 
       expect(page.content.length, 2);
-      expect(page.content.first, 'Tisane A');
+      expect(page.content.first, 'Kinkéliba');
       expect(page.pageNumber, 0);
       expect(page.pageSize, 20);
       expect(page.totalElements, 45);

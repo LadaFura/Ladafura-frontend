@@ -24,7 +24,7 @@ class RoleCardSelector extends StatelessWidget {
           role: UserRole.population,
           title: 'Citoyen / Population',
           subtitle:
-              'Consultez les plantes médicinales, remèdes traditionnels et commandez en officine.',
+              'Consultez les plantes médicinales de la flore malienne, leurs savoirs ancestraux et études scientifiques.',
           icon: Icons.person_outline,
           accentColor: AppColors.primary,
         ),
@@ -34,19 +34,9 @@ class RoleCardSelector extends StatelessWidget {
           role: UserRole.agentCollecte,
           title: 'Agent de Collecte',
           subtitle:
-              'Enregistrez les récits oraux des tradithérapeutes et géolocalisez les espèces végétales.',
+              'Enregistrez les spécimens botaniques sur le terrain, les récits oraux et géolocalisez les espèces.',
           icon: Icons.edit_location_alt_outlined,
           accentColor: AppColors.accent,
-        ),
-        const SizedBox(height: AppDimensions.space12),
-        _buildRoleTile(
-          context: context,
-          role: UserRole.pharmacopee,
-          title: 'Officine / Pharmacopée',
-          subtitle:
-              'Gérez votre officine, mettez à jour vos stocks de remèdes et traitez les commandes.',
-          icon: Icons.storefront_outlined,
-          accentColor: AppColors.info,
         ),
       ],
     );

@@ -93,12 +93,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         case UserRole.agentCollecte:
           context.go(RouteNames.agentHomePath);
           break;
-        case UserRole.pharmacopee:
-          context.go(RouteNames.pharmacopeeHomePath);
-          break;
-        default:
-          context.go(RouteNames.citizenHomePath);
-          break;
       }
     }
   }

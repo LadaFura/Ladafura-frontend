@@ -16,19 +16,16 @@ void main() {
       expect(ApiEndpoints.populationPlantes, '/population/plantes');
       expect(ApiEndpoints.populationPlanteDetail('123'),
           '/population/plantes/123');
-      expect(ApiEndpoints.populationPanier, '/population/panier');
-      expect(ApiEndpoints.populationCommandes, '/population/commandes');
+      expect(ApiEndpoints.populationFavoris, '/population/favoris');
+      expect(ApiEndpoints.populationFavorisPlantes,
+          '/population/favoris/plantes');
 
       // Routes Agent
       expect(ApiEndpoints.agentDashboardStats, '/agent/dashboard/stats');
       expect(ApiEndpoints.agentCollectes, '/agent/collectes');
       expect(ApiEndpoints.agentCollecteDetail('456'), '/agent/collectes/456');
       expect(ApiEndpoints.agentMediasUpload, '/agent/medias/upload');
-
-      // Routes Pharmacopée
-      expect(ApiEndpoints.pharmacopeeProduits, '/pharmacopee/produits');
-      expect(ApiEndpoints.pharmacopeeStock, '/pharmacopee/stock');
-      expect(ApiEndpoints.pharmacopeeCommandes, '/pharmacopee/commandes');
+      expect(ApiEndpoints.agentCollectesDraft, '/agent/collectes/draft');
     });
 
     test('AppColors provides compliant Light and Dark palettes', () {

@@ -29,8 +29,8 @@ class NavItemData {
     this.badgeCount = 0,
   });
 
-  /// Liste officielle des 5 onglets de la plateforme LADAFURA
-  static List<NavItemData> defaultItems({int cartBadgeCount = 0}) => [
+  /// Liste officielle des 5 onglets de la plateforme LADAFURA (Population & Agent)
+  static List<NavItemData> defaultItems({int badgeCount = 0, int? cartBadgeCount}) => [
         const NavItemData(
           index: 0,
           label: 'Accueil',
@@ -40,10 +40,10 @@ class NavItemData {
         ),
         const NavItemData(
           index: 1,
-          label: 'Carte',
-          activeIcon: Icons.map_rounded,
-          inactiveIcon: Icons.map_outlined,
-          tooltip: 'Carte des tradipraticiens & officines',
+          label: 'Flore',
+          activeIcon: Icons.eco_rounded,
+          inactiveIcon: Icons.eco_outlined,
+          tooltip: 'Flore & Plantes Médicinales',
         ),
         const NavItemData(
           index: 2,
@@ -54,11 +54,11 @@ class NavItemData {
         ),
         NavItemData(
           index: 3,
-          label: 'Panier',
-          activeIcon: Icons.shopping_cart_rounded,
-          inactiveIcon: Icons.shopping_cart_outlined,
-          tooltip: 'Panier',
-          badgeCount: cartBadgeCount,
+          label: 'Favoris',
+          activeIcon: Icons.bookmark_rounded,
+          inactiveIcon: Icons.bookmark_border_rounded,
+          tooltip: 'Favoris',
+          badgeCount: cartBadgeCount ?? badgeCount,
         ),
         const NavItemData(
           index: 4,

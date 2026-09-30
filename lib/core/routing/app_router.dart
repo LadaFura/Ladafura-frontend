@@ -44,7 +44,7 @@ AuthRoutingState authRoutingState(AuthRoutingStateRef ref) {
   return AuthRoutingState();
 }
 
-/// Fournisseur Riverpod central du [GoRouter].
+/// Fournisseur Riverpod central du [GoRouter] adapté aux 2 acteurs mobiles (Population & Agent).
 @Riverpod(keepAlive: true)
 GoRouter appRouter(AppRouterRef ref) {
   final authNotifier = ref.watch(authRoutingStateProvider);
@@ -101,7 +101,7 @@ GoRouter appRouter(AppRouterRef ref) {
         builder: (context, state) => const RoleSelectionScreen(),
       ),
 
-      // 3. Espace Visiteur (Public)
+      // 3. Espace Visiteur (Public libre)
       GoRoute(
         path: RouteNames.visitorHomePath,
         name: RouteNames.visitorHome,
@@ -121,23 +121,10 @@ GoRouter appRouter(AppRouterRef ref) {
               title: 'Détail Plante (${state.pathParameters['id']})',
             ),
           ),
-          GoRoute(
-            path: 'produits/:id',
-            name: RouteNames.visitorProduitDetail,
-            builder: (context, state) => _RoutePlaceholder(
-              title: 'Détail Produit (${state.pathParameters['id']})',
-            ),
-          ),
-          GoRoute(
-            path: 'carte',
-            name: RouteNames.visitorCarte,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Carte Officines Publique'),
-          ),
         ],
       ),
 
-      // 4. Espace Citoyen / Population (US-01 à US-12)
+      // 4. Espace Citoyen / Population (Flore & Savoirs ancestraux)
       GoRoute(
         path: RouteNames.citizenHomePath,
         name: RouteNames.citizenHome,
@@ -148,102 +135,31 @@ GoRouter appRouter(AppRouterRef ref) {
             path: 'recherche',
             name: RouteNames.citizenRecherche,
             builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Recherche Citoyen'),
+                const _RoutePlaceholder(title: 'Recherche Flore & Maladies'),
           ),
           GoRoute(
             path: 'plantes/:id',
             name: RouteNames.citizenPlanteDetail,
             builder: (context, state) => _RoutePlaceholder(
-              title: 'Plante Citoyen (${state.pathParameters['id']})',
+              title: 'Fiche Plante (${state.pathParameters['id']})',
             ),
-          ),
-          GoRoute(
-            path: 'produits/:id',
-            name: RouteNames.citizenProduitDetail,
-            builder: (context, state) => _RoutePlaceholder(
-              title: 'Produit Citoyen (${state.pathParameters['id']})',
-            ),
-          ),
-          GoRoute(
-            path: 'marketplace',
-            name: RouteNames.citizenMarketplace,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Marketplace Remèdes'),
-          ),
-          GoRoute(
-            path: 'carte',
-            name: RouteNames.citizenCarte,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Carte Proximité GPS'),
-          ),
-          GoRoute(
-            path: 'panier',
-            name: RouteNames.citizenPanier,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Panier Citoyen'),
-            routes: [
-              GoRoute(
-                path: 'mode-retrait',
-                name: RouteNames.citizenModeRetrait,
-                builder: (context, state) =>
-                    const _RoutePlaceholder(title: 'Choix Mode Retrait'),
-              ),
-              GoRoute(
-                path: 'paiement',
-                name: RouteNames.citizenPaiement,
-                builder: (context, state) => const _RoutePlaceholder(
-                    title: 'Paiement Mobile Money / Cash'),
-              ),
-            ],
-          ),
-          GoRoute(
-            path: 'commandes',
-            name: RouteNames.citizenCommandes,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Mes Commandes'),
-            routes: [
-              GoRoute(
-                path: ':id',
-                name: RouteNames.citizenCommandeDetail,
-                builder: (context, state) => _RoutePlaceholder(
-                  title: 'Détail Commande (${state.pathParameters['id']})',
-                ),
-                routes: [
-                  GoRoute(
-                    path: 'avis',
-                    name: RouteNames.citizenRedigerAvis,
-                    builder: (context, state) => _RoutePlaceholder(
-                      title: 'Rédiger un avis (${state.pathParameters['id']})',
-                    ),
-                  ),
-                ],
-              ),
-            ],
           ),
           GoRoute(
             path: 'favoris',
             name: RouteNames.citizenFavoris,
             builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Favoris Sauvegardés'),
+                const _RoutePlaceholder(title: 'Plantes Favorites'),
           ),
           GoRoute(
             path: 'profil',
             name: RouteNames.citizenProfil,
             builder: (context, state) =>
                 const _RoutePlaceholder(title: 'Profil Citoyen'),
-            routes: [
-              GoRoute(
-                path: 'depenses',
-                name: RouteNames.citizenDepenses,
-                builder: (context, state) =>
-                    const _RoutePlaceholder(title: 'Historique Dépenses'),
-              ),
-            ],
           ),
         ],
       ),
 
-      // 5. Espace Agent de Collecte Terrain (US-13 à US-17)
+      // 5. Espace Agent de Collecte Terrain (Collectes botaniques & Récits oraux)
       GoRoute(
         path: RouteNames.agentDashboardPath,
         name: RouteNames.agentDashboard,
@@ -254,13 +170,13 @@ GoRouter appRouter(AppRouterRef ref) {
             path: 'collectes',
             name: RouteNames.agentCollectes,
             builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Collectes Terrain'),
+                const _RoutePlaceholder(title: 'Collectes Botaniques'),
             routes: [
               GoRoute(
                 path: 'nouvelle',
                 name: RouteNames.agentNouvelleCollecte,
                 builder: (context, state) =>
-                    const _RoutePlaceholder(title: 'Nouvelle Collecte Wizard'),
+                    const _RoutePlaceholder(title: 'Nouvelle Collecte Terrain'),
               ),
               GoRoute(
                 path: ':id',
@@ -292,80 +208,6 @@ GoRouter appRouter(AppRouterRef ref) {
             name: RouteNames.agentProfil,
             builder: (context, state) =>
                 const _RoutePlaceholder(title: 'Profil Agent'),
-          ),
-        ],
-      ),
-
-      // 6. Espace Officine Pharmacopée (US-18 à US-24)
-      GoRoute(
-        path: RouteNames.pharmacopeeDashboardPath,
-        name: RouteNames.pharmacopeeDashboard,
-        builder: (context, state) =>
-            const _RoutePlaceholder(title: 'Tableau de bord Officine'),
-        routes: [
-          GoRoute(
-            path: 'stock',
-            name: RouteNames.pharmacopeeStock,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Gestion des Stocks'),
-            routes: [
-              GoRoute(
-                path: 'ajouter',
-                name: RouteNames.pharmacopeeAjouterProduit,
-                builder: (context, state) =>
-                    const _RoutePlaceholder(title: 'Ajouter Produit Stock'),
-              ),
-            ],
-          ),
-          GoRoute(
-            path: 'modes-retrait',
-            name: RouteNames.pharmacopeeModesRetrait,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Configuration Modes Retrait'),
-          ),
-          GoRoute(
-            path: 'commandes',
-            name: RouteNames.pharmacopeeCommandes,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Commandes Clients Reçues'),
-            routes: [
-              GoRoute(
-                path: ':id',
-                name: RouteNames.pharmacopeeCommandeDetail,
-                builder: (context, state) => _RoutePlaceholder(
-                  title:
-                      'Détail Commande Officine (${state.pathParameters['id']})',
-                ),
-                routes: [
-                  GoRoute(
-                    path: 'valider-pickup',
-                    name: RouteNames.pharmacopeeValiderPickup,
-                    builder: (context, state) => _RoutePlaceholder(
-                      title:
-                          'Validation Retrait (${state.pathParameters['id']})',
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          GoRoute(
-            path: 'avis',
-            name: RouteNames.pharmacopeeAvis,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Avis Clients Officine'),
-          ),
-          GoRoute(
-            path: 'profil',
-            name: RouteNames.pharmacopeeProfil,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Profil Officine'),
-          ),
-          GoRoute(
-            path: 'referencement',
-            name: RouteNames.pharmacopeeReferencement,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Demande Agrément INRMPT'),
           ),
         ],
       ),

@@ -172,7 +172,7 @@ void main() {
     });
 
     testWidgets(
-        'RoleCardSelector allows selecting between Citoyen, Agent, and Pharmacopée',
+        'RoleCardSelector allows selecting between Citoyen and Agent',
         (tester) async {
       UserRole selected = UserRole.population;
 
@@ -197,17 +197,17 @@ void main() {
 
       expect(find.text('Citoyen / Population'), findsOneWidget);
       expect(find.text('Agent de Collecte'), findsOneWidget);
-      expect(find.text('Officine / Pharmacopée'), findsOneWidget);
+      expect(find.text('Officine / Pharmacopée'), findsNothing);
 
       // Tap on Agent
       await tester.tap(find.text('Agent de Collecte'));
       await tester.pump();
       expect(selected, UserRole.agentCollecte);
 
-      // Tap on Pharmacopée
-      await tester.tap(find.text('Officine / Pharmacopée'));
+      // Tap back on Citoyen
+      await tester.tap(find.text('Citoyen / Population'));
       await tester.pump();
-      expect(selected, UserRole.pharmacopee);
+      expect(selected, UserRole.population);
     });
 
     testWidgets('LoginScreen renders fields and validates empty inputs',

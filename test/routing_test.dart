@@ -7,14 +7,18 @@ import 'package:ladafura_frontend_flutter/shared/enums/user_role.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('Routing Layer Tests - LADAFURA', () {
+  group('Routing Layer Tests - LADAFURA (Périmètre 2 Rôles)', () {
     test('RouteNames defines standardized URLs and path generators', () {
       expect(RouteNames.splashPath, '/');
       expect(RouteNames.loginPath, '/auth/login');
+      expect(RouteNames.registerPath, '/auth/register');
       expect(RouteNames.visitorHomePath, '/visitor');
+      expect(RouteNames.visitorRecherchePath, '/visitor/recherche');
       expect(RouteNames.citizenHomePath, '/citizen');
+      expect(RouteNames.citizenRecherchePath, '/citizen/recherche');
+      expect(RouteNames.citizenFavorisPath, '/citizen/favoris');
       expect(RouteNames.agentDashboardPath, '/agent');
-      expect(RouteNames.pharmacopeeDashboardPath, '/pharmacopee');
+      expect(RouteNames.agentCollectesPath, '/agent/collectes');
 
       // Helper URLs paramétrés
       expect(
@@ -22,20 +26,16 @@ void main() {
         '/visitor/plantes/101',
       );
       expect(
-        RouteNames.citizenCommandeDetailUrl('cmd-55'),
-        '/citizen/commandes/cmd-55',
+        RouteNames.citizenPlanteDetailUrl('101'),
+        '/citizen/plantes/101',
       );
       expect(
         RouteNames.agentCollecteDetailUrl('col-99'),
         '/agent/collectes/col-99',
       );
-      expect(
-        RouteNames.pharmacopeeCommandeDetailUrl('ph-12'),
-        '/pharmacopee/commandes/ph-12',
-      );
     });
 
-    group('RouteGuard Decision Tree Tests (Parcours Utilisateur)', () {
+    group('RouteGuard Decision Tree Tests (Citoyen & Agent de Collecte)', () {
       test('Redirection pendant la phase d\'initialisation (Splash)', () {
         final redirect1 = RouteGuard.evaluateRedirect(
           currentPath: '/citizen',
@@ -73,6 +73,7 @@ void main() {
           RouteNames.loginPath,
           RouteNames.registerPath,
           RouteNames.onboardingPath,
+          RouteNames.roleSelectionPath,
         ];
 
         for (final path in publicPaths) {
@@ -92,12 +93,11 @@ void main() {
           () {
         final protectedPaths = [
           RouteNames.citizenHomePath,
-          RouteNames.citizenPanierPath,
-          RouteNames.citizenCommandesPath,
+          RouteNames.citizenFavorisPath,
+          RouteNames.citizenProfilPath,
           RouteNames.agentDashboardPath,
           RouteNames.agentCollectesPath,
-          RouteNames.pharmacopeeDashboardPath,
-          RouteNames.pharmacopeeStockPath,
+          RouteNames.agentNouvelleCollectePath,
         ];
 
         for (final path in protectedPaths) {
@@ -143,7 +143,7 @@ void main() {
 
         // Navigation légitime dans l'espace Citoyen
         final legitimeCitizen = RouteGuard.evaluateRedirect(
-          currentPath: RouteNames.citizenPanierPath,
+          currentPath: RouteNames.citizenFavorisPath,
           isAuthenticated: true,
           role: UserRole.population,
         );
@@ -176,33 +176,6 @@ void main() {
           role: UserRole.agentCollecte,
         );
         expect(legitimeAgent, isNull);
-      });
-
-      test(
-          'Utilisateur PHARMACOPEE : Redirigé vers Espace Pharmacopée et cloisonné',
-          () {
-        final fromLogin = RouteGuard.evaluateRedirect(
-          currentPath: RouteNames.loginPath,
-          isAuthenticated: true,
-          role: UserRole.pharmacopee,
-        );
-        expect(fromLogin, RouteNames.pharmacopeeDashboardPath);
-
-        // Tentative d'accès à l'espace Agent
-        final intrusionAgent = RouteGuard.evaluateRedirect(
-          currentPath: RouteNames.agentDashboardPath,
-          isAuthenticated: true,
-          role: UserRole.pharmacopee,
-        );
-        expect(intrusionAgent, RouteNames.pharmacopeeDashboardPath);
-
-        // Navigation légitime dans l'espace Pharmacopée
-        final legitimePharmacopee = RouteGuard.evaluateRedirect(
-          currentPath: RouteNames.pharmacopeeStockPath,
-          isAuthenticated: true,
-          role: UserRole.pharmacopee,
-        );
-        expect(legitimePharmacopee, isNull);
       });
     });
 

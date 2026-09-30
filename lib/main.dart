@@ -68,11 +68,11 @@ class _LadafuraHomeScreenState extends ConsumerState<LadafuraHomeScreen> {
       case 0:
         return 'Accueil';
       case 1:
-        return 'Carte';
+        return 'Flore';
       case 2:
         return 'Recherche';
       case 3:
-        return 'Panier';
+        return 'Favoris';
       case 4:
         return 'Profil';
       default:
@@ -110,7 +110,8 @@ class _LadafuraHomeScreenState extends ConsumerState<LadafuraHomeScreen> {
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(Icons.shopping_bag_outlined),
+            tooltip: 'Favoris',
+            icon: const Icon(Icons.bookmark_border_rounded),
             onPressed: () {},
           ),
         ],
@@ -217,14 +218,14 @@ class _LadafuraHomeScreenState extends ConsumerState<LadafuraHomeScreen> {
               ),
               const SizedBox(height: AppDimensions.space24),
 
-              // Actions & Rôles mobiles (Population, Agent, Pharmacopée)
+              // Actions & Rôles mobiles (Population, Agent)
               Text(
                 'Espaces mobiles dédiés',
                 style: isDark ? AppTextStyles.h4Dark : AppTextStyles.h4,
               ),
               const SizedBox(height: AppDimensions.space12),
               PrimaryButton(
-                label: 'Explorer le Catalogue (Citoyen)',
+                label: 'Explorer la Flore Médicinale (Citoyen)',
                 icon: Icon(
                   Icons.eco_outlined,
                   color: isDark ? AppColors.darkBackground : Colors.white,
@@ -235,12 +236,6 @@ class _LadafuraHomeScreenState extends ConsumerState<LadafuraHomeScreen> {
               SecondaryButton(
                 label: 'Collecte Terrain (Agent)',
                 icon: const Icon(Icons.edit_location_alt_outlined),
-                onPressed: () {},
-              ),
-              const SizedBox(height: AppDimensions.space12),
-              SecondaryButton(
-                label: 'Gestion Officine (Pharmacopée)',
-                icon: const Icon(Icons.storefront_outlined),
                 onPressed: () {},
               ),
               const SizedBox(height: AppDimensions.space24),

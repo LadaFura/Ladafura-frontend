@@ -11,7 +11,6 @@ export 'inputs/search_bar_widget.dart';
 
 // Cartes & Badges
 export 'cards/plante_card.dart';
-export 'cards/produit_card.dart';
 export 'cards/status_badge.dart';
 
 // Feedback & Alertes

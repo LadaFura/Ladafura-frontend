@@ -3,7 +3,6 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../enums/statut_collecte.dart';
-import '../../enums/statut_commande.dart';
 
 /// Badge d'état coloré dynamique conforme aux exigences d'accessibilité ENF11.
 ///
@@ -22,14 +21,6 @@ class StatusBadge extends StatelessWidget {
 
   /// Usine pour les statuts de collectes de terrain (US-13 & US-17).
   factory StatusBadge.collecte(StatutCollecte statut) {
-    return StatusBadge(
-      label: statut.label,
-      color: statut.badgeColor,
-    );
-  }
-
-  /// Usine pour les statuts de commandes clients (US-11 & US-23).
-  factory StatusBadge.commande(StatutCommande statut) {
     return StatusBadge(
       label: statut.label,
       color: statut.badgeColor,
@@ -66,7 +57,7 @@ class StatusBadge extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.space8,
+        horizontal: AppDimensions.space12,
         vertical: AppDimensions.space4,
       ),
       decoration: BoxDecoration(
@@ -74,7 +65,7 @@ class StatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppDimensions.radiusBadge),
         border: Border.all(
           color: color.withValues(alpha: 0.3),
-          width: 0.8,
+          width: 1,
         ),
       ),
       child: Row(
@@ -91,7 +82,7 @@ class StatusBadge extends StatelessWidget {
           const SizedBox(width: AppDimensions.space4),
           Text(
             label,
-            style: AppTextStyles.badge.copyWith(
+            style: AppTextStyles.caption.copyWith(
               color: color,
               fontWeight: FontWeight.w600,
             ),

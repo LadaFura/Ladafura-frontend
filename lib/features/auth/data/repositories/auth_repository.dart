@@ -133,12 +133,6 @@ class AuthRepository {
       case UserRole.agentCollecte:
         endpoint = ApiEndpoints.agentMe;
         break;
-      case UserRole.pharmacopee:
-        endpoint = ApiEndpoints.pharmacopeeMe;
-        break;
-      default:
-        endpoint = ApiEndpoints.populationMe;
-        break;
     }
 
     final response = await _apiClient.get<Map<String, dynamic>>(endpoint);

@@ -26,9 +26,6 @@ void main() {
     expect(find.byType(LadafuraBottomNavBar), findsOneWidget);
     expect(find.text('Accueil'), findsWidgets);
 
-    // Vérifie le badge du panier (2 articles par défaut)
-    expect(find.text('2'), findsOneWidget);
-
     // Vérifie la présence du bouton de bascule de thème
     final themeToggleFinder = find.byTooltip('Passer en mode sombre');
     expect(themeToggleFinder, findsOneWidget);
@@ -53,9 +50,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Recherche'), findsWidgets);
 
-    // Teste le clic sur l'onglet Panier via son infobulle : expansion en capsule avec texte
-    await tester.tap(find.byTooltip('Panier'));
+    // Teste le clic sur l'onglet Favoris via la barre de navigation
+    final favorisTab = find.descendant(
+      of: find.byType(LadafuraBottomNavBar),
+      matching: find.byTooltip('Favoris'),
+    );
+    await tester.tap(favorisTab);
     await tester.pumpAndSettle();
-    expect(find.text('Panier'), findsWidgets);
+    expect(find.text('Favoris'), findsWidgets);
   });
 }

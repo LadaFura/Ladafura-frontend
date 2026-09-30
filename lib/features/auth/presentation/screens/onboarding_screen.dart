@@ -36,11 +36,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       accentColor: AppColors.accent,
     ),
     _OnboardingSlideData(
-      icon: Icons.storefront_outlined,
-      title: 'Officines Agréées & Commandes',
+      icon: Icons.map_outlined,
+      title: 'Collecte Botanique & Géolocalisation',
       description:
-          'Localisez les pharmacies et pharmacopées traditionnelles certifiées, commandez vos remèdes et payez facilement via Orange Money ou Wave.',
-      accentColor: AppColors.info,
+          'Contribuez sur le terrain à la cartographie des espèces végétales du Mali, à la documentation des localités et à la recherche scientifique.',
+      accentColor: AppColors.primaryDark,
     ),
   ];
 

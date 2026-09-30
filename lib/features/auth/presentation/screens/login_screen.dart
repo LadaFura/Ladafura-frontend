@@ -62,12 +62,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         case UserRole.agentCollecte:
           context.go(RouteNames.agentHomePath);
           break;
-        case UserRole.pharmacopee:
-          context.go(RouteNames.pharmacopeeHomePath);
-          break;
-        default:
-          context.go(RouteNames.citizenHomePath);
-          break;
       }
     }
   }
@@ -126,11 +120,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       value: UserRole.agentCollecte,
                       label: Text('Agent'),
                       icon: Icon(Icons.edit_location_alt, size: 16),
-                    ),
-                    ButtonSegment(
-                      value: UserRole.pharmacopee,
-                      label: Text('Officine'),
-                      icon: Icon(Icons.storefront, size: 16),
                     ),
                   ],
                   selected: {_selectedRole},

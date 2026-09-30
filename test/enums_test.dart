@@ -3,25 +3,21 @@ import 'package:ladafura_frontend_flutter/core/constants/app_colors.dart';
 import 'package:ladafura_frontend_flutter/shared/enums/enums.dart';
 
 void main() {
-  group('Shared Enums Tests - LADAFURA', () {
+  group('Shared Enums Tests - LADAFURA (Périmètre 2 Rôles)', () {
     // =========================================================================
-    // 1. USER ROLE TESTS
+    // 1. USER ROLE TESTS (POPULATION & AGENT DE COLLECTE)
     // =========================================================================
-    test('UserRole matches backend Spring Boot roles and handles mobile actors',
+    test('UserRole matches the 2 mobile roles: POPULATION and AGENT_COLLECTE',
         () {
+      expect(UserRole.values.length, 2);
       expect(UserRole.population.value, 'POPULATION');
       expect(UserRole.agentCollecte.value, 'AGENT_COLLECTE');
-      expect(UserRole.pharmacopee.value, 'PHARMACOPEE');
-      expect(UserRole.administrateur.value, 'ADMINISTRATEUR');
 
       expect(UserRole.population.isMobileActor, isTrue);
       expect(UserRole.agentCollecte.isMobileActor, isTrue);
-      expect(UserRole.pharmacopee.isMobileActor, isTrue);
-      expect(UserRole.administrateur.isMobileActor, isFalse);
 
       expect(UserRole.fromString('population'), UserRole.population);
       expect(UserRole.fromString('AGENT_COLLECTE'), UserRole.agentCollecte);
-      expect(UserRole.fromString('pharmacopee'), UserRole.pharmacopee);
       expect(UserRole.fromString('invalide'), isNull);
     });
 
@@ -55,71 +51,6 @@ void main() {
           StatutCollecte.correctionDemandee);
       expect(StatutCollecte.fromString('CORRECTION_DEMANDEE'),
           StatutCollecte.correctionDemandee);
-    });
-
-    // =========================================================================
-    // 3. STATUT COMMANDE TESTS
-    // =========================================================================
-    test('StatutCommande handles progress, completion and aliases', () {
-      expect(StatutCommande.enAttente.value, 'EN_ATTENTE');
-      expect(StatutCommande.confirmee.value, 'CONFIRMEE');
-      expect(StatutCommande.preparee.value, 'PREPAREE');
-      expect(StatutCommande.enLivraison.value, 'EN_LIVRAISON');
-      expect(StatutCommande.disponiblePickup.value, 'DISPONIBLE_PICKUP');
-      expect(StatutCommande.livree.value, 'LIVREE');
-      expect(StatutCommande.retiree.value, 'RETIREE');
-      expect(StatutCommande.annulee.value, 'ANNULEE');
-
-      // Progression vs Complété
-      expect(StatutCommande.enAttente.isInProgress, isTrue);
-      expect(StatutCommande.enLivraison.isInProgress, isTrue);
-      expect(StatutCommande.livree.isCompleted, isTrue);
-      expect(StatutCommande.retiree.isCompleted, isTrue);
-      expect(StatutCommande.annulee.isCompleted, isTrue);
-
-      // Aliases
-      expect(StatutCommande.fromString('VALIDEE'), StatutCommande.confirmee);
-      expect(StatutCommande.fromString('EXPEDIEE'), StatutCommande.enLivraison);
-      expect(StatutCommande.fromString('DISPONIBLE_PICKUP'),
-          StatutCommande.disponiblePickup);
-    });
-
-    // =========================================================================
-    // 4. METHODE PAIEMENT TESTS
-    // =========================================================================
-    test('MethodePaiement handles Mali mobile money and cash', () {
-      expect(MethodePaiement.mobileMoney.value, 'MOBILE_MONEY');
-      expect(MethodePaiement.cash.value, 'CASH');
-      expect(MethodePaiement.carteBancaire.value, 'CARTE_BANCAIRE');
-
-      expect(MethodePaiement.mobileMoney.isDigital, isTrue);
-      expect(MethodePaiement.cash.isDigital, isFalse);
-
-      expect(MethodePaiement.fromString('MOBILE_MONEY'),
-          MethodePaiement.mobileMoney);
-      expect(MethodePaiement.fromString('ESPECES'), MethodePaiement.cash);
-      expect(MethodePaiement.fromString('CASH'), MethodePaiement.cash);
-    });
-
-    // =========================================================================
-    // 5. MODE RETRAIT TYPE TESTS
-    // =========================================================================
-    test('ModeRetraitType handles Pickup and Livraison with delivery fee flag',
-        () {
-      expect(ModeRetraitType.pickup.value, 'PICKUP');
-      expect(ModeRetraitType.livraison.value, 'LIVRAISON');
-
-      expect(ModeRetraitType.pickup.hasDeliveryFee, isFalse);
-      expect(ModeRetraitType.livraison.hasDeliveryFee, isTrue);
-
-      expect(ModeRetraitType.fromString('PICKUP'), ModeRetraitType.pickup);
-      expect(ModeRetraitType.fromString('RETRAIT_OFFICINE'),
-          ModeRetraitType.pickup);
-      expect(ModeRetraitType.fromString('RETRAIT'), ModeRetraitType.pickup);
-      expect(ModeRetraitType.fromString('LIVRAISON_DOMICILE'),
-          ModeRetraitType.livraison);
-      expect(
-          ModeRetraitType.fromString('LIVRAISON'), ModeRetraitType.livraison);
     });
   });
 }
