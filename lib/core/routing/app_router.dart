@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/agent/presentation/dashboard/screens/agent_dashboard_screen.dart';
 import '../../features/auth/auth.dart';
+import '../../features/population/presentation/home/screens/citizen_home_screen.dart';
 import '../../features/visitor/presentation/screens/accueil_screen.dart';
 import '../../shared/enums/user_role.dart';
 import '../../shared/widgets/navigation/app_shell.dart';
@@ -143,36 +144,41 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
 
       // 4. Espace Citoyen / Population (Flore & Savoirs ancestraux)
-      GoRoute(
-        path: RouteNames.citizenHomePath,
-        name: RouteNames.citizenHome,
-        builder: (context, state) =>
-            const _RoutePlaceholder(title: 'Accueil Citoyen'),
+      ShellRoute(
+        builder: (context, state, child) =>
+            AppShell(location: state.matchedLocation, child: child),
         routes: [
           GoRoute(
-            path: 'recherche',
-            name: RouteNames.citizenRecherche,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Recherche Flore & Maladies'),
-          ),
-          GoRoute(
-            path: 'plantes/:id',
-            name: RouteNames.citizenPlanteDetail,
-            builder: (context, state) => _RoutePlaceholder(
-              title: 'Fiche Plante (${state.pathParameters['id']})',
-            ),
-          ),
-          GoRoute(
-            path: 'favoris',
-            name: RouteNames.citizenFavoris,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Plantes Favorites'),
-          ),
-          GoRoute(
-            path: 'profil',
-            name: RouteNames.citizenProfil,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Profil Citoyen'),
+            path: RouteNames.citizenHomePath,
+            name: RouteNames.citizenHome,
+            builder: (context, state) => const CitizenHomeScreen(),
+            routes: [
+              GoRoute(
+                path: 'recherche',
+                name: RouteNames.citizenRecherche,
+                builder: (context, state) =>
+                    const _RoutePlaceholder(title: 'Recherche Flore & Maladies'),
+              ),
+              GoRoute(
+                path: 'plantes/:id',
+                name: RouteNames.citizenPlanteDetail,
+                builder: (context, state) => _RoutePlaceholder(
+                  title: 'Fiche Plante (${state.pathParameters['id']})',
+                ),
+              ),
+              GoRoute(
+                path: 'favoris',
+                name: RouteNames.citizenFavoris,
+                builder: (context, state) =>
+                    const _RoutePlaceholder(title: 'Plantes Favorites'),
+              ),
+              GoRoute(
+                path: 'profil',
+                name: RouteNames.citizenProfil,
+                builder: (context, state) =>
+                    const _RoutePlaceholder(title: 'Profil Citoyen'),
+              ),
+            ],
           ),
         ],
       ),
