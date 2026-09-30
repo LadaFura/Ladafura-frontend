@@ -60,6 +60,9 @@ class RouteNames {
   static const String citizenPlanteDetailPath = '/citizen/plantes/:id';
   static String citizenPlanteDetailUrl(String id) => '/citizen/plantes/$id';
 
+  static const String citizenCarte = 'citizen-carte';
+  static const String citizenCartePath = '/citizen/carte';
+
   static const String citizenFavoris = 'citizen-favoris';
   static const String citizenFavorisPath = '/citizen/favoris';
 

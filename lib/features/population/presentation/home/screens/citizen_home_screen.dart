@@ -279,7 +279,7 @@ class CitizenHomeScreen extends ConsumerWidget {
                       subtitle: 'Flore par région',
                       color: const Color(0xFF0288D1),
                       onTap: () {
-                        context.go(RouteNames.visitorCartePath);
+                        context.go(RouteNames.citizenCartePath);
                       },
                     ),
                   ),

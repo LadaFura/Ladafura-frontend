@@ -9,7 +9,8 @@ import 'package:ladafura_frontend_flutter/shared/models/utilisateur_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  testWidgets('CitizenHomeScreen displays citizen info, services and logout buttons',
+  testWidgets(
+      'CitizenHomeScreen displays citizen info, services and logout buttons',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
@@ -66,7 +67,9 @@ void main() {
     await tester.tap(find.text('Déconnexion'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Êtes-vous sûr de vouloir vous déconnecter de votre espace citoyen ?'),
+    expect(
+        find.text(
+            'Êtes-vous sûr de vouloir vous déconnecter de votre espace citoyen ?'),
         findsOneWidget);
     expect(find.text('Annuler'), findsOneWidget);
     expect(find.text('Se déconnecter'), findsOneWidget);

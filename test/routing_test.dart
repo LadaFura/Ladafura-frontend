@@ -17,6 +17,7 @@ void main() {
       expect(RouteNames.citizenHomePath, '/citizen');
       expect(RouteNames.citizenRecherchePath, '/citizen/recherche');
       expect(RouteNames.citizenFavorisPath, '/citizen/favoris');
+      expect(RouteNames.citizenCartePath, '/citizen/carte');
       expect(RouteNames.agentDashboardPath, '/agent');
       expect(RouteNames.agentCollectesPath, '/agent/collectes');
 
@@ -93,6 +94,7 @@ void main() {
           () {
         final protectedPaths = [
           RouteNames.citizenHomePath,
+          RouteNames.citizenCartePath,
           RouteNames.citizenFavorisPath,
           RouteNames.citizenProfilPath,
           RouteNames.agentDashboardPath,

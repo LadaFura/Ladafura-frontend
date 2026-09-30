@@ -156,8 +156,8 @@ GoRouter appRouter(AppRouterRef ref) {
               GoRoute(
                 path: 'recherche',
                 name: RouteNames.citizenRecherche,
-                builder: (context, state) =>
-                    const _RoutePlaceholder(title: 'Recherche Flore & Maladies'),
+                builder: (context, state) => const _RoutePlaceholder(
+                    title: 'Recherche Flore & Maladies'),
               ),
               GoRoute(
                 path: 'plantes/:id',
@@ -165,6 +165,12 @@ GoRouter appRouter(AppRouterRef ref) {
                 builder: (context, state) => _RoutePlaceholder(
                   title: 'Fiche Plante (${state.pathParameters['id']})',
                 ),
+              ),
+              GoRoute(
+                path: 'carte',
+                name: RouteNames.citizenCarte,
+                builder: (context, state) =>
+                    const _RoutePlaceholder(title: 'Carte de la Flore Malienne'),
               ),
               GoRoute(
                 path: 'favoris',
