@@ -36,8 +36,10 @@ class CitizenHomeScreen extends ConsumerWidget {
         ),
         content: Text(
           'Êtes-vous sûr de vouloir vous déconnecter de votre espace citoyen ?',
-          style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
-            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+          style:
+              (isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
+            color:
+                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
           ),
         ),
         actions: [
@@ -228,7 +230,8 @@ class CitizenHomeScreen extends ConsumerWidget {
               // 2. Section Actions Rapides & Découverte
               Text(
                 'Vos Services Pharmacopée',
-                style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
+                style:
+                    (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -418,8 +421,7 @@ class CitizenHomeScreen extends ConsumerWidget {
             Text(
               subtitle,
               style: AppTextStyles.caption.copyWith(
-                color:
-                    isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
                 fontSize: 12,
               ),
             ),

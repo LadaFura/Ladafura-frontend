@@ -146,6 +146,35 @@ class AuthRepository {
     }
   }
 
+  StorageService get storageService => _storageService;
+
+  /// Restitue le profil utilisateur mis en cache local sans appel réseau (démarrage instantané).
+  UtilisateurModel? getCachedUser() {
+    final token = _storageService.getToken();
+    final roleStr = _storageService.getRole();
+    if (token == null || token.isEmpty || roleStr == null) {
+      return null;
+    }
+
+    final role = UserRole.fromString(roleStr) ?? UserRole.population;
+    final email = _storageService.getUserEmail() ?? '';
+    final name = _storageService.getUserName() ??
+        (role == UserRole.agentCollecte ? 'Agent Terrain' : 'Citoyen');
+    final userId = int.tryParse(_storageService.getUserId() ?? '0') ?? 0;
+
+    return UtilisateurModel(
+      id: userId,
+      email: email,
+      nom: name,
+      prenom: '',
+      role: role,
+      matricule: role == UserRole.agentCollecte
+          ? (_storageService.getUserId() ?? 'AGT-MALI-001')
+          : null,
+      statut: 'ACTIF',
+    );
+  }
+
   /// Récupère l'utilisateur actuellement connecté depuis sa session locale et vérifie auprès du backend.
   Future<UtilisateurModel?> getCurrentUser() async {
     final token = _storageService.getToken();
@@ -153,15 +182,26 @@ class AuthRepository {
       return null;
     }
 
+    final cachedUser = getCachedUser();
+
     try {
       // 1. Essayer d'abord la résolution neutre /api/v1/auth/me
       final user = await resolveCurrentUser();
       if (user != null) {
         await _storageService.saveRole(user.role.backendValue);
+        await _storageService.saveEmail(user.email);
         return user;
       }
+    } on DioException catch (e) {
+      // Si le serveur répond explicitement 401 Unauthorized (token révoqué ou invalide)
+      if (e.response?.statusCode == 401) {
+        await _storageService.clearSession();
+        _apiClient.clearAuthToken();
+        return null;
+      }
+      if (cachedUser != null) return cachedUser;
     } catch (_) {
-      // Erreur réseau ou token expiré
+      if (cachedUser != null) return cachedUser;
     }
 
     // 2. Si le rôle était déjà mémorisé, tentative avec l'endpoint dédié
@@ -171,15 +211,19 @@ class AuthRepository {
       try {
         final user = await _fetchUserProfileForRole(role);
         return user;
+      } on DioException catch (e) {
+        if (e.response?.statusCode == 401) {
+          await _storageService.clearSession();
+          _apiClient.clearAuthToken();
+          return null;
+        }
+        if (cachedUser != null) return cachedUser;
       } catch (_) {
-        // Session expirée ou invalide
-        await _storageService.clearSession();
-        return null;
+        if (cachedUser != null) return cachedUser;
       }
     }
 
-    await _storageService.clearSession();
-    return null;
+    return cachedUser;
   }
 
   /// Connexion ou Inscription avec un compte Google (Google Sign-In).

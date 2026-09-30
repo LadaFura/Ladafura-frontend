@@ -8,6 +8,7 @@ import 'package:ladafura_frontend_flutter/core/constants/app_text_styles.dart';
 import 'package:ladafura_frontend_flutter/core/routing/route_names.dart';
 import 'package:ladafura_frontend_flutter/core/services/services_providers.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/feedback/app_loading_indicator.dart';
+import 'package:ladafura_frontend_flutter/shared/enums/user_role.dart';
 import '../../providers/auth_state_provider.dart';
 
 /// Écran de démarrage (Splash Screen) contrôlant la session et orientant l'utilisateur.
@@ -27,22 +28,47 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   Future<void> _handleRouting() async {
     // Petit délai d'affichage pour la fluidité visuelle
-    await Future.delayed(const Duration(milliseconds: 1200));
+    await Future.delayed(const Duration(milliseconds: 1000));
     if (!mounted) return;
 
     final storage = ref.read(storageServiceProvider);
     final authState = ref.read(authStateProvider);
 
-    if (authState.isAuthenticated) {
-      // Déjà connecté, GoRouter gère la redirection automatique selon le rôle
-      return;
-    }
+    try {
+      // 1. Si l'état authentifié est confirmé en mémoire
+      if (authState.isAuthenticated) {
+        final role = authState.role ?? UserRole.fromString(storage.getRole());
+        if (role == UserRole.agentCollecte) {
+          context.go(RouteNames.agentDashboardPath);
+        } else {
+          context.go(RouteNames.citizenHomePath);
+        }
+        return;
+      }
 
-    final hasCompletedOnboarding = storage.hasCompletedOnboarding();
-    if (!hasCompletedOnboarding) {
-      context.go(RouteNames.onboardingPath);
-    } else {
-      context.go(RouteNames.visitorHomePath);
+      // 2. Si une session locale est enregistrée dans le stockage (persistance locale)
+      final token = storage.getToken();
+      final roleStr = storage.getRole();
+      if (token != null && token.isNotEmpty && roleStr != null) {
+        final role = UserRole.fromString(roleStr);
+        if (role == UserRole.agentCollecte) {
+          context.go(RouteNames.agentDashboardPath);
+          return;
+        } else if (role == UserRole.population) {
+          context.go(RouteNames.citizenHomePath);
+          return;
+        }
+      }
+
+      // 3. Utilisateur sans session : Onboarding ou Accueil Visiteur
+      final hasCompletedOnboarding = storage.hasCompletedOnboarding();
+      if (!hasCompletedOnboarding) {
+        context.go(RouteNames.onboardingPath);
+      } else {
+        context.go(RouteNames.visitorHomePath);
+      }
+    } catch (_) {
+      // Évite les erreurs de contexte si le widget est rendu sans GoRouter (ex: tests isolés)
     }
   }
 

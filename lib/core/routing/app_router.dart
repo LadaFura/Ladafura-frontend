@@ -9,6 +9,7 @@ import '../../features/visitor/presentation/screens/accueil_screen.dart';
 import '../../shared/enums/user_role.dart';
 import '../../shared/widgets/navigation/app_shell.dart';
 import '../../shared/widgets/navigation/navigation_provider.dart';
+import '../services/services_providers.dart';
 import 'route_guard.dart';
 import 'route_names.dart';
 
@@ -47,7 +48,21 @@ class AuthRoutingState extends ChangeNotifier {
 /// Fournisseur Riverpod de l'état d'authentification pour la navigation.
 @Riverpod(keepAlive: true)
 AuthRoutingState authRoutingState(AuthRoutingStateRef ref) {
-  return AuthRoutingState();
+  final state = AuthRoutingState();
+  try {
+    final storage = ref.watch(storageServiceProvider);
+    final token = storage.getToken();
+    final roleStr = storage.getRole();
+    final role = UserRole.fromString(roleStr);
+    final hasSession = token != null && token.isNotEmpty && role != null;
+
+    if (hasSession) {
+      state.update(isAuthenticated: true, role: role, isInitializing: false);
+    }
+  } catch (_) {
+    // Si storageServiceProvider n'est pas configuré dans un conteneur de test isolé
+  }
+  return state;
 }
 
 /// Fournisseur Riverpod central du [GoRouter] adapté aux 2 acteurs mobiles (Population & Agent).
@@ -169,8 +184,8 @@ GoRouter appRouter(AppRouterRef ref) {
               GoRoute(
                 path: 'carte',
                 name: RouteNames.citizenCarte,
-                builder: (context, state) =>
-                    const _RoutePlaceholder(title: 'Carte de la Flore Malienne'),
+                builder: (context, state) => const _RoutePlaceholder(
+                    title: 'Carte de la Flore Malienne'),
               ),
               GoRoute(
                 path: 'favoris',

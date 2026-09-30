@@ -102,18 +102,45 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required Ref ref,
   })  : _repository = repository,
         _ref = ref,
-        super(const AuthState.initial()) {
+        super(_resolveInitialState(repository)) {
+    // Si une session en cache existait déjà, informer immédiatement le routeur
+    final cached = _repository.getCachedUser();
+    if (cached != null) {
+      _ref.read(authRoutingStateProvider).update(
+            isAuthenticated: true,
+            role: cached.role,
+            isInitializing: false,
+          );
+    }
     checkAuthStatus();
+  }
+
+  static AuthState _resolveInitialState(AuthRepository repository) {
+    final cached = repository.getCachedUser();
+    if (cached != null) {
+      return AuthState.authenticated(cached);
+    }
+    return const AuthState.initial();
   }
 
   /// Vérifie si une session active existe en local et auprès du backend.
   Future<void> checkAuthStatus() async {
-    state = const AuthState.loading();
-    _ref.read(authRoutingStateProvider).update(
-          isAuthenticated: false,
-          role: null,
-          isInitializing: true,
-        );
+    final cached = _repository.getCachedUser();
+    if (cached != null) {
+      state = AuthState.authenticated(cached);
+      _ref.read(authRoutingStateProvider).update(
+            isAuthenticated: true,
+            role: cached.role,
+            isInitializing: false,
+          );
+    } else {
+      state = const AuthState.loading();
+      _ref.read(authRoutingStateProvider).update(
+            isAuthenticated: false,
+            role: null,
+            isInitializing: true,
+          );
+    }
 
     try {
       final user = await _repository.getCurrentUser();
@@ -133,12 +160,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
             );
       }
     } catch (_) {
-      state = const AuthState.unauthenticated();
-      _ref.read(authRoutingStateProvider).update(
-            isAuthenticated: false,
-            role: null,
-            isInitializing: false,
-          );
+      if (cached != null) {
+        state = AuthState.authenticated(cached);
+        _ref.read(authRoutingStateProvider).update(
+              isAuthenticated: true,
+              role: cached.role,
+              isInitializing: false,
+            );
+      } else {
+        state = const AuthState.unauthenticated();
+        _ref.read(authRoutingStateProvider).update(
+              isAuthenticated: false,
+              role: null,
+              isInitializing: false,
+            );
+      }
     }
   }
 
