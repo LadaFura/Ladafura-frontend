@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Constantes officielles des URLs et routes REST du backend Spring Boot LADAFURA.
 ///
 /// L'application Flutter mobile communique avec l'API REST exposée sur le préfixe `/api/v1`.
@@ -11,17 +13,40 @@ class ApiEndpoints {
   // 🌐 CONFIGURATION DE BASE
   // ===========================================================================
 
-  /// Hôte par défaut en local pour simulateur iOS et Web
+  static const String _envHost = String.fromEnvironment('API_HOST');
+  static const String _envBaseUrl = String.fromEnvironment('API_URL');
+
+  /// Adresse IP de votre Mac sur le réseau local Wi-Fi (joignable par téléphones physiques)
+  static const String devMachineIp = '192.168.11.117';
+
+  /// Hôte par défaut pour simulateur iOS et Web
   static const String defaultHost = 'http://localhost:8080';
 
-  /// Hôte pour émulateur Android (redirection vers la machine hôte)
+  /// Hôte pour émulateur Android
   static const String androidEmulatorHost = 'http://10.0.2.2:8080';
 
   /// Préfixe global des routes REST version 1
   static const String apiVersion = '/api/v1';
 
+  /// Résolution dynamique du host selon la plateforme d'exécution
+  static String get resolvedHost {
+    if (_envHost.isNotEmpty) {
+      return _envHost.startsWith('http') ? _envHost : 'http://$_envHost:8080';
+    }
+    if (kIsWeb) {
+      return defaultHost;
+    }
+    // Sur téléphone physique ou émulateur mobile, utiliser l'IP réseau de la machine
+    if (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
+      return 'http://$devMachineIp:8080';
+    }
+    return defaultHost;
+  }
+
   /// URL de base par défaut (configurable dynamiquement selon l'environnement)
-  static String baseUrl = '$defaultHost$apiVersion';
+  static String baseUrl =
+      _envBaseUrl.isNotEmpty ? _envBaseUrl : '$resolvedHost$apiVersion';
 
   /// Délais d'expiration adaptés aux conditions réseau du Mali (15 secondes)
   static const Duration connectionTimeout = Duration(seconds: 15);
