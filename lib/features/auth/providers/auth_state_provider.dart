@@ -270,14 +270,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Déconnexion complète de l'utilisateur.
   Future<void> logout() async {
-    state = const AuthState.loading();
-    await _repository.logout();
-    state = const AuthState.unauthenticated();
-    _ref.read(authRoutingStateProvider).update(
-          isAuthenticated: false,
-          role: null,
-          isInitializing: false,
-        );
+    try {
+      await _repository.logout();
+    } catch (_) {
+      // Ignorer
+    } finally {
+      state = const AuthState.unauthenticated();
+      _ref.read(authRoutingStateProvider).update(
+            isAuthenticated: false,
+            role: null,
+            isInitializing: false,
+          );
+    }
   }
 }
 

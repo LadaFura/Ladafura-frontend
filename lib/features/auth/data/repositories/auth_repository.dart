@@ -294,9 +294,23 @@ class AuthRepository {
 
   /// Déconnexion de l'utilisateur (Firebase, Google et Spring Boot).
   Future<void> logout() async {
-    await _storageService.clearSession();
-    _apiClient.clearAuthToken();
-    await _googleAuthService.signOut();
+    try {
+      await _storageService.clearSession();
+    } catch (e) {
+      // Échec suppression session
+    }
+
+    try {
+      _apiClient.clearAuthToken();
+    } catch (_) {
+      // Ignorer
+    }
+
+    try {
+      await _googleAuthService.signOut();
+    } catch (_) {
+      // Ignorer
+    }
   }
 
   /// Récupère les informations de profil selon le rôle auprès du backend Spring Boot.

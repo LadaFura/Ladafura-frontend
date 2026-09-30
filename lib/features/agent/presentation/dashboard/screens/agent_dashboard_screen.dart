@@ -62,11 +62,13 @@ class AgentDashboardScreen extends ConsumerWidget {
       ),
     );
 
-    if (shouldLogout == true && context.mounted) {
+    if (shouldLogout == true) {
+      try {
+        if (context.mounted) {
+          context.go(RouteNames.visitorHomePath);
+        }
+      } catch (_) {}
       await ref.read(authStateProvider.notifier).logout();
-      if (context.mounted) {
-        context.go(RouteNames.visitorHomePath);
-      }
     }
   }
 

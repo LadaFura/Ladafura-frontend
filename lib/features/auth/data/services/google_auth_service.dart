@@ -106,15 +106,16 @@ class GoogleAuthService {
     }
   }
 
-  /// Déconnecte la session active Google locale.
+  /// Déconnecte la session active Google locale sans bloquer.
   Future<void> signOut() async {
     if (_mockMode) return;
     try {
-      await _googleSignIn.signOut();
+      await _googleSignIn.signOut().timeout(
+            const Duration(milliseconds: 1200),
+            onTimeout: () => null,
+          );
     } catch (e) {
-      if (e is! UnimplementedError) {
-        debugPrint('Erreur déconnexion Google : $e');
-      }
+      debugPrint('Avertissement déconnexion Google : $e');
     }
   }
 }

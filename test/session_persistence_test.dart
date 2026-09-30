@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ladafura_frontend_flutter/core/network/api_client.dart';
+import 'package:ladafura_frontend_flutter/core/routing/app_router.dart';
 import 'package:ladafura_frontend_flutter/core/services/services_providers.dart';
 import 'package:ladafura_frontend_flutter/core/services/storage_service.dart';
 import 'package:ladafura_frontend_flutter/features/auth/auth.dart';
@@ -12,7 +13,8 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Session Persistence - Repositories & Providers', () {
-    test('AuthRepository returns cached citizen user and preserves session on error',
+    test(
+        'AuthRepository returns cached citizen user and preserves session on error',
         () async {
       SharedPreferences.setMockInitialValues({
         'ladafura_jwt_token': 'saved_jwt_token_123',
@@ -64,6 +66,45 @@ void main() {
       expect(cached!.role, UserRole.agentCollecte);
       expect(cached.email, 'agent.kone@ladafura.ml');
       expect(cached.matricule, 'AGT-BKO-2026');
+    });
+
+    test('logout() cleans storage, clears tokens and switches state to unauthenticated',
+        () async {
+      SharedPreferences.setMockInitialValues({
+        'ladafura_jwt_token': 'token_to_clear',
+        'ladafura_user_email': 'citoyen.test@ladafura.ml',
+        'ladafura_user_role': 'POPULATION',
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final storage = StorageService(prefs);
+      final repo = AuthRepository(
+        apiClient: ApiClient(),
+        firebaseAuthService: FirebaseAuthService(mockMode: true),
+        storageService: storage,
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          storageServiceProvider.overrideWithValue(storage),
+          authRepositoryProvider.overrideWithValue(repo),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      // Avant déconnexion
+      expect(storage.getToken(), isNotNull);
+      expect(repo.getCachedUser(), isNotNull);
+
+      // Exécution de la déconnexion
+      await container.read(authStateProvider.notifier).logout();
+
+      // Après déconnexion
+      expect(storage.getToken(), isNull);
+      expect(storage.getRole(), isNull);
+      expect(repo.getCachedUser(), isNull);
+      expect(container.read(authStateProvider).isAuthenticated, isFalse);
+      expect(container.read(authRoutingStateProvider).isAuthenticated, isFalse);
+      expect(container.read(authRoutingStateProvider).role, isNull);
     });
   });
 

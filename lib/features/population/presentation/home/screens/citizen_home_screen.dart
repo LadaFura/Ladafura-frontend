@@ -68,16 +68,16 @@ class CitizenHomeScreen extends ConsumerWidget {
       ),
     );
 
-    if (shouldLogout == true && context.mounted) {
+    if (shouldLogout == true) {
       ref.read(navigationIndexProvider.notifier).setIndex(0);
-      await ref.read(authStateProvider.notifier).logout();
-      if (context.mounted) {
-        try {
+      try {
+        if (context.mounted) {
           context.go(RouteNames.visitorHomePath);
-        } catch (_) {
-          // Permet aux tests de widgets unitaires sans GoRouter de compléter
         }
+      } catch (_) {
+        // Permet aux tests de widgets unitaires sans GoRouter de compléter
       }
+      await ref.read(authStateProvider.notifier).logout();
     }
   }
 

@@ -288,8 +288,12 @@ class _RoutePlaceholder extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isHome = title == 'Accueil' || title == 'Accueil Citoyen';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isProfile = title.contains('Profil');
 
-    final auth = ref.read(authStateProvider);
+    final auth = ref.watch(authStateProvider);
+    final user = auth.user;
+
     final homeRoute = (auth.isAuthenticated && auth.role == UserRole.population)
         ? RouteNames.citizenHomePath
         : (auth.isAuthenticated && auth.role == UserRole.agentCollecte)
@@ -299,6 +303,122 @@ class _RoutePlaceholder extends ConsumerWidget {
     void goBackToHome() {
       ref.read(navigationIndexProvider.notifier).setIndex(0);
       context.go(homeRoute);
+    }
+
+    Widget bodyContent;
+    if (isProfile && auth.isAuthenticated) {
+      final name = user != null && user.nomComplet.trim().isNotEmpty
+          ? user.nomComplet
+          : (auth.role == UserRole.agentCollecte
+              ? 'Agent Terrain'
+              : 'Citoyen LADAFURA');
+      final email = user?.email ?? '';
+      final roleText = auth.role == UserRole.agentCollecte
+          ? 'Agent de Collecte Terrain'
+          : 'Citoyen';
+
+      bodyContent = Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 40,
+                backgroundColor:
+                    isDark ? const Color(0xFF1E3A2F) : const Color(0xFFE8F5E9),
+                child: Text(
+                  name.isNotEmpty ? name[0].toUpperCase() : 'U',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? const Color(0xFF2ECC71)
+                        : const Color(0xFF1B5E20),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                name,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              if (email.isNotEmpty)
+                Text(
+                  email,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  ),
+                ),
+              const SizedBox(height: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[800] : Colors.grey[200],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  roleText,
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE74C3C),
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text('Se déconnecter'),
+                onPressed: () async {
+                  ref.read(navigationIndexProvider.notifier).setIndex(0);
+                  try {
+                    context.go(RouteNames.visitorHomePath);
+                  } catch (_) {}
+                  await ref.read(authStateProvider.notifier).logout();
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    } else if (isProfile && !auth.isAuthenticated) {
+      bodyContent = Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.account_circle_outlined,
+                size: 72, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
+              'Vous n\'êtes pas connecté',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => context.go(RouteNames.loginPath),
+              child: const Text('Se connecter'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      bodyContent = Center(
+        child: Text(
+          title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      );
     }
 
     final scaffold = Scaffold(
@@ -312,12 +432,7 @@ class _RoutePlaceholder extends ConsumerWidget {
                 onPressed: goBackToHome,
               ),
       ),
-      body: Center(
-        child: Text(
-          title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-      ),
+      body: bodyContent,
     );
 
     if (isHome) {
