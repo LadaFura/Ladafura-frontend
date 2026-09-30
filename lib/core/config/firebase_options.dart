@@ -20,4 +20,8 @@ class DefaultFirebaseOptions {
 
   /// Domaine d'authentification
   static const String authDomain = 'ladafura-4b47e.firebaseapp.com';
+
+  /// Client ID Web officiel pour Google Sign-In (serverClientId pour Android & Web)
+  static const String googleServerClientId =
+      '455380277288-pd4rcjgmpa176cg2rtqm3nh9cavf9usa.apps.googleusercontent.com';
 }

@@ -72,7 +72,9 @@ final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
 
 /// Fournisseur du service client Google Sign-In.
 final googleAuthServiceProvider = Provider<GoogleAuthService>((ref) {
-  return GoogleAuthService();
+  return GoogleAuthService(
+    serverClientId: DefaultFirebaseOptions.googleServerClientId,
+  );
 });
 
 /// Fournisseur du dépôt d'authentification.

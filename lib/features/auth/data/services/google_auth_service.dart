@@ -25,10 +25,17 @@ class GoogleAuthService {
   GoogleAuthCredentials? _mockCredentials;
   bool _isInitialized = false;
 
+  final String? _serverClientId;
+  final String? _clientId;
+
   GoogleAuthService({
     GoogleSignIn? googleSignIn,
+    String? serverClientId,
+    String? clientId,
     bool mockMode = false,
   })  : _googleSignIn = googleSignIn ?? GoogleSignIn.instance,
+        _serverClientId = serverClientId,
+        _clientId = clientId,
         _mockMode = mockMode;
 
   /// Configure des identifiants simulés pour les tests unitaires et widgets
@@ -46,7 +53,10 @@ class GoogleAuthService {
   Future<void> _ensureInitialized() async {
     if (_isInitialized || _mockMode) return;
     try {
-      await _googleSignIn.initialize();
+      await _googleSignIn.initialize(
+        serverClientId: _serverClientId,
+        clientId: _clientId,
+      );
       _isInitialized = true;
     } catch (e) {
       debugPrint('Avertissement initialisation GoogleSignIn : $e');
@@ -73,7 +83,8 @@ class GoogleAuthService {
       final idToken = account.authentication.idToken;
 
       if (idToken == null || idToken.isEmpty) {
-        throw Exception('Impossible de récupérer le jeton d\'identité Google (idToken manquant).');
+        throw Exception(
+            'Impossible de récupérer le jeton d\'identité Google (idToken manquant).');
       }
 
       return GoogleAuthCredentials(

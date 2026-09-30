@@ -160,7 +160,8 @@ class FirebaseAuthService {
         refreshToken: data['refreshToken']?.toString() ?? '',
         email: data['email']?.toString() ?? '',
         uid: data['localId']?.toString() ?? '',
-        expiresIn: int.tryParse(data['expiresIn']?.toString() ?? '3600') ?? 3600,
+        expiresIn:
+            int.tryParse(data['expiresIn']?.toString() ?? '3600') ?? 3600,
       );
     } on DioException catch (e) {
       final errorMsg = _extractFirebaseErrorMessage(e);

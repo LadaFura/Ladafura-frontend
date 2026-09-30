@@ -26,7 +26,8 @@ class AuthRepository {
         _googleAuthService = googleAuthService ?? GoogleAuthService(),
         _storageService = storageService {
     // Configurer l'intercepteur Dio pour qu'il injecte toujours le Bearer token
-    _apiClient.authInterceptor.setTokenProvider(() async => _storageService.getToken());
+    _apiClient.authInterceptor
+        .setTokenProvider(() async => _storageService.getToken());
     final existingToken = _storageService.getToken();
     if (existingToken != null && existingToken.isNotEmpty) {
       _apiClient.setAuthToken(existingToken);

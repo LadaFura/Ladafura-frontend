@@ -81,7 +81,8 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('GoogleSignInButton shows loader and disables click when isLoading is true',
+    testWidgets(
+        'GoogleSignInButton shows loader and disables click when isLoading is true',
         (tester) async {
       bool tapped = false;
 
@@ -183,7 +184,8 @@ void main() {
       expect(find.text('OU'), findsOneWidget);
     });
 
-    testWidgets('RegisterScreen displays GoogleSignInButton with appropriate text',
+    testWidgets(
+        'RegisterScreen displays GoogleSignInButton with appropriate text',
         (tester) async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();

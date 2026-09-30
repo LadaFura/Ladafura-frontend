@@ -29,10 +29,8 @@ class GoogleSignInButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final backgroundColor =
-        isDark ? AppColors.darkSurface : Colors.white;
-    final borderColor =
-        isDark ? AppColors.darkBorder : const Color(0xFFDADCE0);
+    final backgroundColor = isDark ? AppColors.darkSurface : Colors.white;
+    final borderColor = isDark ? AppColors.darkBorder : const Color(0xFFDADCE0);
     final textColor =
         isDark ? AppColors.darkTextPrimary : const Color(0xFF3C4043);
 

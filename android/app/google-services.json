@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "455380277288",
+    "project_id": "ladafura-4b47e",
+    "storage_bucket": "ladafura-4b47e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:455380277288:android:ceb73d33db069a59d27d1d",
+        "android_client_info": {
+          "package_name": "com.example.ladafura_frontend_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "455380277288-pd4rcjgmpa176cg2rtqm3nh9cavf9usa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATaibQOBCDliz-jUj1w5Nl3V7k9OiXO0M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "455380277288-pd4rcjgmpa176cg2rtqm3nh9cavf9usa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
