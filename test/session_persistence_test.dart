@@ -68,7 +68,8 @@ void main() {
       expect(cached.matricule, 'AGT-BKO-2026');
     });
 
-    test('logout() cleans storage, clears tokens and switches state to unauthenticated',
+    test(
+        'logout() cleans storage, clears tokens and switches state to unauthenticated',
         () async {
       SharedPreferences.setMockInitialValues({
         'ladafura_jwt_token': 'token_to_clear',
