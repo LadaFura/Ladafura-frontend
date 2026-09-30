@@ -66,5 +66,19 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Configuration officielle Google Sign-In iOS -->
+	<key>GIDClientID</key>
+	<string>455380277288-87ga23g0ol64def9as6uekspqdkrq88p.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.455380277288-87ga23g0ol64def9as6uekspqdkrq88p</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

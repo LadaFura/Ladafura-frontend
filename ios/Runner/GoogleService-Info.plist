@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>455380277288-87ga23g0ol64def9as6uekspqdkrq88p.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.455380277288-87ga23g0ol64def9as6uekspqdkrq88p</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>455380277288-s04u8ivpgt41jjusdcskluhcgrukdc9q.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyB7F3mhf_n_8OuAC3_kjMGqFqdQj-oE4IU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>455380277288</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.ladafuraFrontendFlutter</string>
+	<key>PROJECT_ID</key>
+	<string>ladafura-4b47e</string>
+	<key>STORAGE_BUCKET</key>
+	<string>ladafura-4b47e.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:455380277288:ios:f0988e04ec654f68d27d1d</string>
+</dict>
+</plist>
