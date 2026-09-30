@@ -153,6 +153,7 @@ GoRouter appRouter(AppRouterRef ref) {
             name: RouteNames.visitorPlanteDetail,
             builder: (context, state) => _RoutePlaceholder(
               title: 'Détail Plante (${state.pathParameters['id']})',
+              isSecondary: true,
             ),
           ),
         ],
@@ -179,6 +180,7 @@ GoRouter appRouter(AppRouterRef ref) {
                 name: RouteNames.citizenPlanteDetail,
                 builder: (context, state) => _RoutePlaceholder(
                   title: 'Fiche Plante (${state.pathParameters['id']})',
+                  isSecondary: true,
                 ),
               ),
               GoRoute(
@@ -196,8 +198,10 @@ GoRouter appRouter(AppRouterRef ref) {
               GoRoute(
                 path: 'favoris',
                 name: RouteNames.citizenFavoris,
-                builder: (context, state) =>
-                    const _RoutePlaceholder(title: 'Plantes Favorites'),
+                builder: (context, state) => const _RoutePlaceholder(
+                  title: 'Plantes Favorites',
+                  isSecondary: true,
+                ),
               ),
               GoRoute(
                 path: 'profil',
@@ -225,14 +229,17 @@ GoRouter appRouter(AppRouterRef ref) {
               GoRoute(
                 path: 'nouvelle',
                 name: RouteNames.agentNouvelleCollecte,
-                builder: (context, state) =>
-                    const _RoutePlaceholder(title: 'Nouvelle Collecte Terrain'),
+                builder: (context, state) => const _RoutePlaceholder(
+                  title: 'Nouvelle Collecte Terrain',
+                  isSecondary: true,
+                ),
               ),
               GoRoute(
                 path: ':id',
                 name: RouteNames.agentCollecteDetail,
                 builder: (context, state) => _RoutePlaceholder(
                   title: 'Détail Collecte (${state.pathParameters['id']})',
+                  isSecondary: true,
                 ),
                 routes: [
                   GoRoute(
@@ -241,6 +248,7 @@ GoRouter appRouter(AppRouterRef ref) {
                     builder: (context, state) => _RoutePlaceholder(
                       title:
                           'Modifier Collecte (${state.pathParameters['id']})',
+                      isSecondary: true,
                     ),
                   ),
                 ],
@@ -286,29 +294,54 @@ GoRouter appRouter(AppRouterRef ref) {
   );
 }
 
-/// Widget temporaire utilisé comme placeholder pour les routes avant intégration des écrans features.
-class _RoutePlaceholder extends ConsumerWidget {
+/// Widget écran placeholder pour les routes avant intégration des écrans features.
+typedef _RoutePlaceholder = RoutePlaceholderScreen;
+
+class RoutePlaceholderScreen extends ConsumerWidget {
   final String title;
-  const _RoutePlaceholder({required this.title});
+  final bool isSecondary;
+
+  const RoutePlaceholderScreen({
+    super.key,
+    required this.title,
+    this.isSecondary = false,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isHome = title == 'Accueil' || title == 'Accueil Citoyen';
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isProfile = title.contains('Profil');
 
     final auth = ref.watch(authStateProvider);
     final user = auth.user;
 
-    final homeRoute = (auth.isAuthenticated && auth.role == UserRole.population)
-        ? RouteNames.citizenHomePath
-        : (auth.isAuthenticated && auth.role == UserRole.agentCollecte)
-            ? RouteNames.agentDashboardPath
-            : RouteNames.visitorHomePath;
+    void goBack() {
+      if (context.canPop()) {
+        context.pop();
+        return;
+      }
+      final isCitizen =
+          auth.isAuthenticated && auth.role == UserRole.population;
+      final isAgent =
+          auth.isAuthenticated && auth.role == UserRole.agentCollecte;
 
-    void goBackToHome() {
-      ref.read(navigationIndexProvider.notifier).setIndex(0);
-      context.go(homeRoute);
+      if (title.contains('Collecte')) {
+        context.go(RouteNames.agentCollectesPath);
+      } else if (title.contains('Favoris')) {
+        ref.read(navigationIndexProvider.notifier).setIndex(0);
+        context.go(RouteNames.citizenHomePath);
+      } else if (title.contains('Plante')) {
+        ref.read(navigationIndexProvider.notifier).setIndex(1);
+        context.go(isCitizen
+            ? RouteNames.citizenRecherchePath
+            : RouteNames.visitorRecherchePath);
+      } else if (isAgent) {
+        context.go(RouteNames.agentDashboardPath);
+      } else if (isCitizen) {
+        context.go(RouteNames.citizenHomePath);
+      } else {
+        context.go(RouteNames.visitorHomePath);
+      }
     }
 
     Widget bodyContent;
@@ -428,9 +461,8 @@ class _RoutePlaceholder extends ConsumerWidget {
               Icon(
                 Icons.shopping_bag_outlined,
                 size: 72,
-                color: isDark
-                    ? const Color(0xFF2ECC71)
-                    : const Color(0xFF1B5E20),
+                color:
+                    isDark ? const Color(0xFF2ECC71) : const Color(0xFF1B5E20),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -463,8 +495,8 @@ class _RoutePlaceholder extends ConsumerWidget {
                 label: const Text('Découvrir la pharmacopée'),
                 onPressed: () {
                   ref.read(navigationIndexProvider.notifier).setIndex(1);
-                  final isCitizen = auth.isAuthenticated &&
-                      auth.role == UserRole.population;
+                  final isCitizen =
+                      auth.isAuthenticated && auth.role == UserRole.population;
                   context.go(isCitizen
                       ? RouteNames.citizenRecherchePath
                       : RouteNames.visitorRecherchePath);
@@ -486,28 +518,29 @@ class _RoutePlaceholder extends ConsumerWidget {
     final scaffold = Scaffold(
       appBar: AppBar(
         title: Text(title),
-        leading: isHome
-            ? null
-            : IconButton(
+        automaticallyImplyLeading: isSecondary,
+        leading: isSecondary
+            ? IconButton(
                 icon: const Icon(Icons.arrow_back),
-                tooltip: 'Retour à l\'accueil',
-                onPressed: goBackToHome,
-              ),
+                tooltip: 'Retour',
+                onPressed: goBack,
+              )
+            : null,
       ),
       body: bodyContent,
     );
 
-    if (isHome) {
-      return scaffold;
+    if (isSecondary) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          goBack();
+        },
+        child: scaffold,
+      );
     }
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        goBackToHome();
-      },
-      child: scaffold,
-    );
+    return scaffold;
   }
 }

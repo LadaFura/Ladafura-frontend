@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ladafura_frontend_flutter/core/routing/routing.dart';
+import 'package:ladafura_frontend_flutter/core/routing/app_router.dart';
+import 'package:ladafura_frontend_flutter/core/routing/route_names.dart';
 import 'package:ladafura_frontend_flutter/core/services/storage_service.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/navigation/app_shell.dart';
-import 'package:ladafura_frontend_flutter/shared/widgets/navigation/navigation_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -17,9 +17,9 @@ void main() {
     StorageService(prefs);
   });
 
-  GoRouter createTestRouter() {
+  GoRouter createTestRouter({String initialLocation = RouteNames.visitorHomePath}) {
     return GoRouter(
-      initialLocation: RouteNames.visitorHomePath,
+      initialLocation: initialLocation,
       routes: [
         ShellRoute(
           builder: (context, state, child) =>
@@ -32,60 +32,29 @@ void main() {
             ),
             GoRoute(
               path: RouteNames.visitorRecherchePath,
-              builder: (context, state) => PopScope(
-                canPop: false,
-                onPopInvokedWithResult: (didPop, result) {
-                  if (didPop) return;
-                  ProviderScope.containerOf(context)
-                      .read(navigationIndexProvider.notifier)
-                      .setIndex(0);
-                  context.go(RouteNames.visitorHomePath);
-                },
-                child: Scaffold(
-                  appBar: AppBar(
-                    title: const Text('Recherche Universelle'),
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      tooltip: 'Retour à l\'accueil',
-                      onPressed: () {
-                        ProviderScope.containerOf(context)
-                            .read(navigationIndexProvider.notifier)
-                            .setIndex(0);
-                        context.go(RouteNames.visitorHomePath);
-                      },
-                    ),
-                  ),
-                  body: const Center(child: Text('Recherche Universelle')),
-                ),
-              ),
+              builder: (context, state) =>
+                  const RoutePlaceholderScreen(title: 'Recherche Universelle'),
             ),
             GoRoute(
               path: RouteNames.visitorCartePath,
-              builder: (context, state) => PopScope(
-                canPop: false,
-                onPopInvokedWithResult: (didPop, result) {
-                  if (didPop) return;
-                  ProviderScope.containerOf(context)
-                      .read(navigationIndexProvider.notifier)
-                      .setIndex(0);
-                  context.go(RouteNames.visitorHomePath);
-                },
-                child: Scaffold(
-                  appBar: AppBar(
-                    title: const Text('Carte de la Flore Malienne'),
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      tooltip: 'Retour à l\'accueil',
-                      onPressed: () {
-                        ProviderScope.containerOf(context)
-                            .read(navigationIndexProvider.notifier)
-                            .setIndex(0);
-                        context.go(RouteNames.visitorHomePath);
-                      },
-                    ),
-                  ),
-                  body: const Center(child: Text('Carte de la Flore Malienne')),
-                ),
+              builder: (context, state) =>
+                  const RoutePlaceholderScreen(title: 'Carte de la Flore Malienne'),
+            ),
+            GoRoute(
+              path: RouteNames.visitorPanierPath,
+              builder: (context, state) =>
+                  const RoutePlaceholderScreen(title: 'Mon Panier'),
+            ),
+            GoRoute(
+              path: RouteNames.visitorProfilPath,
+              builder: (context, state) =>
+                  const RoutePlaceholderScreen(title: 'Mon Profil'),
+            ),
+            GoRoute(
+              path: RouteNames.visitorPlanteDetailPath,
+              builder: (context, state) => RoutePlaceholderScreen(
+                title: 'Détail Plante (${state.pathParameters['id']})',
+                isSecondary: true,
               ),
             ),
           ],
@@ -94,9 +63,9 @@ void main() {
     );
   }
 
-  group('Navigation & BottomNavBar Back Button Tests', () {
+  group('Navigation & BottomNavBar Back Button Rules', () {
     testWidgets(
-        'Clicking back arrow on Recherche tab redirects to Accueil (index 0)',
+        'Main bottom bar sections (Recherche, Carte, Panier, Profil) have NO back arrow',
         (tester) async {
       final router = createTestRouter();
 
@@ -109,66 +78,50 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Au démarrage : Accueil actif
+      // 1. Sur Accueil : Aucune icône retour
       expect(find.text('Contenu Accueil Visiteur'), findsOneWidget);
-      expect(find.byType(AppShell), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_back), findsNothing);
 
-      // Clic sur l'onglet 1 (Recherche)
+      // 2. Clic sur onglet 1 (Recherche)
       final rechercheTab = find.byKey(const ValueKey('nav_item_1'));
       expect(rechercheTab, findsOneWidget);
       await tester.tap(rechercheTab);
       await tester.pumpAndSettle();
 
-      // On est sur Recherche Universelle
       expect(find.text('Recherche Universelle'), findsWidgets);
+      // AUCUNE icône de retour sur la section principale Recherche
+      expect(find.byIcon(Icons.arrow_back), findsNothing);
 
-      // Clic sur la flèche retour
-      final backButton = find.byIcon(Icons.arrow_back);
-      expect(backButton, findsOneWidget);
-      await tester.tap(backButton);
-      await tester.pumpAndSettle();
-
-      // Redirigé vers Accueil
-      expect(find.text('Contenu Accueil Visiteur'), findsOneWidget);
-      expect(find.text('Recherche Universelle'), findsNothing);
-    });
-
-    testWidgets(
-        'Clicking back arrow on Carte tab redirects to Accueil (index 0)',
-        (tester) async {
-      final router = createTestRouter();
-
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp.router(
-            routerConfig: router,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // Clic sur l'onglet 2 (Carte)
+      // 3. Clic sur onglet 2 (Carte)
       final carteTab = find.byKey(const ValueKey('nav_item_2'));
-      expect(carteTab, findsOneWidget);
       await tester.tap(carteTab);
       await tester.pumpAndSettle();
 
-      // On est sur Carte
       expect(find.text('Carte de la Flore Malienne'), findsWidgets);
+      // AUCUNE icône de retour sur la section principale Carte
+      expect(find.byIcon(Icons.arrow_back), findsNothing);
 
-      // Clic sur la flèche retour
-      final backButton = find.byIcon(Icons.arrow_back);
-      expect(backButton, findsOneWidget);
-      await tester.tap(backButton);
+      // 4. Clic sur onglet 3 (Panier)
+      final panierTab = find.byKey(const ValueKey('nav_item_3'));
+      await tester.tap(panierTab);
       await tester.pumpAndSettle();
 
-      // Redirigé vers Accueil
-      expect(find.text('Contenu Accueil Visiteur'), findsOneWidget);
-      expect(find.text('Carte de la Flore Malienne'), findsNothing);
+      expect(find.text('Mon Panier'), findsWidgets);
+      // AUCUNE icône de retour sur la section principale Panier
+      expect(find.byIcon(Icons.arrow_back), findsNothing);
+
+      // 5. Clic sur onglet 4 (Profil)
+      final profilTab = find.byKey(const ValueKey('nav_item_4'));
+      await tester.tap(profilTab);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Mon Profil'), findsWidgets);
+      // AUCUNE icône de retour sur la section principale Profil
+      expect(find.byIcon(Icons.arrow_back), findsNothing);
     });
 
     testWidgets(
-        'PopScope system back navigation from secondary tab redirects to Accueil (index 0)',
+        'Secondary pages (Détail Plante) HAVE a back arrow that returns to previous page',
         (tester) async {
       final router = createTestRouter();
 
@@ -181,19 +134,50 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Clic sur l'onglet 1 (Recherche)
-      final rechercheTab = find.byKey(const ValueKey('nav_item_1'));
-      await tester.tap(rechercheTab);
+      // Naviguer vers la page secondaire Détail Plante
+      router.go(RouteNames.visitorPlanteDetailUrl('42'));
       await tester.pumpAndSettle();
-      expect(find.text('Recherche Universelle'), findsWidgets);
 
-      // Simulation du retour système (ex: bouton physique Android / gesture)
+      expect(find.text('Détail Plante (42)'), findsWidgets);
+
+      // Une icône retour DOIT être présente sur la page secondaire
+      final backButton = find.byIcon(Icons.arrow_back);
+      expect(backButton, findsOneWidget);
+
+      // Clic sur l'icône retour
+      await tester.tap(backButton);
+      await tester.pumpAndSettle();
+
+      // On est revenu en arrière (sur Recherche ou Accueil)
+      expect(find.text('Détail Plante (42)'), findsNothing);
+    });
+
+    testWidgets(
+        'Secondary pages handle system PopScope back action to previous page',
+        (tester) async {
+      final router = createTestRouter();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp.router(
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Naviguer vers la page secondaire Détail Plante
+      router.go(RouteNames.visitorPlanteDetailUrl('99'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Détail Plante (99)'), findsWidgets);
+
+      // Simuler le retour système Android / geste iOS
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
 
-      // Doit être revenu à l'accueil
-      expect(find.text('Contenu Accueil Visiteur'), findsOneWidget);
-      expect(find.text('Recherche Universelle'), findsNothing);
+      // On est revenu en arrière
+      expect(find.text('Détail Plante (99)'), findsNothing);
     });
   });
 }
