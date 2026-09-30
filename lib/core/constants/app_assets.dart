@@ -9,10 +9,12 @@ class AppAssets {
   // ==========================================
   /// Logo icône carré SVG - Thème Clair (fond vert, motif blanc & or)
   static const String logoIconSvg = 'assets/images/ladafura-logo-icon.svg';
+  static const String logoEmbleme = logoIconSvg;
 
   /// Logo horizontal complet SVG - Thème Clair (texte vert foncé #065223)
   static const String logoHorizontalSvg =
       'assets/images/ladafura-logo-horizontal.svg';
+  static const String logoComplet = logoHorizontalSvg;
 
   // ==========================================
   // LOGOS SVG - THÈME SOMBRE (DARK MODE)

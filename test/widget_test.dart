@@ -22,9 +22,9 @@ void main() {
     // Vérifie le titre LADAFURA
     expect(find.text('LADAFURA'), findsWidgets);
 
-    // Vérifie la présence de la barre de navigation moderne
+    // Vérifie la présence de la barre de navigation moderne et de l'onglet actif initial (Accueil)
     expect(find.byType(LadafuraBottomNavBar), findsOneWidget);
-    expect(find.text('Recherche'), findsOneWidget);
+    expect(find.text('Accueil'), findsWidgets);
 
     // Vérifie le badge du panier (2 articles par défaut)
     expect(find.text('2'), findsOneWidget);
@@ -48,8 +48,14 @@ void main() {
     // Vérifie que le tooltip est repassé en mode sombre
     expect(find.byTooltip('Passer en mode sombre'), findsOneWidget);
 
-    // Teste le clic sur l'onglet Recherche dans la barre de navigation
-    await tester.tap(find.text('Recherche'));
+    // Teste le clic sur l'onglet Recherche via son infobulle : expansion en capsule avec texte
+    await tester.tap(find.byTooltip('Recherche'));
     await tester.pumpAndSettle();
+    expect(find.text('Recherche'), findsWidgets);
+
+    // Teste le clic sur l'onglet Panier via son infobulle : expansion en capsule avec texte
+    await tester.tap(find.byTooltip('Panier'));
+    await tester.pumpAndSettle();
+    expect(find.text('Panier'), findsWidgets);
   });
 }

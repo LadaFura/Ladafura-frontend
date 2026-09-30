@@ -3,41 +3,50 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/constants/app_text_styles.dart';
 
-/// Bouton d'action principal du Design System LADAFURA
-/// Rayon de courbure : 8 px, Hauteur : 48 px, Typographie : Poppins 15 px / 500 Medium
-/// Compatible nativement Thème Clair et Thème Sombre.
+/// Bouton d'action principal de LADAFURA.
+///
+/// Caractéristiques :
+/// - Hauteur standardisée de 48 px conforme à [AppDimensions.buttonHeight].
+/// - Gestion intégrée de l'état de chargement ([isLoading]) avec indicateur centré.
+/// - Support d'une icône optionnelle à gauche ([icon]).
+/// - Adaptation automatique aux thèmes clair et sombre.
 class PrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
+  final dynamic icon;
+  final double? width;
   final Color? backgroundColor;
   final Color? textColor;
-  final Widget? icon;
-  final double? width;
 
   const PrimaryButton({
     super.key,
     required this.label,
     required this.onPressed,
     this.isLoading = false,
-    this.backgroundColor,
-    this.textColor,
     this.icon,
     this.width,
+    this.backgroundColor,
+    this.textColor,
   });
+
+  Widget? _buildIcon(Color color) {
+    if (icon == null) return null;
+    if (icon is IconData) {
+      return Icon(icon as IconData, size: 20, color: color);
+    }
+    if (icon is Widget) {
+      return icon as Widget;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final defaultBg = isDark ? AppColors.darkPrimary : AppColors.primary;
-    final defaultFg = isDark ? AppColors.darkBackground : Colors.white;
-
-    final bgColor = backgroundColor ?? defaultBg;
-    final fgColor = textColor ?? defaultFg;
-
-    final disabledBg = isDark ? AppColors.darkSurfaceVariant : AppColors.border;
-    final disabledFg = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
+    final bg =
+        backgroundColor ?? (isDark ? AppColors.darkPrimary : AppColors.primary);
+    final fg = textColor ?? (isDark ? AppColors.darkBackground : Colors.white);
 
     return SizedBox(
       width: width ?? double.infinity,
@@ -45,14 +54,18 @@ class PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: bgColor,
-          foregroundColor: fgColor,
-          disabledBackgroundColor: disabledBg,
-          disabledForegroundColor: disabledFg,
+          backgroundColor: bg,
+          foregroundColor: fg,
+          disabledBackgroundColor:
+              isDark ? AppColors.darkSurface : AppColors.border,
+          disabledForegroundColor: AppColors.textMuted,
+          elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimensions.radiusButton),
           ),
-          elevation: 0,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.space16,
+          ),
         ),
         child: isLoading
             ? SizedBox(
@@ -60,22 +73,26 @@ class PrimaryButton extends StatelessWidget {
                 height: 22,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(fgColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(fg),
                 ),
               )
             : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (icon != null) ...[
-                    icon!,
+                    _buildIcon(fg)!,
                     const SizedBox(width: AppDimensions.space8),
                   ],
-                  Text(
-                    label,
-                    style: AppTextStyles.button.copyWith(
-                      color: fgColor,
-                      fontWeight: isDark ? FontWeight.w600 : FontWeight.w500,
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: AppTextStyles.button.copyWith(
+                        color: fg,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                 ],

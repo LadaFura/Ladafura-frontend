@@ -3,94 +3,97 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/constants/app_text_styles.dart';
 
-/// Bouton secondaire / outline du Design System LADAFURA
-/// Rayon : 8 px, Hauteur : 48 px, Poppins 15 px / 500 Medium
-/// Compatible nativement Thème Clair et Thème Sombre.
+/// Bouton secondaire borduré (Outlined) de LADAFURA.
+///
+/// Utilisé pour les actions d'annulation, de retour ou les actions secondaires.
 class SecondaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
+  final bool isLoading;
+  final dynamic icon;
+  final double? width;
   final Color? borderColor;
   final Color? textColor;
-  final Color? backgroundColor;
-  final Widget? icon;
-  final double? width;
-  final bool isNeutral;
 
   const SecondaryButton({
     super.key,
     required this.label,
     required this.onPressed,
+    this.isLoading = false,
+    this.icon,
+    this.width,
     this.borderColor,
     this.textColor,
-    this.backgroundColor,
-    this.icon,
-    this.width,
-  }) : isNeutral = false;
+  });
 
-  /// Variante neutre / annuler (bordure douce, fond surface)
-  const SecondaryButton.neutral({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    this.width,
-    this.icon,
-  })  : borderColor = null,
-        textColor = null,
-        backgroundColor = null,
-        isNeutral = true;
+  Widget? _buildIcon(Color color) {
+    if (icon == null) return null;
+    if (icon is IconData) {
+      return Icon(icon as IconData, size: 20, color: color);
+    }
+    if (icon is Widget) {
+      return icon as Widget;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final Color defaultBorder;
-    final Color defaultText;
-    final Color defaultBg;
-
-    if (isNeutral) {
-      defaultBorder = isDark ? AppColors.darkBorder : AppColors.border;
-      defaultText = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
-      defaultBg = isDark ? AppColors.darkSurface : Colors.white;
-    } else {
-      defaultBorder = isDark ? AppColors.darkPrimary : AppColors.primary;
-      defaultText = isDark ? AppColors.darkPrimary : AppColors.primary;
-      defaultBg = isDark
-          ? AppColors.darkPrimaryContainer.withValues(alpha: 0.4)
-          : AppColors.primaryLight.withValues(alpha: 0.5);
-    }
-
-    final borderCol = borderColor ?? defaultBorder;
-    final textCol = textColor ?? defaultText;
-    final bgCol = backgroundColor ?? defaultBg;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
+    final color = textColor ?? borderColor ?? primaryColor;
 
     return SizedBox(
       width: width ?? double.infinity,
       height: AppDimensions.buttonHeight,
       child: OutlinedButton(
-        onPressed: onPressed,
+        onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          backgroundColor: bgCol,
-          foregroundColor: textCol,
-          side: BorderSide(color: borderCol, width: 1.2),
+          foregroundColor: color,
+          disabledForegroundColor: AppColors.textMuted,
+          side: BorderSide(
+            color: onPressed == null || isLoading
+                ? (isDark ? AppColors.darkBorder : AppColors.border)
+                : (borderColor ?? primaryColor),
+            width: 1.5,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimensions.radiusButton),
           ),
-          elevation: 0,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.space16,
+          ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              icon!,
-              const SizedBox(width: AppDimensions.space8),
-            ],
-            Text(
-              label,
-              style: AppTextStyles.button.copyWith(color: textCol),
-            ),
-          ],
-        ),
+        child: isLoading
+            ? SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                ),
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (icon != null) ...[
+                    _buildIcon(color)!,
+                    const SizedBox(width: AppDimensions.space8),
+                  ],
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: AppTextStyles.button.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }

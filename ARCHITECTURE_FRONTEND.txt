@@ -37,7 +37,7 @@ lib/
 │   │   ├── api_endpoints.dart                  # URLs de base (http://localhost:8080/api/v1/...) et routes REST
 │   │   ├── app_colors.dart                     # Palette : Vert médicinal, Ocre terre, Or, Neutres
 │   │   ├── app_text_styles.dart                # Typographie lisible et hiérarchisée
-│   │   ├── app_assets.dart                     # Logos INRMPT / Ladafura, icônes botaniques SVG
+│   │   ├── app_assets.dart                     # Logos  Ladafura, icônes botaniques SVG
 │   │   └── app_dimensions.dart                 # Marges, espacements et rayons standardisés
 │   │
 │   ├── theme/

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/constants/app_colors.dart';
 import 'core/constants/app_dimensions.dart';
 import 'core/constants/app_text_styles.dart';
+import 'core/services/storage_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'shared/widgets/buttons/primary_button.dart';
@@ -13,7 +15,11 @@ import 'shared/widgets/inputs/custom_text_field.dart';
 import 'shared/widgets/media/app_logo.dart';
 import 'shared/widgets/navigation/ladafura_bottom_nav_bar.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  StorageService.init(prefs);
+
   runApp(
     const ProviderScope(
       child: LadafuraApp(),
@@ -50,8 +56,6 @@ class LadafuraHomeScreen extends ConsumerStatefulWidget {
 
 class _LadafuraHomeScreenState extends ConsumerState<LadafuraHomeScreen> {
   final TextEditingController _searchController = TextEditingController();
-  int _currentNavIndex = 0;
-  final int _cartCount = 2; // Exemple avec 2 remèdes dans le panier
 
   @override
   void dispose() {
@@ -59,21 +63,31 @@ class _LadafuraHomeScreenState extends ConsumerState<LadafuraHomeScreen> {
     super.dispose();
   }
 
+  String _getTabName(int index) {
+    switch (index) {
+      case 0:
+        return 'Accueil';
+      case 1:
+        return 'Carte';
+      case 2:
+        return 'Recherche';
+      case 3:
+        return 'Panier';
+      case 4:
+        return 'Profil';
+      default:
+        return 'Accueil';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentNavIndex = ref.watch(navigationIndexProvider);
 
     return Scaffold(
       extendBody: true,
-      bottomNavigationBar: LadafuraBottomNavBar(
-        currentIndex: _currentNavIndex,
-        cartBadgeCount: _cartCount,
-        onTap: (index) {
-          setState(() {
-            _currentNavIndex = index;
-          });
-        },
-      ),
+      bottomNavigationBar: const LadafuraBottomNavBar(),
       appBar: AppBar(
         title: const AppLogo.horizontal(height: 32),
         centerTitle: false,
@@ -216,17 +230,6 @@ class _LadafuraHomeScreenState extends ConsumerState<LadafuraHomeScreen> {
                   color: isDark ? AppColors.darkBackground : Colors.white,
                 ),
                 onPressed: () {},
-                backgroundColor: AppColors.danger,
-                textColor: Colors.white,
-              ),
-              const SizedBox(height: AppDimensions.space12),
-              PrimaryButton(
-                label: 'Explorer le Catalogue (Citoyen)',
-                icon: Icon(
-                  Icons.eco_outlined,
-                  color: isDark ? AppColors.darkBackground : Colors.white,
-                ),
-                onPressed: () {},
               ),
               const SizedBox(height: AppDimensions.space12),
               SecondaryButton(
@@ -239,16 +242,13 @@ class _LadafuraHomeScreenState extends ConsumerState<LadafuraHomeScreen> {
                 label: 'Gestion Officine (Pharmacopée)',
                 icon: const Icon(Icons.storefront_outlined),
                 onPressed: () {},
-                borderColor: AppColors.danger,
-                backgroundColor: const Color.fromARGB(255, 238, 225, 225),
-                textColor: AppColors.danger,
               ),
               const SizedBox(height: AppDimensions.space24),
 
               // Mention de standard typographique & thème actif
               Center(
                 child: Text(
-                  'Typographie 100% Poppins • Rendu vectoriel SVG • Thème : ${isDark ? "Sombre (Nuit)" : "Clair (Jour)"}',
+                  'Typographie 100% Poppins • Thème : ${isDark ? "Sombre" : "Clair"} • Onglet actif : ${_getTabName(currentNavIndex)}',
                   style: (isDark
                           ? AppTextStyles.captionDark
                           : AppTextStyles.caption)
