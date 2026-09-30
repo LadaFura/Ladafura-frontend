@@ -66,6 +66,9 @@ class RouteNames {
   static const String citizenFavoris = 'citizen-favoris';
   static const String citizenFavorisPath = '/citizen/favoris';
 
+  static const String citizenPanier = 'citizen-panier';
+  static const String citizenPanierPath = '/citizen/panier';
+
   static const String citizenProfil = 'citizen-profil';
   static const String citizenProfilPath = '/citizen/profil';
 

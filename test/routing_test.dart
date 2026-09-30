@@ -17,6 +17,7 @@ void main() {
       expect(RouteNames.citizenHomePath, '/citizen');
       expect(RouteNames.citizenRecherchePath, '/citizen/recherche');
       expect(RouteNames.citizenFavorisPath, '/citizen/favoris');
+      expect(RouteNames.citizenPanierPath, '/citizen/panier');
       expect(RouteNames.citizenCartePath, '/citizen/carte');
       expect(RouteNames.agentDashboardPath, '/agent');
       expect(RouteNames.agentCollectesPath, '/agent/collectes');
@@ -96,6 +97,7 @@ void main() {
           RouteNames.citizenHomePath,
           RouteNames.citizenCartePath,
           RouteNames.citizenFavorisPath,
+          RouteNames.citizenPanierPath,
           RouteNames.citizenProfilPath,
           RouteNames.agentDashboardPath,
           RouteNames.agentCollectesPath,

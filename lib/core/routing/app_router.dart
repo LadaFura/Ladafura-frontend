@@ -188,6 +188,12 @@ GoRouter appRouter(AppRouterRef ref) {
                     title: 'Carte de la Flore Malienne'),
               ),
               GoRoute(
+                path: 'panier',
+                name: RouteNames.citizenPanier,
+                builder: (context, state) =>
+                    const _RoutePlaceholder(title: 'Mon Panier'),
+              ),
+              GoRoute(
                 path: 'favoris',
                 name: RouteNames.citizenFavoris,
                 builder: (context, state) =>
@@ -410,6 +416,62 @@ class _RoutePlaceholder extends ConsumerWidget {
               child: const Text('Se connecter'),
             ),
           ],
+        ),
+      );
+    } else if (title.contains('Panier')) {
+      bodyContent = Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.shopping_bag_outlined,
+                size: 72,
+                color: isDark
+                    ? const Color(0xFF2ECC71)
+                    : const Color(0xFF1B5E20),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Votre panier est vide',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Explorez notre catalogue de plantes et remèdes traditionnels pour composer votre commande.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isDark
+                      ? const Color(0xFF2ECC71)
+                      : const Color(0xFF1B5E20),
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: const Icon(Icons.search_rounded),
+                label: const Text('Découvrir la pharmacopée'),
+                onPressed: () {
+                  ref.read(navigationIndexProvider.notifier).setIndex(1);
+                  final isCitizen = auth.isAuthenticated &&
+                      auth.role == UserRole.population;
+                  context.go(isCitizen
+                      ? RouteNames.citizenRecherchePath
+                      : RouteNames.visitorRecherchePath);
+                },
+              ),
+            ],
+          ),
         ),
       );
     } else {

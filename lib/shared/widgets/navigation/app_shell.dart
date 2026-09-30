@@ -54,7 +54,7 @@ class AppShell extends ConsumerWidget {
           context.go(RouteNames.citizenCartePath);
           break;
         case 3:
-          context.go(RouteNames.citizenFavorisPath);
+          context.go(RouteNames.citizenPanierPath);
           break;
         case 4:
           context.go(RouteNames.citizenProfilPath);
@@ -99,7 +99,7 @@ class AppShell extends ConsumerWidget {
     }
 
     if (location.startsWith(RouteNames.visitorPanierPath) ||
-        location.startsWith(RouteNames.citizenFavorisPath)) {
+        location.startsWith(RouteNames.citizenPanierPath)) {
       return 3;
     }
 
