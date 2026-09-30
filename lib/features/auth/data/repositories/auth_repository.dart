@@ -7,19 +7,23 @@ import 'package:ladafura_frontend_flutter/shared/models/utilisateur_model.dart';
 import '../models/auth_me_model.dart';
 import '../models/register_request_model.dart';
 import '../services/firebase_auth_service.dart';
+import '../services/google_auth_service.dart';
 
-/// Dépôt central d'authentification orchestrant Firebase Auth et le backend Spring Boot.
+/// Dépôt central d'authentification orchestrant Firebase Auth, Google Sign-In et le backend Spring Boot.
 class AuthRepository {
   final ApiClient _apiClient;
   final FirebaseAuthService _firebaseAuthService;
+  final GoogleAuthService _googleAuthService;
   final StorageService _storageService;
 
   AuthRepository({
     required ApiClient apiClient,
     required FirebaseAuthService firebaseAuthService,
+    GoogleAuthService? googleAuthService,
     required StorageService storageService,
   })  : _apiClient = apiClient,
         _firebaseAuthService = firebaseAuthService,
+        _googleAuthService = googleAuthService ?? GoogleAuthService(),
         _storageService = storageService {
     // Configurer l'intercepteur Dio pour qu'il injecte toujours le Bearer token
     _apiClient.authInterceptor.setTokenProvider(() async => _storageService.getToken());
@@ -177,10 +181,77 @@ class AuthRepository {
     return null;
   }
 
-  /// Déconnexion de l'utilisateur.
+  /// Connexion ou Inscription avec un compte Google (Google Sign-In).
+  ///
+  /// Orchestre :
+  /// 1. La sélection interactive de compte Google
+  /// 2. L'échange du jeton avec Firebase Identity Toolkit
+  /// 3. La synchronisation et récupération du profil auprès de Spring Boot
+  /// 4. La mémorisation de session locale
+  Future<UtilisateurModel?> signInWithGoogle({UserRole? role}) async {
+    // 1. Authentification Google native
+    final googleCreds = await _googleAuthService.signIn();
+    if (googleCreds == null) {
+      // Annulé par l'utilisateur
+      return null;
+    }
+
+    // 2. Échange avec Firebase Auth
+    final firebaseResult = await _firebaseAuthService.signInWithGoogleIdToken(
+      idToken: googleCreds.idToken,
+      accessToken: googleCreds.accessToken,
+    );
+
+    // 3. Enregistrement temporaire du jeton
+    await _storageService.saveToken(firebaseResult.idToken);
+    _apiClient.setAuthToken(firebaseResult.idToken);
+
+    // 4. Résolution du profil auprès du backend Spring Boot
+    UtilisateurModel? user;
+    try {
+      user = await resolveCurrentUser();
+    } catch (_) {
+      user = null;
+    }
+
+    // Si l'utilisateur n'existe pas encore en base, création/synchronisation citoyen
+    if (user == null) {
+      try {
+        user = await _syncPopulationUser(firebaseResult.email);
+      } catch (_) {
+        final effectiveRole = role ?? UserRole.population;
+        try {
+          user = await _fetchUserProfileForRole(effectiveRole);
+        } catch (_) {
+          user = UtilisateurModel(
+            id: 0,
+            firebaseUid: firebaseResult.uid,
+            email: firebaseResult.email,
+            nom: googleCreds.displayName ?? 'Citoyen',
+            prenom: '',
+            role: UserRole.population,
+            statut: 'ACTIF',
+          );
+        }
+      }
+    }
+
+    // 5. Sauvegarde définitive de la session active
+    await _storageService.saveSession(
+      token: firebaseResult.idToken,
+      email: user.email,
+      role: user.role.backendValue,
+      userId: user.id.toString(),
+    );
+
+    return user;
+  }
+
+  /// Déconnexion de l'utilisateur (Firebase, Google et Spring Boot).
   Future<void> logout() async {
     await _storageService.clearSession();
     _apiClient.clearAuthToken();
+    await _googleAuthService.signOut();
   }
 
   /// Récupère les informations de profil selon le rôle auprès du backend Spring Boot.

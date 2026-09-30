@@ -4,6 +4,7 @@ library;
 // Boutons
 export 'buttons/primary_button.dart';
 export 'buttons/secondary_button.dart';
+export 'buttons/google_sign_in_button.dart';
 
 // Champs de formulaire & Recherche
 export 'inputs/custom_text_field.dart';

@@ -7,6 +7,7 @@ import 'package:ladafura_frontend_flutter/shared/models/utilisateur_model.dart';
 import '../data/models/register_request_model.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/services/firebase_auth_service.dart';
+import '../data/services/google_auth_service.dart';
 import '../../../core/config/firebase_options.dart';
 
 /// Statut de l'état d'authentification de l'utilisateur.
@@ -69,15 +70,22 @@ final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
   );
 });
 
+/// Fournisseur du service client Google Sign-In.
+final googleAuthServiceProvider = Provider<GoogleAuthService>((ref) {
+  return GoogleAuthService();
+});
+
 /// Fournisseur du dépôt d'authentification.
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   final firebaseAuth = ref.watch(firebaseAuthServiceProvider);
+  final googleAuth = ref.watch(googleAuthServiceProvider);
   final storageService = ref.watch(storageServiceProvider);
 
   return AuthRepository(
     apiClient: apiClient,
     firebaseAuthService: firebaseAuth,
+    googleAuthService: googleAuth,
     storageService: storageService,
   );
 });
@@ -172,6 +180,37 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     try {
       final user = await _repository.register(request);
+      state = AuthState.authenticated(user);
+      _ref.read(authRoutingStateProvider).update(
+            isAuthenticated: true,
+            role: user.role,
+            isInitializing: false,
+          );
+      return true;
+    } catch (e) {
+      final cleanMsg = e.toString().replaceFirst('Exception: ', '');
+      state = AuthState.error(cleanMsg);
+      _ref.read(authRoutingStateProvider).update(
+            isAuthenticated: false,
+            role: null,
+            isInitializing: false,
+          );
+      return false;
+    }
+  }
+
+  /// Connexion ou Inscription avec un compte Google (Google Sign-In).
+  Future<bool> signInWithGoogle({UserRole? role}) async {
+    state = const AuthState.loading();
+
+    try {
+      final user = await _repository.signInWithGoogle(role: role);
+      if (user == null) {
+        // Flux annulé par l'utilisateur
+        state = const AuthState.unauthenticated();
+        return false;
+      }
+
       state = AuthState.authenticated(user);
       _ref.read(authRoutingStateProvider).update(
             isAuthenticated: true,

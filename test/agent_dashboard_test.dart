@@ -109,6 +109,9 @@ class _FakeAuthNotifier extends StateNotifier<AuthState>
   Future<bool> register(dynamic request) async => true;
 
   @override
+  Future<bool> signInWithGoogle({UserRole? role}) async => true;
+
+  @override
   Future<void> logout() async {
     state = const AuthState.unauthenticated();
   }

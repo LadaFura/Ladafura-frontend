@@ -9,6 +9,7 @@ void main() {
       'assets/images/ladafura-logo-icon.svg',
       'assets/images/ladafura-logo-horizontal-darkmode.svg',
       'assets/images/ladafura-logo-icon-darkmode.svg',
+      'assets/images/google-logo.svg',
     ];
 
     for (final path in files) {

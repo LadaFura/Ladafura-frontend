@@ -7,6 +7,7 @@ import 'package:ladafura_frontend_flutter/core/constants/app_text_styles.dart';
 import 'package:ladafura_frontend_flutter/core/routing/route_names.dart';
 import 'package:ladafura_frontend_flutter/shared/enums/user_role.dart';
 import 'package:ladafura_frontend_flutter/shared/utils/validators.dart';
+import 'package:ladafura_frontend_flutter/shared/widgets/buttons/google_sign_in_button.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/buttons/primary_button.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/inputs/custom_text_field.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/navigation/navigation_provider.dart';
@@ -33,6 +34,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  bool _isGoogleLoading = false;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -49,17 +52,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
 
     if (success && mounted) {
-      final userRole = ref.read(authStateProvider).role;
-      // Redirection automatique et transparente selon le rôle résolu par le backend
-      switch (userRole) {
-        case UserRole.agentCollecte:
-          context.go(RouteNames.agentDashboardPath);
-          break;
-        case UserRole.population:
-        default:
-          context.go(RouteNames.citizenHomePath);
-          break;
+      _redirectToAppropriateHome();
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _isGoogleLoading = true);
+    try {
+      final success = await ref
+          .read(authStateProvider.notifier)
+          .signInWithGoogle(role: widget.initialRole);
+
+      if (success && mounted) {
+        _redirectToAppropriateHome();
       }
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
+    }
+  }
+
+  void _redirectToAppropriateHome() {
+    final userRole = ref.read(authStateProvider).role;
+    switch (userRole) {
+      case UserRole.agentCollecte:
+        context.go(RouteNames.agentDashboardPath);
+        break;
+      case UserRole.population:
+      default:
+        context.go(RouteNames.citizenHomePath);
+        break;
     }
   }
 
@@ -164,8 +187,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 PrimaryButton(
                   label: 'Se connecter',
                   icon: Icons.login,
-                  isLoading: authState.isLoading,
-                  onPressed: _handleLogin,
+                  isLoading: authState.isLoading && !_isGoogleLoading,
+                  onPressed: _isGoogleLoading ? null : _handleLogin,
+                ),
+                const SizedBox(height: AppDimensions.space16),
+
+                // Séparateur Visuel
+                Row(
+                  children: [
+                    Expanded(
+                      child: Divider(
+                        color: isDark ? AppColors.darkBorder : AppColors.border,
+                        thickness: 1,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimensions.space12,
+                      ),
+                      child: Text(
+                        'OU',
+                        style: AppTextStyles.caption.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextMuted
+                              : AppColors.textMuted,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: isDark ? AppColors.darkBorder : AppColors.border,
+                        thickness: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppDimensions.space16),
+
+                // Connexion rapide via Google Sign-In
+                GoogleSignInButton(
+                  label: 'Continuer avec Google',
+                  isLoading: _isGoogleLoading,
+                  onPressed: authState.isLoading ? null : _handleGoogleSignIn,
                 ),
                 const SizedBox(height: AppDimensions.space20),
 

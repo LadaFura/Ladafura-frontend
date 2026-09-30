@@ -121,6 +121,53 @@ class FirebaseAuthService {
     }
   }
 
+  /// Authentification via jeton Google Identity (Google Sign-In).
+  ///
+  /// Échange le jeton Google auprès de l'API Identity Toolkit Firebase
+  /// pour obtenir un jeton JWT Firebase complet reconnu par le backend Spring Boot.
+  Future<FirebaseAuthResult> signInWithGoogleIdToken({
+    required String idToken,
+    String? accessToken,
+  }) async {
+    if (_mockMode || _firebaseApiKey == null || _firebaseApiKey.isEmpty) {
+      return const FirebaseAuthResult(
+        idToken: 'mock-firebase-id-token-google.jwt.mock',
+        refreshToken: 'mock-firebase-refresh-token',
+        email: 'citoyen.google@ladafura.ml',
+        uid: 'uid-google-mock-12345',
+        expiresIn: 3600,
+      );
+    }
+
+    try {
+      final postBody = accessToken != null && accessToken.isNotEmpty
+          ? 'access_token=$accessToken&id_token=$idToken&providerId=google.com'
+          : 'id_token=$idToken&providerId=google.com';
+
+      final response = await _dio.post(
+        'https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=$_firebaseApiKey',
+        data: {
+          'postBody': postBody,
+          'requestUri': 'http://localhost',
+          'returnIdpCredential': true,
+          'returnSecureToken': true,
+        },
+      );
+
+      final data = response.data as Map<String, dynamic>;
+      return FirebaseAuthResult(
+        idToken: data['idToken']?.toString() ?? '',
+        refreshToken: data['refreshToken']?.toString() ?? '',
+        email: data['email']?.toString() ?? '',
+        uid: data['localId']?.toString() ?? '',
+        expiresIn: int.tryParse(data['expiresIn']?.toString() ?? '3600') ?? 3600,
+      );
+    } on DioException catch (e) {
+      final errorMsg = _extractFirebaseErrorMessage(e);
+      throw Exception(errorMsg);
+    }
+  }
+
   /// Décodage des messages d'erreurs standard Firebase vers des messages en français.
   String _extractFirebaseErrorMessage(DioException e) {
     if (e.response?.data is Map) {

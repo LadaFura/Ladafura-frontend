@@ -7,6 +7,7 @@ import 'package:ladafura_frontend_flutter/core/constants/app_text_styles.dart';
 import 'package:ladafura_frontend_flutter/core/routing/route_names.dart';
 import 'package:ladafura_frontend_flutter/shared/enums/user_role.dart';
 import 'package:ladafura_frontend_flutter/shared/utils/validators.dart';
+import 'package:ladafura_frontend_flutter/shared/widgets/buttons/google_sign_in_button.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/buttons/primary_button.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/feedback/medical_disclaimer_banner.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/inputs/custom_text_field.dart';
@@ -39,6 +40,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
 
   bool _acceptTerms = true;
+  bool _isGoogleLoading = false;
 
   @override
   void dispose() {
@@ -81,6 +83,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     if (success && mounted) {
       context.go(RouteNames.citizenHomePath);
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _isGoogleLoading = true);
+    try {
+      final success = await ref
+          .read(authStateProvider.notifier)
+          .signInWithGoogle(role: UserRole.population);
+
+      if (success && mounted) {
+        context.go(RouteNames.citizenHomePath);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
     }
   }
 
@@ -263,8 +282,49 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 PrimaryButton(
                   label: 'Créer mon compte',
                   icon: Icons.person_add,
-                  isLoading: authState.isLoading,
-                  onPressed: _handleRegister,
+                  isLoading: authState.isLoading && !_isGoogleLoading,
+                  onPressed: _isGoogleLoading ? null : _handleRegister,
+                ),
+                const SizedBox(height: AppDimensions.space16),
+
+                // Séparateur Visuel
+                Row(
+                  children: [
+                    Expanded(
+                      child: Divider(
+                        color: isDark ? AppColors.darkBorder : AppColors.border,
+                        thickness: 1,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimensions.space12,
+                      ),
+                      child: Text(
+                        'OU',
+                        style: AppTextStyles.caption.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextMuted
+                              : AppColors.textMuted,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: isDark ? AppColors.darkBorder : AppColors.border,
+                        thickness: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppDimensions.space16),
+
+                // Inscription rapide via Google Sign-In
+                GoogleSignInButton(
+                  label: 'S\'inscrire avec Google',
+                  isLoading: _isGoogleLoading,
+                  onPressed: authState.isLoading ? null : _handleGoogleSignIn,
                 ),
                 const SizedBox(height: AppDimensions.space20),
 

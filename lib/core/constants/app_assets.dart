@@ -54,4 +54,10 @@ class AppAssets {
   /// Image par défaut pour un produit de pharmacopée
   static const String productPlaceholder =
       'assets/images/product_placeholder.png';
+
+  // ==========================================
+  // LOGOS TIERS & FOURNISSEURS AUTHENTIFICATION
+  // ==========================================
+  /// Logo officiel Google (SVG vectoriel multicouleur)
+  static const String googleLogoSvg = 'assets/images/google-logo.svg';
 }
