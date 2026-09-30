@@ -263,11 +263,9 @@ class _RoutePlaceholder extends ConsumerWidget {
     final isHome = title == 'Accueil' || title == 'Accueil Citoyen';
 
     final auth = ref.read(authStateProvider);
-    final homeRoute = (auth.isAuthenticated &&
-            auth.role == UserRole.population)
+    final homeRoute = (auth.isAuthenticated && auth.role == UserRole.population)
         ? RouteNames.citizenHomePath
-        : (auth.isAuthenticated &&
-                auth.role == UserRole.agentCollecte)
+        : (auth.isAuthenticated && auth.role == UserRole.agentCollecte)
             ? RouteNames.agentDashboardPath
             : RouteNames.visitorHomePath;
 
