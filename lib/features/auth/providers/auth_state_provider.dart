@@ -103,16 +103,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
   })  : _repository = repository,
         _ref = ref,
         super(_resolveInitialState(repository)) {
-    // Si une session en cache existait déjà, informer immédiatement le routeur
-    final cached = _repository.getCachedUser();
-    if (cached != null) {
-      _ref.read(authRoutingStateProvider).update(
-            isAuthenticated: true,
-            role: cached.role,
-            isInitializing: false,
-          );
-    }
-    checkAuthStatus();
+    // Informer le routeur et vérifier le token de façon asynchrone après le montage initial
+    Future.microtask(() {
+      final cached = _repository.getCachedUser();
+      if (cached != null) {
+        _ref.read(authRoutingStateProvider).update(
+              isAuthenticated: true,
+              role: cached.role,
+              isInitializing: false,
+            );
+      }
+      checkAuthStatus();
+    });
   }
 
   static AuthState _resolveInitialState(AuthRepository repository) {

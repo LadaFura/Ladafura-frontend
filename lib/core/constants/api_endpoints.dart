@@ -17,7 +17,7 @@ class ApiEndpoints {
   static const String _envBaseUrl = String.fromEnvironment('API_URL');
 
   /// Adresse IP de votre Mac sur le réseau local Wi-Fi (joignable par téléphones physiques)
-  static const String devMachineIp = '192.168.11.117';
+  static const String devMachineIp = '192.168.10.248';
 
   /// Hôte par défaut pour simulateur iOS et Web
   static const String defaultHost = 'http://localhost:8080';
@@ -37,9 +37,12 @@ class ApiEndpoints {
       return defaultHost;
     }
     // Sur téléphone physique ou émulateur mobile, utiliser l'IP réseau de la machine
-    if (defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS) {
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
       return 'http://$devMachineIp:8080';
+    }
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return androidEmulatorHost;
     }
     return defaultHost;
   }

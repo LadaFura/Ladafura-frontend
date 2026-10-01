@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -25,6 +26,14 @@ class AuthRoutingState extends ChangeNotifier {
   UserRole? _role;
   bool _isInitializing = false;
 
+  AuthRoutingState({
+    bool isAuthenticated = false,
+    UserRole? role,
+    bool isInitializing = false,
+  })  : _isAuthenticated = isAuthenticated,
+        _role = role,
+        _isInitializing = isInitializing;
+
   bool get isAuthenticated => _isAuthenticated;
   UserRole? get role => _role;
   bool get isInitializing => _isInitializing;
@@ -40,6 +49,18 @@ class AuthRoutingState extends ChangeNotifier {
       _isAuthenticated = isAuthenticated;
       _role = role;
       _isInitializing = isInitializing;
+      _safeNotifyListeners();
+    }
+  }
+
+  void _safeNotifyListeners() {
+    final binding = WidgetsBinding.instance;
+    if (binding.schedulerPhase == SchedulerPhase.persistentCallbacks ||
+        binding.schedulerPhase == SchedulerPhase.midFrameMicrotasks) {
+      binding.addPostFrameCallback((_) {
+        notifyListeners();
+      });
+    } else {
       notifyListeners();
     }
   }
@@ -48,21 +69,24 @@ class AuthRoutingState extends ChangeNotifier {
 /// Fournisseur Riverpod de l'état d'authentification pour la navigation.
 @Riverpod(keepAlive: true)
 AuthRoutingState authRoutingState(AuthRoutingStateRef ref) {
-  final state = AuthRoutingState();
+  bool isAuthenticated = false;
+  UserRole? role;
+
   try {
     final storage = ref.watch(storageServiceProvider);
     final token = storage.getToken();
     final roleStr = storage.getRole();
-    final role = UserRole.fromString(roleStr);
-    final hasSession = token != null && token.isNotEmpty && role != null;
-
-    if (hasSession) {
-      state.update(isAuthenticated: true, role: role, isInitializing: false);
-    }
+    role = UserRole.fromString(roleStr);
+    isAuthenticated = token != null && token.isNotEmpty && role != null;
   } catch (_) {
     // Si storageServiceProvider n'est pas configuré dans un conteneur de test isolé
   }
-  return state;
+
+  return AuthRoutingState(
+    isAuthenticated: isAuthenticated,
+    role: role,
+    isInitializing: false,
+  );
 }
 
 /// Fournisseur Riverpod central du [GoRouter] adapté aux 2 acteurs mobiles (Population & Agent).
