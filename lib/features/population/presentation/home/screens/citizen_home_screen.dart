@@ -432,7 +432,8 @@ class CitizenHomeScreen extends ConsumerWidget {
                         final produit = produits[index];
                         return ProduitHomeCard(
                           produit: produit,
-                          onTap: () => context.go(RouteNames.citizenRecherchePath),
+                          onTap: () =>
+                              context.go(RouteNames.citizenRecherchePath),
                         );
                       },
                     ),
@@ -470,7 +471,8 @@ class CitizenHomeScreen extends ConsumerWidget {
                         return PlanteHomeCard(
                           plante: plante,
                           onTap: () => context.go(
-                            RouteNames.citizenPlanteDetailUrl(plante.id.toString()),
+                            RouteNames.citizenPlanteDetailUrl(
+                                plante.id.toString()),
                           ),
                         );
                       },

@@ -97,7 +97,8 @@ class PlanteHomeCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontStyle: FontStyle.italic,
-                      color: isDark ? Colors.grey[400] : const Color(0xFF616161),
+                      color:
+                          isDark ? Colors.grey[400] : const Color(0xFF616161),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

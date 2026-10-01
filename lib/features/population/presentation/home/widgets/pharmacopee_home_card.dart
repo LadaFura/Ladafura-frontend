@@ -98,7 +98,8 @@ class PharmacopeeHomeCard extends StatelessWidget {
                     '${pharmacopee.adresseComplete} • ${pharmacopee.distanceFormatee(userCoordinates)}',
                     style: TextStyle(
                       fontSize: 13,
-                      color: isDark ? Colors.grey[400] : const Color(0xFF757575),
+                      color:
+                          isDark ? Colors.grey[400] : const Color(0xFF757575),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -129,14 +130,18 @@ class PharmacopeeHomeCard extends StatelessWidget {
                         Icon(
                           Icons.storefront_outlined,
                           size: 16,
-                          color: isDark ? Colors.grey[300] : const Color(0xFF424242),
+                          color: isDark
+                              ? Colors.grey[300]
+                              : const Color(0xFF424242),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'prendre sur place',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? Colors.grey[300] : const Color(0xFF424242),
+                            color: isDark
+                                ? Colors.grey[300]
+                                : const Color(0xFF424242),
                           ),
                         ),
                       ],
@@ -153,7 +158,8 @@ class PharmacopeeHomeCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : const Color(0xFF2E7D32),
+                          color:
+                              isDark ? Colors.white : const Color(0xFF2E7D32),
                         ),
                       ),
                       const SizedBox(width: 2),

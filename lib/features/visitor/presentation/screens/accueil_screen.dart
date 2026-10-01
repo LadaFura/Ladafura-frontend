@@ -149,7 +149,8 @@ class AccueilScreen extends ConsumerWidget {
                         final produit = produits[index];
                         return ProduitHomeCard(
                           produit: produit,
-                          onTap: () => context.go(RouteNames.visitorRecherchePath),
+                          onTap: () =>
+                              context.go(RouteNames.visitorRecherchePath),
                         );
                       },
                     ),
@@ -187,7 +188,8 @@ class AccueilScreen extends ConsumerWidget {
                         return PlanteHomeCard(
                           plante: plante,
                           onTap: () => context.go(
-                            RouteNames.visitorPlanteDetailUrl(plante.id.toString()),
+                            RouteNames.visitorPlanteDetailUrl(
+                                plante.id.toString()),
                           ),
                         );
                       },
@@ -222,14 +224,17 @@ class AccueilScreen extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : const Color(0xFF1E272E),
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : const Color(0xFF1E272E),
+            ),
           ),
         ),
+        const SizedBox(width: AppDimensions.space8),
         InkWell(
           onTap: onSeeAll,
           borderRadius: BorderRadius.circular(4),
@@ -314,6 +319,8 @@ class AccueilScreen extends ConsumerWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF2E7D32),
               foregroundColor: Colors.white,
+              minimumSize: const Size(0, 36),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               padding: const EdgeInsets.symmetric(
                 horizontal: AppDimensions.space12,
                 vertical: AppDimensions.space8,

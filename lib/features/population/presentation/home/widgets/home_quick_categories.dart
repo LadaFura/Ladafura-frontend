@@ -28,45 +28,37 @@ class HomeQuickCategories extends StatelessWidget {
           _CategoryItem(
             label: 'Pharmacopée',
             icon: Icons.storefront_rounded,
-            backgroundColor: isDark
-                ? const Color(0xFF1E3A2F)
-                : const Color(0xFFD7EFE6),
-            iconColor: isDark
-                ? const Color(0xFF2ECC71)
-                : const Color(0xFF1B5E20),
+            backgroundColor:
+                isDark ? const Color(0xFF1E3A2F) : const Color(0xFFD7EFE6),
+            iconColor:
+                isDark ? const Color(0xFF2ECC71) : const Color(0xFF1B5E20),
             onTap: onPharmacopeeTap,
           ),
           _CategoryItem(
             label: 'Fura',
             icon: Icons.medication_rounded,
-            backgroundColor: isDark
-                ? const Color(0xFF1A365D)
-                : const Color(0xFFD9EEF9),
-            iconColor: isDark
-                ? const Color(0xFF63B3ED)
-                : const Color(0xFF1976D2),
+            backgroundColor:
+                isDark ? const Color(0xFF1A365D) : const Color(0xFFD9EEF9),
+            iconColor:
+                isDark ? const Color(0xFF63B3ED) : const Color(0xFF1976D2),
             onTap: onFuraTap,
           ),
           _CategoryItem(
             label: 'Plante',
             icon: Icons.eco_rounded,
-            backgroundColor: isDark
-                ? const Color(0xFF1E3E2B)
-                : const Color(0xFFE2F4E9),
-            iconColor: isDark
-                ? const Color(0xFF48BB78)
-                : const Color(0xFF2E7D32),
+            backgroundColor:
+                isDark ? const Color(0xFF1E3E2B) : const Color(0xFFE2F4E9),
+            iconColor:
+                isDark ? const Color(0xFF48BB78) : const Color(0xFF2E7D32),
             onTap: onPlanteTap,
           ),
           _CategoryItem(
             label: 'Maladie',
             icon: Icons.add_box_rounded,
-            backgroundColor: isDark
-                ? const Color(0xFF4A1E24)
-                : const Color(0xFFFBE4E4),
-            iconColor: isDark
-                ? const Color(0xFFFC8181)
-                : const Color(0xFFDC4747),
+            backgroundColor:
+                isDark ? const Color(0xFF4A1E24) : const Color(0xFFFBE4E4),
+            iconColor:
+                isDark ? const Color(0xFFFC8181) : const Color(0xFFDC4747),
             onTap: onMaladieTap,
           ),
         ],

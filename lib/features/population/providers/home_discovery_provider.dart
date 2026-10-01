@@ -11,7 +11,8 @@ final List<PharmacopeeModel> _fallbackPharmacopees = [
   const PharmacopeeModel(
     id: 1,
     nom: 'Pharmacie Jnane Awrad',
-    description: 'Officine agréée spécialisée en phytothérapie et remèdes sahéliens.',
+    description:
+        'Officine agréée spécialisée en phytothérapie et remèdes sahéliens.',
     telephone: '+223 76 12 34 56',
     region: 'Bamako',
     cercle: 'Bamako',
@@ -47,7 +48,8 @@ final List<PharmacopeeModel> _fallbackPharmacopees = [
   const PharmacopeeModel(
     id: 3,
     nom: 'Officine Botanique Djoliba',
-    description: 'Préparations traditionnelles, tisanes et poudres médicinales certifiées.',
+    description:
+        'Préparations traditionnelles, tisanes et poudres médicinales certifiées.',
     telephone: '+223 70 45 89 20',
     region: 'Bamako',
     cercle: 'Bamako',
@@ -82,7 +84,8 @@ final List<ProduitModel> _fallbackProduits = [
   const ProduitModel(
     id: 2,
     nom: 'Sirop Balanites Énergie',
-    description: 'Sirop fortifiant à base de dattes du désert (Balanites aegyptiaca).',
+    description:
+        'Sirop fortifiant à base de dattes du désert (Balanites aegyptiaca).',
     forme: 'Flacon 250ml',
     prixIndicatif: 2500.0,
     categorieNom: 'Sirops & Émulsions',
@@ -95,7 +98,8 @@ final List<ProduitModel> _fallbackProduits = [
   const ProduitModel(
     id: 3,
     nom: 'Poudre de Moringa Pure',
-    description: 'Superaliment riche en vitamines, antioxydants et minéraux essentiels.',
+    description:
+        'Superaliment riche en vitamines, antioxydants et minéraux essentiels.',
     forme: 'Pot hermétique 200g',
     prixIndicatif: 2000.0,
     categorieNom: 'Poudres Médicinales',
@@ -125,7 +129,8 @@ final List<PlanteSommaireModel> _fallbackPlantes = [
   const PlanteSommaireModel(
     id: 1,
     nomScientifique: 'Combretum micranthum',
-    description: 'Arbuste sahélien réputé pour son infusion bienfaisante digestive et hypotensive.',
+    description:
+        'Arbuste sahélien réputé pour son infusion bienfaisante digestive et hypotensive.',
     nomsVernaculaires: ['Kinkéliba', 'Sere', 'Kokobe'],
     maladies: ['Hypertension', 'Troubles digestifs', 'Fièvre bilieuse'],
     nombreConnaissances: 6,
@@ -134,7 +139,8 @@ final List<PlanteSommaireModel> _fallbackPlantes = [
   const PlanteSommaireModel(
     id: 2,
     nomScientifique: 'Moringa oleifera',
-    description: 'L\'arbre de vie africain aux multiples vertus nutritionnelles et immunitaires.',
+    description:
+        'L\'arbre de vie africain aux multiples vertus nutritionnelles et immunitaires.',
     nomsVernaculaires: ['Moringa', 'Nebedaye', 'Arbre miracle'],
     maladies: ['Diabète', 'Anémie', 'Fatigue générale'],
     nombreConnaissances: 8,
@@ -143,7 +149,8 @@ final List<PlanteSommaireModel> _fallbackPlantes = [
   const PlanteSommaireModel(
     id: 3,
     nomScientifique: 'Azadirachta indica',
-    description: 'Arbre protecteur ancestral aux vertus antiparasitaires et fébrifuges.',
+    description:
+        'Arbre protecteur ancestral aux vertus antiparasitaires et fébrifuges.',
     nomsVernaculaires: ['Neem', 'Kingoba', 'Nîm'],
     maladies: ['Paludisme', 'Gale & Dermatoses', 'Infections cutanées'],
     nombreConnaissances: 7,
@@ -152,7 +159,8 @@ final List<PlanteSommaireModel> _fallbackPlantes = [
   const PlanteSommaireModel(
     id: 4,
     nomScientifique: 'Artemisia annua',
-    description: 'Plante aromatique reconnue internationalement contre les fièvres palustres.',
+    description:
+        'Plante aromatique reconnue internationalement contre les fièvres palustres.',
     nomsVernaculaires: ['Armoise annuelle', 'Artemisia'],
     maladies: ['Paludisme', 'Fièvre palustre', 'Inflammations'],
     nombreConnaissances: 5,
@@ -161,7 +169,8 @@ final List<PlanteSommaireModel> _fallbackPlantes = [
   const PlanteSommaireModel(
     id: 5,
     nomScientifique: 'Parkia biglobosa',
-    description: 'Arbre nourricier produisant la pulpe jaune et le néré pour le soumbala.',
+    description:
+        'Arbre nourricier produisant la pulpe jaune et le néré pour le soumbala.',
     nomsVernaculaires: ['Néré', 'Netetu'],
     maladies: ['Hypertension artérielle', 'Constipation'],
     nombreConnaissances: 4,
@@ -180,12 +189,14 @@ final userLocationProvider = FutureProvider<GeoCoordinates?>((ref) async {
 });
 
 /// Provider pour les pharmacopées les plus proches du visiteur ou citoyen
-final nearbyPharmacopeesProvider = FutureProvider<List<PharmacopeeModel>>((ref) async {
+final nearbyPharmacopeesProvider =
+    FutureProvider<List<PharmacopeeModel>>((ref) async {
   final dio = ref.watch(dioProvider);
   final userLocation = await ref.watch(userLocationProvider.future);
 
   try {
-    final response = await dio.get('/population/pharmacopees', queryParameters: {
+    final response =
+        await dio.get('/population/pharmacopees', queryParameters: {
       'page': 0,
       'size': 10,
     });
@@ -198,8 +209,9 @@ final nearbyPharmacopeesProvider = FutureProvider<List<PharmacopeeModel>>((ref) 
       if (items.isNotEmpty) {
         final list = items.map((e) => PharmacopeeModel.fromJson(e)).toList();
         // Tri par distance croissante
-        list.sort((a, b) =>
-            a.distanceToKm(userLocation).compareTo(b.distanceToKm(userLocation)));
+        list.sort((a, b) => a
+            .distanceToKm(userLocation)
+            .compareTo(b.distanceToKm(userLocation)));
         return list;
       }
     }
@@ -241,7 +253,8 @@ final popularProduitsProvider = FutureProvider<List<ProduitModel>>((ref) async {
 });
 
 /// Provider pour les plantes médicinales les plus consultées
-final popularPlantesProvider = FutureProvider<List<PlanteSommaireModel>>((ref) async {
+final popularPlantesProvider =
+    FutureProvider<List<PlanteSommaireModel>>((ref) async {
   final dio = ref.watch(dioProvider);
 
   try {

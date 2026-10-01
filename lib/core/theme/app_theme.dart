@@ -67,7 +67,7 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 0,
-          minimumSize: const Size.fromHeight(AppDimensions.buttonHeight),
+          minimumSize: const Size(64, AppDimensions.buttonHeight),
           textStyle: AppTextStyles.button,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimensions.radiusButton),
@@ -83,7 +83,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
-          minimumSize: const Size.fromHeight(AppDimensions.buttonHeight),
+          minimumSize: const Size(64, AppDimensions.buttonHeight),
           side: const BorderSide(color: AppColors.primary, width: 1.5),
           textStyle: AppTextStyles.button.copyWith(color: AppColors.primary),
           shape: RoundedRectangleBorder(
@@ -213,7 +213,7 @@ class AppTheme {
           backgroundColor: AppColors.darkPrimary,
           foregroundColor: AppColors.darkBackground,
           elevation: 0,
-          minimumSize: const Size.fromHeight(AppDimensions.buttonHeight),
+          minimumSize: const Size(64, AppDimensions.buttonHeight),
           textStyle: AppTextStyles.button.copyWith(
             color: AppColors.darkBackground,
             fontWeight: FontWeight.w600,
@@ -232,7 +232,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.darkPrimary,
-          minimumSize: const Size.fromHeight(AppDimensions.buttonHeight),
+          minimumSize: const Size(64, AppDimensions.buttonHeight),
           side: const BorderSide(color: AppColors.darkPrimary, width: 1.5),
           textStyle:
               AppTextStyles.button.copyWith(color: AppColors.darkPrimary),

@@ -84,12 +84,15 @@ void main() {
   });
 
   testWidgets(
-      'AccueilScreen renders all public sections and quick access cards',
+      'AccueilScreen renders all public sections and quick access cards with AppTheme',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      const ProviderScope(
+      ProviderScope(
         child: MaterialApp(
-          home: AccueilScreen(),
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.light,
+          home: const AccueilScreen(),
         ),
       ),
     );
@@ -108,6 +111,21 @@ void main() {
 
     // Vérifie la section Agent de collecte
     expect(find.text('Vous êtes agent de collecte ?'), findsOneWidget);
+    expect(find.text('Connexion'), findsOneWidget);
+
+    // Test avec le thème sombre
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.dark,
+          home: const AccueilScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Pharmacopée'), findsWidgets);
     expect(find.text('Connexion'), findsOneWidget);
   });
 }
