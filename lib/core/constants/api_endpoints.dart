@@ -16,8 +16,9 @@ class ApiEndpoints {
   static const String _envHost = String.fromEnvironment('API_HOST');
   static const String _envBaseUrl = String.fromEnvironment('API_URL');
 
-  /// Adresse IP de votre Mac sur le réseau local Wi-Fi (joignable par téléphones physiques)
-  static const String devMachineIp = '192.168.10.248';
+  /// Adresse IPv4 de la machine de développement sur le réseau Wi-Fi local.
+  /// Peut être remplacée au lancement avec --dart-define=API_HOST=<adresse>.
+  static const String devMachineIp = '192.168.11.160';
 
   /// Hôte par défaut pour simulateur iOS et Web
   static const String defaultHost = 'http://localhost:8080';
@@ -36,14 +37,12 @@ class ApiEndpoints {
     if (kIsWeb) {
       return defaultHost;
     }
-    // Sur téléphone physique ou émulateur mobile, utiliser l'IP réseau de la machine
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
+    // Sur un appareil physique, localhost désigne l'appareil, pas la machine hôte.
+    if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS) {
       return 'http://$devMachineIp:8080';
     }
 
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return androidEmulatorHost;
-    }
+    
     return defaultHost;
   }
 

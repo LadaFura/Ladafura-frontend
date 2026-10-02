@@ -1,16 +1,27 @@
-# ladafura_frontend_flutter
+# LADAFURA Flutter
 
-A new Flutter project.
+## Connexion à l'API locale
 
-## Getting Started
+Démarrez le backend Spring Boot sur le port `8080` et vérifiez que le téléphone
+et l'ordinateur sont connectés au même réseau Wi-Fi.
 
-This project is a starting point for a Flutter application.
+Sur un téléphone Android physique, configurez l'adresse IPv4 Wi-Fi de
+l'ordinateur qui exécute le backend :
 
-A few resources to get you started if this is your first Flutter project:
+```powershell
+flutter run --dart-define=API_HOST=192.168.11.160
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Remplacez cette adresse par l'adresse IPv4 actuelle de l'ordinateur si elle
+change. Elle peut être vérifiée avec `ipconfig`. Autorisez également le port
+`8080` dans le pare-feu Windows si nécessaire.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Pour l'émulateur Android, utilisez l'adresse spéciale de l'hôte :
+
+```powershell
+flutter run --dart-define=API_HOST=10.0.2.2
+```
+
+Pour les plateformes desktop et Web, l'adresse par défaut est
+`http://localhost:8080`. `API_URL` peut remplacer l'URL complète de base,
+y compris `/api/v1`, si nécessaire.

@@ -41,58 +41,6 @@ class ApiClient {
     _authInterceptor = AuthInterceptor();
     _dio.interceptors.add(_authInterceptor);
 
-    // Intercepteur de bascule automatique d'hôte (ex: si l'IP Wi-Fi ou localhost est temporairement indisponible)
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onError: (DioException err, ErrorInterceptorHandler handler) async {
-          if (err.type == DioExceptionType.connectionError &&
-              !kIsWeb &&
-              err.requestOptions.extra['is_retry'] != true) {
-            final currentBase = _dio.options.baseUrl;
-            String? fallbackBase;
-
-            if (currentBase.contains(ApiEndpoints.devMachineIp)) {
-              fallbackBase = '${ApiEndpoints.defaultHost}${ApiEndpoints.apiVersion}';
-            } else if (currentBase.contains('localhost') || currentBase.contains('127.0.0.1')) {
-              fallbackBase = 'http://${ApiEndpoints.devMachineIp}:8080${ApiEndpoints.apiVersion}';
-            }
-
-            if (fallbackBase != null && fallbackBase != currentBase) {
-              debugPrint('[ApiClient] Échec connexion vers $currentBase. Tentative automatique vers $fallbackBase...');
-              try {
-                final options = Options(
-                  method: err.requestOptions.method,
-                  headers: err.requestOptions.headers,
-                  responseType: err.requestOptions.responseType,
-                  contentType: err.requestOptions.contentType,
-                  extra: {...err.requestOptions.extra, 'is_retry': true},
-                );
-
-                final fullUri = err.requestOptions.uri.toString();
-                final retryUri = fullUri.startsWith('http')
-                    ? fullUri.replaceFirst(currentBase, fallbackBase)
-                    : '$fallbackBase${err.requestOptions.path}';
-
-                final response = await _dio.requestUri(
-                  Uri.parse(retryUri),
-                  data: err.requestOptions.data,
-                  options: options,
-                );
-
-                _dio.options.baseUrl = fallbackBase;
-                ApiEndpoints.baseUrl = fallbackBase;
-                debugPrint('[ApiClient] Bascule réussie ! Hôte actif conservé : $fallbackBase');
-                return handler.resolve(response);
-              } catch (_) {
-                // Si le serveur de secours échoue aussi, laisser passer l'erreur
-              }
-            }
-          }
-          return handler.next(err);
-        },
-      ),
-    );
-
     // Logging en mode débogage sans polluer les tests unitaires
     if (kDebugMode) {
       _dio.interceptors.add(
