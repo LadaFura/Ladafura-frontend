@@ -37,12 +37,12 @@ class ApiEndpoints {
     if (kIsWeb) {
       return defaultHost;
     }
-    // Sur un appareil physique, localhost désigne l'appareil, pas la machine hôte.
-    if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS) {
+    // Sur téléphone physique ou émulateur mobile, utiliser l'IP réseau de la machine
+    if (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
       return 'http://$devMachineIp:8080';
     }
 
-    
     return defaultHost;
   }
 
