@@ -142,7 +142,8 @@ class PharmacopeeHeaderCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.success.withAlpha(20),
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusBadge),
+                    borderRadius:
+                        BorderRadius.circular(AppDimensions.radiusBadge),
                   ),
                   child: Row(
                     children: [
@@ -168,7 +169,8 @@ class PharmacopeeHeaderCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withAlpha(20),
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusBadge),
+                    borderRadius:
+                        BorderRadius.circular(AppDimensions.radiusBadge),
                   ),
                   child: Row(
                     children: [

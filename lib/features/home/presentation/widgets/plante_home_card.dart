@@ -25,7 +25,7 @@ class PlanteHomeCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
       child: Container(
-        width: 200,
+        width: AppDimensions.cardPlantHomeWidth,
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : AppColors.surface,
           borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
@@ -50,15 +50,18 @@ class PlanteHomeCard extends StatelessWidget {
                 top: Radius.circular(AppDimensions.radiusCard),
               ),
               child: SizedBox(
-                height: 110,
+                height: 104,
                 width: double.infinity,
                 child: _buildImage(isDark),
               ),
             ),
 
-            // Détails de la plante avec typographie Poppins et espacements standardisés
+            // Détails de la plante avec typographie et espacements standardisés
             Padding(
-              padding: const EdgeInsets.all(AppDimensions.space12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.space12,
+                vertical: AppDimensions.space8,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -91,8 +94,8 @@ class PlanteHomeCard extends StatelessWidget {
                   ),
                   const SizedBox(height: AppDimensions.space8),
 
-                  // Première maladie traitée sous forme de badge pill
-                  if (plante.maladies.isNotEmpty)
+                  // Première maladie traitée sous forme de badge pill (si présente)
+                  if (plante.maladies.isNotEmpty) ...[
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppDimensions.space8,
@@ -117,7 +120,8 @@ class PlanteHomeCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  const SizedBox(height: AppDimensions.space8),
+                    const SizedBox(height: AppDimensions.space8),
+                  ],
 
                   // Savoirs traditionnels & études scientifiques
                   Wrap(

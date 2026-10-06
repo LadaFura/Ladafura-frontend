@@ -114,23 +114,25 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                 child: PharmacopeeDetailHeader(pharmacopee: pharma),
               ),
 
-              const SliverToBoxAdapter(
-                child: SizedBox(height: AppDimensions.space16),
-              ),
-
-              // 3. Barre de recherche de produits, placée immédiatement après les informations de la pharmacopée
-              SliverToBoxAdapter(
-                child: PharmacopeeSearchBar(
-                  pharmacopeeNom: pharma.nom,
-                  onSearchChanged: controller.setSearchQuery,
-                  categories: categories,
-                  selectedCategory: controllerState.selectedCategory,
-                  onCategorySelected: controller.selectCategory,
+              // 3. Barre de recherche de produits fixée au défilement (Sticky pinned header)
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _StickySearchBarDelegate(
+                  builder: (context, isPinned) => PharmacopeeSearchBar(
+                    pharmacopeeNom: pharma.nom,
+                    onSearchChanged: controller.setSearchQuery,
+                    categories: categories,
+                    selectedCategory: controllerState.selectedCategory,
+                    onCategorySelected: controller.selectCategory,
+                    isPinned: isPinned,
+                  ),
+                  baseHeight: categories.isNotEmpty ? 116.0 : 66.0,
+                  topSafeArea: MediaQuery.paddingOf(context).top,
                 ),
               ),
 
               const SliverToBoxAdapter(
-                child: SizedBox(height: AppDimensions.space16),
+                child: SizedBox(height: AppDimensions.space8),
               ),
 
               // 4. Choix du mode de retrait (Livraison vs Retrait sur place)
@@ -201,7 +203,8 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                           Icon(
                             Icons.search_off_rounded,
                             size: 54,
-                            color: isDark ? Colors.white30 : Colors.grey.shade400,
+                            color:
+                                isDark ? Colors.white30 : Colors.grey.shade400,
                           ),
                           const SizedBox(height: AppDimensions.space12),
                           Text(
@@ -230,7 +233,7 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.64,
+                      childAspectRatio: 0.78,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),
@@ -316,3 +319,46 @@ class PharmacopeeDetailPage extends ConsumerWidget {
     );
   }
 }
+
+/// Délégué pour épingler la barre de recherche en haut au défilement (sticky header)
+/// avec animation fluide lors de la transition et dégagement supérieur sous la barre d'état.
+class _StickySearchBarDelegate extends SliverPersistentHeaderDelegate {
+  final Widget Function(BuildContext context, bool isPinned) builder;
+  final double baseHeight;
+  final double topSafeArea;
+
+  const _StickySearchBarDelegate({
+    required this.builder,
+    required this.baseHeight,
+    required this.topSafeArea,
+  });
+
+  // Hauteur fixe lorsque la barre est épinglée sous la barre de statut (avec marge de confort)
+  double get pinnedHeight => (baseHeight) + (topSafeArea);
+
+  @override
+  double get minExtent => pinnedHeight > 0.0 ? pinnedHeight : 66.0;
+
+  @override
+  double get maxExtent => pinnedHeight > 0.0 ? pinnedHeight : 66.0;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    // La barre est considérée fixée / épinglée dès qu'il y a recouvrement ou défilement
+    final isPinned = overlapsContent || shrinkOffset > 0;
+    return SizedBox(
+      height: pinnedHeight,
+      child: builder(context, isPinned),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _StickySearchBarDelegate oldDelegate) {
+    return oldDelegate.baseHeight != baseHeight ||
+        oldDelegate.topSafeArea != topSafeArea;
+  }
+}
+
+
+

@@ -29,7 +29,6 @@ class PharmacopeeProduitCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
         border: Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.border,
@@ -84,7 +83,9 @@ class PharmacopeeProduitCard extends StatelessWidget {
                   bottom: 8,
                   right: 8,
                   child: Material(
-                    color: produit.disponible ? Colors.white : Colors.grey.shade300,
+                    color: produit.disponible
+                        ? Colors.white
+                        : Colors.grey.shade300,
                     shape: const CircleBorder(),
                     elevation: 3,
                     shadowColor: Colors.black38,
@@ -134,17 +135,22 @@ class PharmacopeeProduitCard extends StatelessWidget {
                     const SizedBox(height: 3),
 
                     // Forme galénique ou catégorie
-                    Text(
-                      produit.forme ?? produit.categorieNom ?? '',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textMuted,
+                    if ((produit.forme != null && produit.forme!.isNotEmpty) ||
+                        (produit.categorieNom != null &&
+                            produit.categorieNom!.isNotEmpty)) ...[
+                      Text(
+                        produit.forme ?? produit.categorieNom!,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textMuted,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const Spacer(),
+                      const SizedBox(height: 6),
+                    ] else ...[
+                      const SizedBox(height: 6),
+                    ],
 
                     // Prix en FCFA bien mis en valeur
                     Text(
@@ -152,9 +158,8 @@ class PharmacopeeProduitCard extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 13.5,
-                        color: isDark
-                            ? AppColors.darkPrimary
-                            : AppColors.primary,
+                        color:
+                            isDark ? AppColors.darkPrimary : AppColors.primary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

@@ -23,8 +23,8 @@ class PharmacopeeModesRetraitSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final livraison = modes.where((m) => m.isLivraison && m.actif).firstOrNull;
-    final pickup = modes.where((m) => m.isPickup && m.actif).firstOrNull;
+    final livraison = modes.where((m) => m.isLivraison && m.actif == true).firstOrNull;
+    final pickup = modes.where((m) => m.isPickup && m.actif == true).firstOrNull;
 
     final hasLivraison = livraison != null;
     final hasPickup = pickup != null;
