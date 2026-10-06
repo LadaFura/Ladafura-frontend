@@ -9,12 +9,13 @@ Sur un téléphone Android physique, configurez l'adresse IPv4 Wi-Fi de
 l'ordinateur qui exécute le backend :
 
 ```powershell
-flutter run --dart-define=API_HOST=192.168.11.160
+flutter run --dart-define=API_HOST=172.25.36.133
 ```
 
 Remplacez cette adresse par l'adresse IPv4 actuelle de l'ordinateur si elle
-change. Elle peut être vérifiée avec `ipconfig`. Autorisez également le port
-`8080` dans le pare-feu Windows si nécessaire.
+change (la valeur par défaut dans `api_endpoints.dart` doit alors être mise à
+jour aussi). Elle peut être vérifiée avec `ipconfig`. Autorisez également le
+port `8080` dans le pare-feu Windows si nécessaire.
 
 Pour l'émulateur Android, utilisez l'adresse spéciale de l'hôte :
 

@@ -12,77 +12,11 @@ import '../../../../auth/providers/auth_state_provider.dart';
 class AgentDashboardScreen extends ConsumerWidget {
   const AgentDashboardScreen({super.key});
 
-  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final shouldLogout = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-        ),
-        title: Text(
-          'Déconnexion',
-          style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
-            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-          ),
-        ),
-        content: Text(
-          'Êtes-vous sûr de vouloir vous déconnecter de votre espace Agent de Collecte ?',
-          style:
-              (isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
-            color:
-                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(
-              'Annuler',
-              style: AppTextStyles.button.copyWith(
-                color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
-              ),
-            ),
-          ),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.danger,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppDimensions.radiusButton),
-              ),
-            ),
-            icon: const Icon(Icons.logout_rounded, size: 18),
-            label: const Text('Se déconnecter'),
-            onPressed: () => Navigator.of(ctx).pop(true),
-          ),
-        ],
-      ),
-    );
-
-    if (shouldLogout == true) {
-      try {
-        if (context.mounted) {
-          context.go(RouteNames.visitorHomePath);
-        }
-      } catch (_) {}
-      await ref.read(authStateProvider.notifier).logout();
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final authState = ref.watch(authStateProvider);
     final user = authState.user;
-
-    final agentName = user != null && user.nomComplet.trim().isNotEmpty
-        ? user.nomComplet
-        : 'Agent de Collecte';
-    final agentEmail = user?.email ?? 'agent@ladafura.ml';
-    final agentMatricule = user?.matricule ?? 'AGT-MALI-001';
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
@@ -110,273 +44,490 @@ class AgentDashboardScreen extends ConsumerWidget {
                   .toggleTheme(currentIsDark: isDark);
             },
           ),
-
-          // Bouton de Déconnexion dans l'AppBar
-          IconButton(
-            tooltip: 'Se déconnecter',
-            icon: const Icon(
-              Icons.logout_rounded,
-              color: AppColors.danger,
-            ),
-            onPressed: () => _handleLogout(context, ref),
-          ),
-          const SizedBox(width: AppDimensions.space8),
         ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.space20,
-            vertical: AppDimensions.space16,
-          ),
+          padding: AppDimensions.paddingScreenMobile,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Carte Profil de l'Agent
+              Text(
+                'Bonjour, Awa',
+                style: isDark ? AppTextStyles.h2Dark : AppTextStyles.h2,
+              ),
+              Text(
+                'Prête pour votre prochaine collecte ?',
+                style: isDark ? AppTextStyles.bodyDark : AppTextStyles.body,
+              ),
+              const SizedBox(height: AppDimensions.space16),
               Container(
-                padding: const EdgeInsets.all(AppDimensions.space20),
+                padding: const EdgeInsets.all(AppDimensions.space16),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isDark
-                        ? const [
-                            AppColors.darkSurfaceVariant,
-                            AppColors.darkPrimaryContainer,
-                          ]
-                        : const [
-                            AppColors.primaryDark,
-                            AppColors.primary,
-                          ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.2),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+                  color: isDark ? AppColors.darkAccent : AppColors.primary,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Cette semaine",
+                      style: isDark
+                          ? AppTextStyles.bodyDark
+                          : TextStyle(color: AppColors.surface),
+                    ),
+                    SizedBox(height: AppDimensions.space16),
+                    Row(
+                      children: [
+                        Text("12",
+                            style: isDark
+                                ? AppTextStyles.h1Dark
+                                : TextStyle(
+                                    color: AppColors.surface,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.25,
+                                  )),
+                        SizedBox(width: AppDimensions.space8),
+                        Text("fiches collectées",
+                            style: isDark
+                                ? AppTextStyles.bodyDark
+                                : TextStyle(color: AppColors.surface)),
+                      ],
+                    ),
+                    SizedBox(height: AppDimensions.space16),
+                    ProgressIndicatorTheme(
+                      data: ProgressIndicatorTheme.of(context).copyWith(
+                        linearMinHeight: 5,
+                        linearTrackColor:
+                            isDark ? AppColors.darkSurface : Colors.grey[300],
+                        color:
+                            isDark ? AppColors.darkAccent : AppColors.primary,
+                      ),
+                      child: const LinearProgressIndicator(value: 0.5),
                     ),
                   ],
                 ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 32,
-                      backgroundColor: Colors.white.withValues(alpha: 0.2),
-                      child: const Icon(
-                        Icons.person_pin_circle_rounded,
-                        color: Colors.white,
-                        size: 36,
-                      ),
+              ),
+              const SizedBox(height: AppDimensions.space20),
+              ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        isDark ? AppColors.darkPrimary : AppColors.primary,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppDimensions.space12,
+                      horizontal: AppDimensions.space24,
                     ),
-                    const SizedBox(width: AppDimensions.space16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.accent.withValues(alpha: 0.25),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Text(
-                              'AGENT TERRAIN',
-                              style: TextStyle(
-                                color: AppColors.accent,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
+                          Icon(
+                            Icons.add_circle,
+                            size: 30,
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(width: AppDimensions.space8),
                           Text(
-                            agentName,
-                            style: AppTextStyles.h3.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            agentEmail,
-                            style: AppTextStyles.caption.copyWith(
-                              color: Colors.white.withValues(alpha: 0.85),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Matricule : $agentMatricule',
-                            style: AppTextStyles.caption.copyWith(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              fontSize: 11,
-                            ),
+                            'Nouvelle collecte',
+                            style: isDark
+                                ? AppTextStyles.bodyDark
+                                : TextStyle(color: AppColors.surface),
                           ),
                         ],
                       ),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: isDark ? AppColors.darkSurface : Colors.white,
+                      ),
+                    ],
+                  )),
+              const SizedBox(height: AppDimensions.space20),
+
+              // text
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Votre activité',
+                    style: isDark ? AppTextStyles.h4Dark : AppTextStyles.h4,
+                  ),
+                  Text(
+                    'Ce mois-ci',
+                    style:
+                        (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
+                            .copyWith(color: Colors.grey),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: AppDimensions.space8),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(AppDimensions.space16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "03",
+                              style: (isDark
+                                      ? AppTextStyles.h1Dark
+                                      : AppTextStyles.h1)
+                                  .copyWith(color: AppColors.darkAccent),
+                            ),
+                            SizedBox(height: AppDimensions.space16),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "Brouillons",
+                                style: (isDark
+                                        ? AppTextStyles.bodyDark
+                                        : AppTextStyles.body)
+                                    .copyWith(color: Colors.black87),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: AppDimensions.space12),
+                  Expanded(
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(AppDimensions.space16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "07",
+                              style: (isDark
+                                      ? AppTextStyles.h1Dark
+                                      : AppTextStyles.h1)
+                                  .copyWith(color: AppColors.primary),
+                            ),
+                            SizedBox(height: AppDimensions.space16),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "En validation",
+                                style: (isDark
+                                        ? AppTextStyles.bodyDark
+                                        : AppTextStyles.body)
+                                    .copyWith(color: Colors.black87),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppDimensions.space12),
+                  Expanded(
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(AppDimensions.space16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "02",
+                              style: (isDark
+                                      ? AppTextStyles.h1Dark
+                                      : AppTextStyles.h1)
+                                  .copyWith(color: AppColors.darkAccent),
+                            ),
+                            SizedBox(height: AppDimensions.space16),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "A complèter",
+                                style: (isDark
+                                        ? AppTextStyles.bodyDark
+                                        : AppTextStyles.body)
+                                    .copyWith(color: Colors.black87),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
+              SizedBox(height: AppDimensions.space16),
 
-              const SizedBox(height: AppDimensions.space24),
-
-              // 2. Section Actions Rapides de Terrain
-              Text(
-                'Actions de terrain',
-                style:
-                    (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Collectes récentes',
+                    style: isDark ? AppTextStyles.h4Dark : AppTextStyles.h4,
+                  ),
+                  TextButton(
+                    onPressed: () => context.go(RouteNames.agentCollectesPath),
+                    child: Text(
+                      'Voir tout',
+                      style:
+                          (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
+                              .copyWith(color: AppColors.primary),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppDimensions.space8),
+              _RecentCollectionCard(
+                id: 'F-0241',
+                details: 'Hier · Koulikoro',
+                status: 'En validation',
+                statusColor: AppColors.success,
               ),
               const SizedBox(height: AppDimensions.space12),
-
-              _buildActionCard(
-                context: context,
-                isDark: isDark,
-                title: 'Nouvelle Collecte Terrain',
-                subtitle:
-                    'Enregistrer un nouveau spécimen botanique avec coordonnées GPS et photos.',
-                icon: Icons.add_location_alt_rounded,
-                iconColor: AppColors.primary,
-                onTap: () {
-                  context.push(RouteNames.agentNouvelleCollectePath);
-                },
+              _RecentCollectionCard(
+                id: 'F-0238',
+                details: '12 juin · Ségou',
+                status: 'À compléter',
+                statusColor: AppColors.warning,
               ),
-
-              const SizedBox(height: AppDimensions.space12),
-
-              _buildActionCard(
-                context: context,
-                isDark: isDark,
-                title: 'Mes Collectes Botaniques',
-                subtitle:
-                    'Consulter, synchroniser et gérer vos spécimens collectés sur le terrain.',
-                icon: Icons.eco_rounded,
-                iconColor: AppColors.primaryDark,
-                onTap: () {
-                  context.push(RouteNames.agentCollectesPath);
-                },
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        height: 62,
+        padding: EdgeInsets.zero,
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        surfaceTintColor: isDark ? AppColors.darkSurface : Colors.white,
+        elevation: 3,
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 6,
+        child: SafeArea(
+          top: false,
+          child: Row(
+            children: [
+              Expanded(
+                child: _AgentNavItem(
+                  icon: Icons.home_outlined,
+                  label: 'Accueil',
+                  selected: true,
+                  isDark: isDark,
+                  onTap: () => context.go(RouteNames.agentDashboardPath),
+                ),
               ),
-
-              const SizedBox(height: AppDimensions.space12),
-
-              _buildActionCard(
-                context: context,
-                isDark: isDark,
-                title: 'Sources & Tradipraticiens',
-                subtitle:
-                    'Renseigner les herboristes, détenteurs de savoirs et récits oraux.',
-                icon: Icons.record_voice_over_rounded,
-                iconColor: AppColors.accent,
-                onTap: () {
-                  context.push(RouteNames.agentSourcesPath);
-                },
+              Expanded(
+                child: _AgentNavItem(
+                  icon: Icons.description_outlined,
+                  label: 'Collectes',
+                  isDark: isDark,
+                  onTap: () => context.go(RouteNames.agentCollectesPath),
+                ),
               ),
-
-              const SizedBox(height: AppDimensions.space32),
-
-              // 3. Bouton Déconnexion bien visible dans le corps de la page
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.danger,
-                  side: const BorderSide(color: AppColors.danger, width: 1.2),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppDimensions.space16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppDimensions.radiusButton),
+              Expanded(
+                child: Center(
+                  child: SizedBox(
+                    width: 42,
+                    height: 42,
+                    child: FloatingActionButton(
+                      tooltip: 'Nouvelle collecte',
+                      onPressed: () =>
+                          context.go(RouteNames.agentNouvelleCollectePath),
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: const CircleBorder(),
+                      child: const Icon(Icons.add, size: 25),
+                    ),
                   ),
                 ),
-                icon: const Icon(Icons.logout_rounded, size: 20),
-                label: const Text(
-                  'Se déconnecter de l\'espace Agent',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onPressed: () => _handleLogout(context, ref),
               ),
-
-              const SizedBox(height: AppDimensions.space24),
+              Expanded(
+                child: _AgentNavItem(
+                  icon: Icons.notifications_none_outlined,
+                  label: 'Notif.',
+                  isDark: isDark,
+                  onTap: () => context.go(RouteNames.agentNotificationsPath),
+                ),
+              ),
+              Expanded(
+                child: _AgentNavItem(
+                  icon: Icons.person_outline,
+                  label: 'Profil',
+                  isDark: isDark,
+                  onTap: () => context.go(RouteNames.agentProfilPath),
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildActionCard({
-    required BuildContext context,
-    required bool isDark,
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color iconColor,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-      child: Container(
-        padding: const EdgeInsets.all(AppDimensions.space16),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface : Colors.white,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-          border: Border.all(
-            color: isDark ? AppColors.darkBorder : AppColors.border,
-            width: 1.0,
-          ),
-        ),
-        child: Row(
+class _AgentNavItem extends StatelessWidget {
+  const _AgentNavItem({
+    required this.icon,
+    required this.label,
+    required this.isDark,
+    required this.onTap,
+    this.selected = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool isDark;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected
+        ? AppColors.primary
+        : isDark
+            ? AppColors.darkTextSecondary
+            : AppColors.textSecondary;
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(AppDimensions.space12),
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
+            Icon(icon, size: 19, color: color),
+            const SizedBox(height: 3),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 9,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
               ),
-              child: Icon(icon, color: iconColor, size: 24),
-            ),
-            const SizedBox(width: AppDimensions.space16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: (isDark ? AppTextStyles.h4Dark : AppTextStyles.h4)
-                        .copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: (isDark
-                            ? AppTextStyles.bodySecondaryDark
-                            : AppTextStyles.bodySecondary)
-                        .copyWith(
-                      color: isDark
-                          ? AppColors.darkTextMuted
-                          : AppColors.textMuted,
-                      fontSize: 12,
-                      height: 1.3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _RecentCollectionCard extends StatelessWidget {
+  const _RecentCollectionCard({
+    required this.id,
+    required this.details,
+    required this.status,
+    required this.statusColor,
+  });
+
+  final String id;
+  final String details;
+  final String status;
+  final Color statusColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(AppDimensions.space12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: AppColors.primaryLight,
+            child: Icon(
+              Icons.description_outlined,
+              size: 18,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: AppDimensions.space12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Fiche de collecte',
+                  style: AppTextStyles.body.copyWith(
+                    color: isDark ? Colors.black : AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '$id · $details',
+                  style: AppTextStyles.caption.copyWith(
+                    color: isDark ? Colors.black : AppColors.textSecondary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.space8,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
