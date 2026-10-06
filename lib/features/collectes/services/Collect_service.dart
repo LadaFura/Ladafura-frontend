@@ -15,7 +15,7 @@ class CollectService {
   CollectService(this.dio);
 
   Future<List<AgentCollecteSummaryModel>> getAgentCollectes() async {
-    final response = await dio.get('/agent/collectes',);
+    final response = await dio.get('/agent/collectes');
 
     
 if (response.statusCode == 200) {
