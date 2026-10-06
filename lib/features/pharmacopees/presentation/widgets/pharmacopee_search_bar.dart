@@ -39,6 +39,9 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? AppColors.darkBackground : AppColors.surface;
+    final topPadding = widget.isPinned
+        ? (MediaQuery.paddingOf(context).top + AppDimensions.space8)
+        : AppDimensions.space8;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -48,7 +51,7 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
         boxShadow: widget.isPinned
             ? [
                 BoxShadow(
-                  color: Colors.black.withAlpha(isDark ? 45 : 20),
+                  color: Colors.black.withAlpha(isDark ? 55 : 20),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -63,9 +66,11 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
               )
             : null,
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.space16,
-        vertical: AppDimensions.space8,
+      padding: EdgeInsets.only(
+        left: AppDimensions.space16,
+        right: AppDimensions.space16,
+        top: topPadding,
+        bottom: AppDimensions.space8,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

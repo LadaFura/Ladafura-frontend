@@ -126,7 +126,8 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                     onCategorySelected: controller.selectCategory,
                     isPinned: isPinned,
                   ),
-                  height: categories.isNotEmpty ? 116.0 : 66.0,
+                  baseHeight: categories.isNotEmpty ? 116.0 : 66.0,
+                  topSafeArea: MediaQuery.paddingOf(context).top,
                 ),
               ),
 
@@ -320,37 +321,44 @@ class PharmacopeeDetailPage extends ConsumerWidget {
 }
 
 /// Délégué pour épingler la barre de recherche en haut au défilement (sticky header)
-/// avec animation fluide lors de la transition
+/// avec animation fluide lors de la transition et dégagement supérieur sous la barre d'état.
 class _StickySearchBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget Function(BuildContext context, bool isPinned) builder;
-  final double height;
+  final double baseHeight;
+  final double topSafeArea;
 
   const _StickySearchBarDelegate({
     required this.builder,
-    required this.height,
+    required this.baseHeight,
+    required this.topSafeArea,
   });
 
-  @override
-  double get minExtent => height;
+  // Hauteur fixe lorsque la barre est épinglée sous la barre de statut (avec marge de confort)
+  double get pinnedHeight => baseHeight + topSafeArea;
 
   @override
-  double get maxExtent => height;
+  double get minExtent => pinnedHeight;
+
+  @override
+  double get maxExtent => pinnedHeight;
 
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    // La barre est considérée fixée / épinglée dès qu'il y a recouvrement ou un léger défilement
+    // La barre est considérée fixée / épinglée dès qu'il y a recouvrement ou défilement
     final isPinned = overlapsContent || shrinkOffset > 0;
     return SizedBox(
-      height: height,
+      height: pinnedHeight,
       child: builder(context, isPinned),
     );
   }
 
   @override
   bool shouldRebuild(covariant _StickySearchBarDelegate oldDelegate) {
-    return oldDelegate.height != height;
+    return oldDelegate.baseHeight != baseHeight ||
+        oldDelegate.topSafeArea != topSafeArea;
   }
 }
+
 
 

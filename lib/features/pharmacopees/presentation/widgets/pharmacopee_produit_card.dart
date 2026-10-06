@@ -29,7 +29,6 @@ class PharmacopeeProduitCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
         border: Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.border,
