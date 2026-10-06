@@ -18,7 +18,10 @@ class UtilisateurModel {
   // Attributs spécifiques selon le rôle
   final String? matricule;
   final String? zoneCouverture;
-  final String? officineNom;
+  final String? pharmacopeeNom;
+
+  /// Alias de rétrocompatibilité
+  String? get officineNom => pharmacopeeNom;
 
   const UtilisateurModel({
     required this.id,
@@ -32,7 +35,7 @@ class UtilisateurModel {
     this.dateCreation,
     this.matricule,
     this.zoneCouverture,
-    this.officineNom,
+    this.pharmacopeeNom,
   });
 
   /// Nom complet formaté (Prénom Nom).
@@ -66,7 +69,7 @@ class UtilisateurModel {
     DateTime? dateCreation,
     String? matricule,
     String? zoneCouverture,
-    String? officineNom,
+    String? pharmacopeeNom,
   }) {
     return UtilisateurModel(
       id: id ?? this.id,
@@ -80,7 +83,7 @@ class UtilisateurModel {
       dateCreation: dateCreation ?? this.dateCreation,
       matricule: matricule ?? this.matricule,
       zoneCouverture: zoneCouverture ?? this.zoneCouverture,
-      officineNom: officineNom ?? this.officineNom,
+      pharmacopeeNom: pharmacopeeNom ?? this.pharmacopeeNom,
     );
   }
 
@@ -96,7 +99,7 @@ class UtilisateurModel {
         'dateCreation': dateCreation?.toIso8601String(),
         'matricule': matricule,
         'zoneCouverture': zoneCouverture,
-        'officineNom': officineNom,
+        'pharmacopeeNom': pharmacopeeNom,
       };
 
   factory UtilisateurModel.fromJson(Map<String, dynamic> json) {
@@ -115,7 +118,8 @@ class UtilisateurModel {
           : null,
       matricule: json['matricule']?.toString(),
       zoneCouverture: json['zoneCouverture']?.toString(),
-      officineNom: json['officineNom']?.toString(),
+      pharmacopeeNom:
+          (json['pharmacopeeNom'] ?? json['officineNom'])?.toString(),
     );
   }
 

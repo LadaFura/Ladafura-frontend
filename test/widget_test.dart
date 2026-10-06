@@ -5,7 +5,7 @@ import 'package:ladafura_frontend_flutter/core/services/storage_service.dart';
 import 'package:ladafura_frontend_flutter/core/theme/app_theme.dart';
 import 'package:ladafura_frontend_flutter/core/theme/theme_provider.dart';
 import 'package:ladafura_frontend_flutter/dev/design_system_showcase.dart';
-import 'package:ladafura_frontend_flutter/features/visitor/presentation/screens/accueil_screen.dart';
+import 'package:ladafura_frontend_flutter/features/home/presentation/pages/accueil_screen.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/media/app_logo.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/navigation/ladafura_bottom_nav_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -105,8 +105,8 @@ void main() {
     expect(find.text('Maladie'), findsOneWidget);
 
     // Vérifie les sections de découverte
-    expect(find.text('Pharmacopée près de vous'), findsOneWidget);
-    expect(find.text('Produits populaires'), findsOneWidget);
+    expect(find.text('Pharmacopées à proximité'), findsOneWidget);
+    expect(find.text('Produits populaires'), findsNothing);
     expect(find.text('Plantes les plus consultées'), findsOneWidget);
 
     // Vérifie la section Agent de collecte

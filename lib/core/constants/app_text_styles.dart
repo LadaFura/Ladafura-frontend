@@ -3,10 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 /// Hiérarchie typographique officielle LADAFURA
-/// Police exclusive : Poppins (Google Fonts)
+/// Police exclusive : Roboto (Google Fonts)
 /// Écran de référence mobile : 402 × 874 px
 /// Échelle stricte à 7 tailles : 12 / 14 / 16 / 18 / 20 / 24 / 28 px
 /// Poids : 400 (Regular), 500 (Medium), 600 (SemiBold), 700 (Bold)
+/// Texte normal (sans italique) pour une clarté et lisibilité optimales.
 class AppTextStyles {
   AppTextStyles._();
 
@@ -15,7 +16,7 @@ class AppTextStyles {
   // ===========================================================================
 
   /// H1 : Titre principal de l'écran (28 px / 700 Bold)
-  static TextStyle get h1 => GoogleFonts.poppins(
+  static TextStyle get h1 => GoogleFonts.roboto(
         fontSize: 28,
         fontWeight: FontWeight.w700,
         height: 1.25,
@@ -23,7 +24,7 @@ class AppTextStyles {
       );
 
   /// H2 : Titres de sections et titres de pages secondaires (24 px / 600 SemiBold)
-  static TextStyle get h2 => GoogleFonts.poppins(
+  static TextStyle get h2 => GoogleFonts.roboto(
         fontSize: 24,
         fontWeight: FontWeight.w600,
         height: 1.3,
@@ -31,7 +32,7 @@ class AppTextStyles {
       );
 
   /// H3 : Sous-titres et sections importantes (20 px / 600 SemiBold)
-  static TextStyle get h3 => GoogleFonts.poppins(
+  static TextStyle get h3 => GoogleFonts.roboto(
         fontSize: 20,
         fontWeight: FontWeight.w600,
         height: 1.35,
@@ -39,7 +40,7 @@ class AppTextStyles {
       );
 
   /// H4 : Titres de cartes, noms de produits et pharmacopées (18 px / 600 SemiBold)
-  static TextStyle get h4 => GoogleFonts.poppins(
+  static TextStyle get h4 => GoogleFonts.roboto(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         height: 1.4,
@@ -67,7 +68,7 @@ class AppTextStyles {
   // ===========================================================================
 
   /// Texte principal (16 px / 400 Regular)
-  static TextStyle get body => GoogleFonts.poppins(
+  static TextStyle get body => GoogleFonts.roboto(
         fontSize: 16,
         fontWeight: FontWeight.w400,
         height: 1.5,
@@ -79,7 +80,7 @@ class AppTextStyles {
       body.copyWith(color: AppColors.darkTextPrimary);
 
   /// Texte secondaire (14 px / 400 Regular)
-  static TextStyle get bodySecondary => GoogleFonts.poppins(
+  static TextStyle get bodySecondary => GoogleFonts.roboto(
         fontSize: 14,
         fontWeight: FontWeight.w400,
         height: 1.45,
@@ -95,7 +96,7 @@ class AppTextStyles {
   // ===========================================================================
 
   /// Labels de formulaires et indications (14 px / 500 Medium)
-  static TextStyle get label => GoogleFonts.poppins(
+  static TextStyle get label => GoogleFonts.roboto(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         height: 1.4,
@@ -107,7 +108,7 @@ class AppTextStyles {
       label.copyWith(color: AppColors.darkTextPrimary);
 
   /// Boutons d'action (15 px / 500 Medium)
-  static TextStyle get button => GoogleFonts.poppins(
+  static TextStyle get button => GoogleFonts.roboto(
         fontSize: 15,
         fontWeight: FontWeight.w500,
         height: 1.2,
@@ -116,7 +117,7 @@ class AppTextStyles {
       );
 
   /// Navigation et onglets (14 px / 500 Medium)
-  static TextStyle get navigation => GoogleFonts.poppins(
+  static TextStyle get navigation => GoogleFonts.roboto(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         height: 1.2,
@@ -132,7 +133,7 @@ class AppTextStyles {
   // ===========================================================================
 
   /// Prix importants (18 px / 600 SemiBold) - Light
-  static TextStyle get priceLarge => GoogleFonts.poppins(
+  static TextStyle get priceLarge => GoogleFonts.roboto(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         height: 1.2,
@@ -140,7 +141,7 @@ class AppTextStyles {
       );
 
   /// Prix importants (18 px / 600 SemiBold) - Dark
-  static TextStyle get priceLargeDark => GoogleFonts.poppins(
+  static TextStyle get priceLargeDark => GoogleFonts.roboto(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         height: 1.2,
@@ -148,7 +149,7 @@ class AppTextStyles {
       );
 
   /// Prix standards (16 px / 600 SemiBold) - Light
-  static TextStyle get priceMedium => GoogleFonts.poppins(
+  static TextStyle get priceMedium => GoogleFonts.roboto(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         height: 1.2,
@@ -156,7 +157,7 @@ class AppTextStyles {
       );
 
   /// Prix standards (16 px / 600 SemiBold) - Dark
-  static TextStyle get priceMediumDark => GoogleFonts.poppins(
+  static TextStyle get priceMediumDark => GoogleFonts.roboto(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         height: 1.2,
@@ -168,7 +169,7 @@ class AppTextStyles {
   // ===========================================================================
 
   /// Badges et statuts certifiés (12 px / 500 Medium)
-  static TextStyle get badge => GoogleFonts.poppins(
+  static TextStyle get badge => GoogleFonts.roboto(
         fontSize: 12,
         fontWeight: FontWeight.w500,
         height: 1.2,
@@ -176,7 +177,7 @@ class AppTextStyles {
       );
 
   /// Caption et aide (12 px / 400 Regular) - Light
-  static TextStyle get caption => GoogleFonts.poppins(
+  static TextStyle get caption => GoogleFonts.roboto(
         fontSize: 12,
         fontWeight: FontWeight.w400,
         height: 1.35,

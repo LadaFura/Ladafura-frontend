@@ -88,5 +88,10 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<!-- Autorisations de localisation GPS (US-05 & US-16) -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>LADAFURA a besoin de votre position pour afficher les pharmacopées traditionnelles les plus proches de vous sur la carte.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>LADAFURA a besoin de votre position pour calculer les itinéraires et distances vers les pharmacopées.</string>
 </dict>
 </plist>

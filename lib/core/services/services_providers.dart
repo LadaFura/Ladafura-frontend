@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'audio_recorder_service.dart';
 import 'location_service.dart';
@@ -33,3 +34,43 @@ NotificationService notificationService(NotificationServiceRef ref) {
   ref.onDispose(service.dispose);
   return service;
 }
+
+/// Notifier pour gérer l'état de la position GPS de l'utilisateur avec demande d'autorisation.
+class UserLocationNotifier extends StateNotifier<AsyncValue<GeoCoordinates?>> {
+  final LocationService _locationService;
+
+  UserLocationNotifier(this._locationService)
+      : super(const AsyncValue.loading()) {
+    _initLocation();
+  }
+
+  Future<void> _initLocation() async {
+    try {
+      final pos = await _locationService.getCurrentPosition();
+      state = AsyncValue.data(pos);
+    } catch (_) {
+      state = AsyncValue.data(_locationService.lastKnownPosition ?? GeoCoordinates.bamako);
+    }
+  }
+
+  /// Déclenche la demande explicite de permission et met à jour la position GPS.
+  Future<GeoCoordinates?> requestLocationWithPermission() async {
+    state = const AsyncValue.loading();
+    try {
+      final pos = await _locationService.requestPositionWithPermission();
+      state = AsyncValue.data(pos ?? _locationService.lastKnownPosition ?? GeoCoordinates.bamako);
+      return pos;
+    } catch (_) {
+      state = AsyncValue.data(_locationService.lastKnownPosition ?? GeoCoordinates.bamako);
+      return null;
+    }
+  }
+}
+
+/// Fournisseur Riverpod pour la position GPS de l'appareil (avec réactivité et demande de permission).
+final userLocationProvider =
+    StateNotifierProvider<UserLocationNotifier, AsyncValue<GeoCoordinates?>>((ref) {
+  final locService = ref.watch(locationServiceProvider);
+  return UserLocationNotifier(locService);
+});
+

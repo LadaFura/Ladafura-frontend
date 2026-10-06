@@ -80,14 +80,13 @@ class PlanteCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
 
-                    // Nom scientifique botanique (en italique)
+                    // Nom scientifique botanique (texte normal)
                     Text(
                       plante.nomScientifique,
                       style: (isDark
                               ? AppTextStyles.bodySecondaryDark
                               : AppTextStyles.bodySecondary)
                           .copyWith(
-                        fontStyle: FontStyle.italic,
                         color: isDark
                             ? AppColors.darkTextSecondary
                             : AppColors.textSecondary,
