@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ladafura_frontend_flutter/features/population/data/models/population_models.dart';
+import 'package:ladafura_frontend_flutter/features/plantes/models/plante_model.dart';
+import 'package:ladafura_frontend_flutter/features/plantes/models/maladie_model.dart';
 
 void main() {
   group('Population Models Tests (Flore & Santé)', () {

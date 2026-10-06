@@ -36,7 +36,7 @@ class LocalisationMaliModel {
     'Ménaka',
   ];
 
-  /// Libellé administratif complet pour affichage sur les fiches de collecte ou d'officines.
+  /// Libellé administratif complet pour affichage sur les fiches de collecte ou de pharmacopées.
   String get libelleComplet => '$localite, $commune, $cercle ($region)';
 
   /// Indique si des coordonnées GPS précises sont associées à cette localisation.

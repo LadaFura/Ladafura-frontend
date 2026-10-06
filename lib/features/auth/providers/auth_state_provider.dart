@@ -4,10 +4,10 @@ import 'package:ladafura_frontend_flutter/core/routing/app_router.dart';
 import 'package:ladafura_frontend_flutter/core/services/services_providers.dart';
 import 'package:ladafura_frontend_flutter/shared/enums/user_role.dart';
 import 'package:ladafura_frontend_flutter/shared/models/utilisateur_model.dart';
-import '../data/models/register_request_model.dart';
-import '../data/repositories/auth_repository.dart';
-import '../data/services/firebase_auth_service.dart';
-import '../data/services/google_auth_service.dart';
+import '../models/register_request_model.dart';
+import '../services/auth_repository.dart';
+import '../services/firebase_auth_service.dart';
+import '../services/google_auth_service.dart';
 import '../../../core/config/firebase_options.dart';
 
 /// Statut de l'état d'authentification de l'utilisateur.
@@ -291,4 +291,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   return AuthNotifier(repository: repository, ref: ref);
+});
+
+/// Fournisseur pratique pour accéder directement à l'utilisateur connecté courant.
+final currentUserProvider = Provider<UtilisateurModel?>((ref) {
+  return ref.watch(authStateProvider).user;
 });

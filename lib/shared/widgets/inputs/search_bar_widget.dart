@@ -3,7 +3,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/constants/app_text_styles.dart';
 
-/// Barre de recherche commune pour explorer les plantes, produits et officines (US-01 & US-03).
+/// Barre de recherche commune pour explorer les plantes, produits et pharmacopées (US-01 & US-03).
 class SearchBarWidget extends StatefulWidget {
   final String hintText;
   final TextEditingController? controller;

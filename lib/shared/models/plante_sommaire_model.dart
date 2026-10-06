@@ -70,19 +70,28 @@ class PlanteSommaireModel {
       };
 
   factory PlanteSommaireModel.fromJson(Map<String, dynamic> json) {
+    List<String> parseStringList(dynamic raw) {
+      if (raw is! List) return const [];
+      return raw
+          .map((e) {
+            if (e is Map) {
+              final nom = e['nom']?.toString() ?? '';
+              final langue = e['langue']?.toString() ?? '';
+              return langue.isNotEmpty ? '$nom ($langue)' : nom;
+            }
+            return e.toString();
+          })
+          .where((s) => s.trim().isNotEmpty)
+          .toList();
+    }
+
     return PlanteSommaireModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
       nomScientifique: json['nomScientifique']?.toString() ?? '',
       description: json['description']?.toString(),
       photoUrl: json['photoUrl']?.toString(),
-      nomsVernaculaires: json['nomsVernaculaires'] is List
-          ? (json['nomsVernaculaires'] as List)
-              .map((e) => e.toString())
-              .toList()
-          : const [],
-      maladies: json['maladies'] is List
-          ? (json['maladies'] as List).map((e) => e.toString()).toList()
-          : const [],
+      nomsVernaculaires: parseStringList(json['nomsVernaculaires']),
+      maladies: parseStringList(json['maladies'] ?? json['maladiesAssociees']),
       nombreConnaissances: (json['nombreConnaissances'] as num?)?.toInt() ?? 0,
       nombreEtudesScientifiques:
           (json['nombreEtudesScientifiques'] as num?)?.toInt() ?? 0,

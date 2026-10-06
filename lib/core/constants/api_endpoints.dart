@@ -18,7 +18,7 @@ class ApiEndpoints {
 
   /// Adresse IPv4 de la machine de développement sur le réseau Wi-Fi local.
   /// Peut être remplacée au lancement avec --dart-define=API_HOST=<adresse>.
-  static const String devMachineIp = '172.25.36.133';
+  static const String devMachineIp = '192.168.11.174';
 
   /// Hôte par défaut pour simulateur iOS et Web
   static const String defaultHost = 'http://localhost:8080';
@@ -80,12 +80,56 @@ class ApiEndpoints {
 
   // --- Recherche & Découverte Flore ---
   static const String populationRecherche = '/population/recherche';
+  static const String populationRecherchePharmacopees =
+      '/population/recherche/pharmacopees';
   static const String populationRecherchePlantes =
       '/population/recherche/plantes';
   static const String populationRechercheVernaculaires =
       '/population/recherche/vernaculaires';
   static const String populationRechercheMaladies =
       '/population/recherche/maladies';
+  static const String populationRechercheProduits =
+      '/population/recherche/produits';
+
+  // --- Carte & Proximité GPS ---
+  static const String populationCartePharmacopees =
+      '/population/carte/pharmacopees';
+  static String populationCartePharmacopeeDetail(String id) =>
+      '/population/carte/pharmacopees/$id';
+  static const String populationCarteProduit = '/population/carte/produit';
+
+  // --- Pharmacopées Traditionnelles Agréées ---
+  static const String populationPharmacopees = '/population/pharmacopees';
+  static String populationPharmacopeeDetail(String id) =>
+      '/population/pharmacopees/$id';
+  static String populationPharmacopeeProduits(String id) =>
+      '/population/pharmacopees/$id/produits';
+  static String populationPharmacopeeModesRetrait(String id) =>
+      '/population/pharmacopees/$id/modes-retrait';
+  static String populationPharmacopeeAvis(String id) =>
+      '/population/pharmacopees/$id/avis';
+
+  // --- Produits & Remèdes Traditionnels (Fura) ---
+  static const String populationProduits = '/population/produits';
+  static String populationProduitDetail(String id) =>
+      '/population/produits/$id';
+
+  // --- Panier Citoyen ---
+  static const String populationPanier = '/population/panier';
+  static const String populationPanierLignes = '/population/panier/lignes';
+  static String populationPanierLigneDetail(String id) =>
+      '/population/panier/lignes/$id';
+
+  // --- Commandes Citoyen & Retrait ---
+  static const String populationCommandes = '/population/commandes';
+  static const String populationCommandesRecapitulatif =
+      '/population/commandes/recapitulatif';
+  static String populationCommandeDetail(String id) =>
+      '/population/commandes/$id';
+  static String populationCommandeStatut(String id) =>
+      '/population/commandes/$id/statut';
+  static String populationCommandeAnnuler(String id) =>
+      '/population/commandes/$id/annuler';
 
   // --- Plantes Médicinales Maliennes ---
   static const String populationPlantes = '/population/plantes';

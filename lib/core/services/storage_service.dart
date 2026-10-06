@@ -19,6 +19,15 @@ class StorageService {
   static const String _keyUserName = 'ladafura_user_name';
   static const String _keyOnboardingDone = 'ladafura_onboarding_completed';
   static const String _keyThemeMode = 'ladafura_theme_mode';
+  static const String _keyRecentSearches = 'ladafura_recent_searches';
+
+  static const List<String> defaultRecentSearches = [
+    'Moringa',
+    'Pharmacopée dagaba',
+    'Diabète',
+    'Kinkeliba',
+    'Bissap',
+  ];
 
   final SharedPreferences _prefs;
   static StorageService? _instance;
@@ -216,7 +225,41 @@ class StorageService {
   }
 
   // ===========================================================================
-  // 3. UTILITAIRES GÉNÉRIQUES
+  // 3. HISTORIQUE DES RECHERCHES RÉCENTES
+  // ===========================================================================
+
+  /// Récupère la liste des termes recherchés récemment.
+  List<String> getRecentSearches() {
+    return _prefs.getStringList(_keyRecentSearches) ?? defaultRecentSearches;
+  }
+
+  /// Sauvegarde la liste complète des recherches récentes.
+  Future<bool> saveRecentSearches(List<String> searches) {
+    return _prefs.setStringList(_keyRecentSearches, searches);
+  }
+
+  /// Ajoute un terme en tête de l'historique sans doublon (max 10 éléments).
+  Future<bool> addRecentSearch(String term) {
+    final clean = term.trim();
+    if (clean.isEmpty) return Future.value(false);
+    final list = List<String>.from(getRecentSearches());
+    list.removeWhere((item) => item.toLowerCase() == clean.toLowerCase());
+    list.insert(0, clean);
+    if (list.length > 10) {
+      list.removeRange(10, list.length);
+    }
+    return saveRecentSearches(list);
+  }
+
+  /// Supprime un terme de l'historique de recherche.
+  Future<bool> removeRecentSearch(String term) {
+    final list = List<String>.from(getRecentSearches());
+    list.removeWhere((item) => item.toLowerCase() == term.toLowerCase());
+    return saveRecentSearches(list);
+  }
+
+  // ===========================================================================
+  // 4. UTILITAIRES GÉNÉRIQUES
   // ===========================================================================
 
   String? getString(String key) => _prefs.getString(key);

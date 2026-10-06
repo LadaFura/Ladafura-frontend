@@ -6,7 +6,6 @@ import 'package:ladafura_frontend_flutter/core/routing/app_router.dart';
 import 'package:ladafura_frontend_flutter/core/services/services_providers.dart';
 import 'package:ladafura_frontend_flutter/core/services/storage_service.dart';
 import 'package:ladafura_frontend_flutter/features/auth/auth.dart';
-import 'package:ladafura_frontend_flutter/features/auth/data/services/google_auth_service.dart';
 import 'package:ladafura_frontend_flutter/shared/enums/user_role.dart';
 import 'package:ladafura_frontend_flutter/shared/widgets/buttons/google_sign_in_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';

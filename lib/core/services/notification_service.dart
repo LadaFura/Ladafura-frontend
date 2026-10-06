@@ -8,7 +8,7 @@ enum AppNotificationType {
   /// Notification de validation ou correction de collecte terrain (US-17).
   collecte,
 
-  /// Alerte de seuil de stock ou rupture pour une officine (US-20).
+  /// Alerte de seuil de stock ou rupture pour une pharmacopée (US-20).
   stock,
 
   /// Information émise par la plateforme LADAFURA.

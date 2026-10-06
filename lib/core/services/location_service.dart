@@ -1,4 +1,6 @@
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
+import 'package:geolocator/geolocator.dart';
 
 /// Coordonnées géographiques immuables et typées pour LADAFURA.
 class GeoCoordinates {
@@ -72,7 +74,7 @@ class GeoCoordinates {
   int get hashCode => latitude.hashCode ^ longitude.hashCode;
 }
 
-/// Service de capture des coordonnées GPS pour la cartographie des officines (US-05)
+/// Service de capture des coordonnées GPS pour la cartographie des pharmacopées (US-05)
 /// et la géolocalisation des collectes de plantes sur le terrain (US-16).
 class LocationService {
   // Limites géographiques de la République du Mali (Bounding Box)
@@ -133,22 +135,93 @@ class LocationService {
 
   static double _toRadians(double degrees) => degrees * (math.pi / 180.0);
 
-  /// Capture la position GPS actuelle de l'appareil.
+  /// Demande l'autorisation à l'utilisateur et récupère sa position GPS actuelle.
+  /// Si les services de localisation sont désactivés ou la permission refusée, renvoie null.
+  Future<GeoCoordinates?> requestPositionWithPermission() async {
+    if (_mockMode && _mockPosition != null) {
+      _lastKnownPosition = _mockPosition;
+      return _mockPosition;
+    }
+
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        debugPrint('[LocationService] Le service de localisation GPS est désactivé.');
+        return _lastKnownPosition;
+      }
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          debugPrint('[LocationService] Permission de localisation refusée par l\'utilisateur.');
+          return _lastKnownPosition;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        debugPrint('[LocationService] Permission de localisation refusée définitivement.');
+        return _lastKnownPosition;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+
+      final coords = GeoCoordinates(
+        latitude: position.latitude,
+        longitude: position.longitude,
+        altitude: position.altitude,
+        accuracy: position.accuracy,
+        timestamp: position.timestamp,
+      );
+
+      _lastKnownPosition = coords;
+      return coords;
+    } catch (e) {
+      debugPrint('[LocationService] Erreur lors de la récupération GPS: $e');
+      return _lastKnownPosition;
+    }
+  }
+
+  /// Capture la position GPS actuelle de l'appareil (tente d'obtenir la position si permise).
   Future<GeoCoordinates?> getCurrentPosition() async {
     if (_mockMode && _mockPosition != null) {
       _lastKnownPosition = _mockPosition;
       return _mockPosition;
     }
 
-    // Si aucune position réelle n'est disponible (ex: web/simulateur sans capteur),
-    // retourne la dernière position connue ou la position par défaut de Bamako.
-    return _lastKnownPosition ??
-        GeoCoordinates(
-          latitude: 12.6392,
-          longitude: -8.0029,
-          accuracy: 10.0,
-          timestamp: DateTime.now(),
-        );
+    try {
+      final hasPermission = await Geolocator.checkPermission();
+      if (hasPermission == LocationPermission.always ||
+          hasPermission == LocationPermission.whileInUse) {
+        final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (serviceEnabled) {
+          final position = await Geolocator.getCurrentPosition(
+            locationSettings: const LocationSettings(
+              accuracy: LocationAccuracy.medium,
+              timeLimit: Duration(seconds: 5),
+            ),
+          );
+          final coords = GeoCoordinates(
+            latitude: position.latitude,
+            longitude: position.longitude,
+            altitude: position.altitude,
+            accuracy: position.accuracy,
+            timestamp: position.timestamp,
+          );
+          _lastKnownPosition = coords;
+          return coords;
+        }
+      }
+    } catch (_) {
+      // Échec silencieux, retour repli
+    }
+
+    return _lastKnownPosition ?? GeoCoordinates.bamako;
   }
 
   /// Dernière position capturée en mémoire.

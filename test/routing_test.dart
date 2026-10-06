@@ -193,5 +193,47 @@ void main() {
       expect(router, isA<GoRouter>());
       expect(router.configuration.routes.isNotEmpty, isTrue);
     });
+
+    test(
+        'Pages secondaires (détails, commandes, favoris) hors du ShellRoute sans BottomNavBar',
+        () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final router = container.read(appRouterProvider);
+      final routes = router.configuration.routes;
+
+      // 1. Les ShellRoutes ne doivent contenir QUE les 5 onglets principaux
+      final shellRoutes = routes.whereType<ShellRoute>().toList();
+      expect(shellRoutes.isNotEmpty, isTrue);
+
+      for (final shell in shellRoutes) {
+        final tabNames =
+            shell.routes.whereType<GoRoute>().map((r) => r.name).toList();
+        expect(tabNames.contains(RouteNames.citizenPlanteDetail), isFalse);
+        expect(tabNames.contains(RouteNames.citizenPharmacopeeDetail), isFalse);
+        expect(tabNames.contains(RouteNames.citizenCommandes), isFalse);
+        expect(tabNames.contains(RouteNames.citizenFavoris), isFalse);
+        expect(tabNames.contains(RouteNames.visitorPlanteDetail), isFalse);
+        expect(tabNames.contains(RouteNames.visitorPharmacopeeDetail), isFalse);
+      }
+
+      // 2. Les pages secondaires doivent être au niveau racine avec parentNavigatorKey = rootNavigatorKey
+      final rootGoRoutes = routes.whereType<GoRoute>().toList();
+      final detailRoutes = rootGoRoutes.where((r) => [
+            RouteNames.citizenPlanteDetail,
+            RouteNames.citizenPharmacopeeDetail,
+            RouteNames.citizenCommandes,
+            RouteNames.citizenFavoris,
+            RouteNames.visitorPlanteDetail,
+            RouteNames.visitorPharmacopeeDetail,
+          ].contains(r.name));
+
+      expect(detailRoutes.length, 6);
+      for (final route in detailRoutes) {
+        expect(route.parentNavigatorKey, rootNavigatorKey);
+      }
+    });
   });
 }
+
