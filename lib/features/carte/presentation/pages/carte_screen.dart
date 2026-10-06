@@ -35,6 +35,9 @@ class CarteScreen extends ConsumerStatefulWidget {
 class _CarteScreenState extends ConsumerState<CarteScreen> {
   final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
+  bool _mapReady = false;
+  LatLng? _pendingMapCenter;
+  double? _pendingMapZoom;
 
   // Coordonnées par défaut : Bamako, Mali (Place de l'Indépendance / Fleuve Niger)
   static const LatLng _bamakoCenter = LatLng(12.6392, -8.0029);
@@ -58,7 +61,7 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
     final coords = await notifier.requestLocationWithPermission();
     if (mounted) {
       if (coords != null) {
-        _mapController.animateTo(
+        _moveMapTo(
           LatLng(coords.latitude, coords.longitude),
           zoom: 14.5,
         );
@@ -78,7 +81,7 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
 
   void _onMarkerTap(PharmacopeeModel pharmacopee) {
     ref.read(selectedCartePharmacopeeProvider.notifier).state = pharmacopee;
-    _mapController.animateTo(
+    _moveMapTo(
       LatLng(pharmacopee.latitude, pharmacopee.longitude),
       zoom: 14.5,
     );
@@ -86,12 +89,34 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
 
   void _recenterMap(GeoCoordinates? userCoords) {
     if (userCoords != null) {
-      _mapController.animateTo(
+      _moveMapTo(
         LatLng(userCoords.latitude, userCoords.longitude),
         zoom: 14.5,
       );
     } else {
       _requestUserLocation(showFeedbackOnDenied: true);
+    }
+  }
+
+  void _moveMapTo(LatLng center, {required double zoom}) {
+    if (!_mapReady) {
+      _pendingMapCenter = center;
+      _pendingMapZoom = zoom;
+      return;
+    }
+
+    _mapController.move(center, zoom);
+  }
+
+  void _onMapReady() {
+    _mapReady = true;
+    final pendingCenter = _pendingMapCenter;
+    final pendingZoom = _pendingMapZoom;
+    _pendingMapCenter = null;
+    _pendingMapZoom = null;
+
+    if (pendingCenter != null && pendingZoom != null) {
+      _mapController.move(pendingCenter, pendingZoom);
     }
   }
 
@@ -113,13 +138,19 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
         children: [
           // 1. FOND DE CARTE OPENSTREETMAP (Gratuit, interactif, tuiles OSM officielles)
           pharmacopeesAsync.when(
-            loading: () => const Center(child: AppLoadingIndicator()),
-            error: (err, stack) => _buildMapFallback(
-              context: context,
-              isDark: isDark,
-              pharmacopees: const [],
-              userLocation: userLocation,
-            ),
+            loading: () {
+              _mapReady = false;
+              return const Center(child: AppLoadingIndicator());
+            },
+            error: (err, stack) {
+              _mapReady = false;
+              return _buildMapFallback(
+                context: context,
+                isDark: isDark,
+                pharmacopees: const [],
+                userLocation: userLocation,
+              );
+            },
             data: (pharmacopees) {
               return _buildOpenStreetMap(
                 context: context,
@@ -226,6 +257,7 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
         initialZoom: 13.2,
         minZoom: 5.0,
         maxZoom: 18.0,
+        onMapReady: _onMapReady,
         onTap: (_, __) {
           // Désélectionne la carte si l'utilisateur clique sur la carte vide
           if (ref.read(selectedCartePharmacopeeProvider) != null) {
@@ -435,7 +467,8 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
               .copyWith(color: AppColors.textMuted),
           prefixIcon: Icon(
             Icons.search_rounded,
-            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+            color:
+                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
             size: 22,
           ),
           suffixIcon: _searchController.text.isNotEmpty
@@ -559,7 +592,8 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(AppDimensions.radiusCapsule),
-          border: Border.all(color: borderColor, width: AppDimensions.cardBorderWidth),
+          border: Border.all(
+              color: borderColor, width: AppDimensions.cardBorderWidth),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -692,175 +726,193 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
+                            // Section 1 : Services disponibles
+                            Text(
+                              'SERVICES DISPONIBLES',
+                              style: (isDark
+                                      ? AppTextStyles.captionDark
+                                      : AppTextStyles.caption)
+                                  .copyWith(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.8,
+                                color: isDark
+                                    ? AppColors.darkPrimary
+                                    : AppColors.primary,
+                              ),
+                            ),
+                            const SizedBox(height: AppDimensions.space8),
 
-                  // Section 1 : Services disponibles
-                  Text(
-                    'SERVICES DISPONIBLES',
-                    style: (isDark
-                            ? AppTextStyles.captionDark
-                            : AppTextStyles.caption)
-                        .copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.8,
-                      color: isDark ? AppColors.darkPrimary : AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(height: AppDimensions.space8),
-
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Livraison disponible'),
-                    subtitle: const Text('Pharmacopées proposant l\'expédition à domicile'),
-                    value: activeFilter.showOnlyWithDelivery,
-                    activeTrackColor: isDark ? AppColors.darkPrimary : AppColors.primary,
-                    onChanged: (val) {
-                      ref.read(carteFilterProvider.notifier).state =
-                          activeFilter.copyWith(showOnlyWithDelivery: val);
-                      setModalState(() {});
-                    },
-                  ),
-
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Retrait sur place (Pickup)'),
-                    subtitle: const Text('Commande prête à retirer sur place'),
-                    value: activeFilter.showOnlyPickup,
-                    activeTrackColor: isDark ? AppColors.darkPrimary : AppColors.primary,
-                    onChanged: (val) {
-                      ref.read(carteFilterProvider.notifier).state =
-                          activeFilter.copyWith(showOnlyPickup: val);
-                      setModalState(() {});
-                    },
-                  ),
-
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Mieux notées uniquement (★ 4.5+)'),
-                    subtitle: const Text('Pharmacopées les mieux recommandées par la population'),
-                    value: activeFilter.showOnlyTopRated,
-                    activeTrackColor: isDark ? AppColors.darkPrimary : AppColors.primary,
-                    onChanged: (val) {
-                      ref.read(carteFilterProvider.notifier).state =
-                          activeFilter.copyWith(showOnlyTopRated: val);
-                      setModalState(() {});
-                    },
-                  ),
-
-                  const SizedBox(height: AppDimensions.space16),
-
-                  // Section 2 : Filtrer par Région
-                  Text(
-                    'RÉGION DU MALI',
-                    style: (isDark
-                            ? AppTextStyles.captionDark
-                            : AppTextStyles.caption)
-                        .copyWith(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.8,
-                      color: isDark ? AppColors.darkPrimary : AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(height: AppDimensions.space8),
-
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      'Bamako',
-                      'Koulikoro',
-                      'Sikasso',
-                      'Ségou',
-                      'Mopti',
-                      'Kayes',
-                    ].map((region) {
-                      final isSelected = activeFilter.selectedRegion == region;
-                      return ChoiceChip(
-                        label: Text(region),
-                        selected: isSelected,
-                        selectedColor: isDark
-                            ? AppColors.darkPrimaryContainer
-                            : AppColors.primaryLight,
-                        labelStyle: TextStyle(
-                          color: isSelected
-                              ? (isDark
+                            SwitchListTile.adaptive(
+                              contentPadding: EdgeInsets.zero,
+                              title: const Text('Livraison disponible'),
+                              subtitle: const Text(
+                                  'Pharmacopées proposant l\'expédition à domicile'),
+                              value: activeFilter.showOnlyWithDelivery,
+                              activeTrackColor: isDark
                                   ? AppColors.darkPrimary
-                                  : AppColors.primaryDark)
-                              : (isDark ? Colors.white70 : Colors.black87),
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                        onSelected: (selected) {
-                          ref.read(carteFilterProvider.notifier).state =
-                              activeFilter.copyWith(
-                            selectedRegion: selected ? region : null,
-                          );
-                          setModalState(() {});
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: AppDimensions.space16),
-                ],
-              ),
-            ),
-          ),
+                                  : AppColors.primary,
+                              onChanged: (val) {
+                                ref.read(carteFilterProvider.notifier).state =
+                                    activeFilter.copyWith(
+                                        showOnlyWithDelivery: val);
+                                setModalState(() {});
+                              },
+                            ),
 
-          // Barre d'action inférieure fixe, bien remontée au-dessus de tout et protégée des marges
-          Container(
-            padding: EdgeInsets.fromLTRB(
-              AppDimensions.space20,
-              AppDimensions.space12,
-              AppDimensions.space20,
-              MediaQuery.of(context).viewInsets.bottom + AppDimensions.space20,
-            ),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurface : AppColors.surface,
-              border: Border(
-                top: BorderSide(
-                  color: isDark ? AppColors.darkBorder : AppColors.border,
-                  width: 1,
+                            SwitchListTile.adaptive(
+                              contentPadding: EdgeInsets.zero,
+                              title: const Text('Retrait sur place (Pickup)'),
+                              subtitle: const Text(
+                                  'Commande prête à retirer sur place'),
+                              value: activeFilter.showOnlyPickup,
+                              activeTrackColor: isDark
+                                  ? AppColors.darkPrimary
+                                  : AppColors.primary,
+                              onChanged: (val) {
+                                ref.read(carteFilterProvider.notifier).state =
+                                    activeFilter.copyWith(showOnlyPickup: val);
+                                setModalState(() {});
+                              },
+                            ),
+
+                            SwitchListTile.adaptive(
+                              contentPadding: EdgeInsets.zero,
+                              title: const Text(
+                                  'Mieux notées uniquement (★ 4.5+)'),
+                              subtitle: const Text(
+                                  'Pharmacopées les mieux recommandées par la population'),
+                              value: activeFilter.showOnlyTopRated,
+                              activeTrackColor: isDark
+                                  ? AppColors.darkPrimary
+                                  : AppColors.primary,
+                              onChanged: (val) {
+                                ref.read(carteFilterProvider.notifier).state =
+                                    activeFilter.copyWith(
+                                        showOnlyTopRated: val);
+                                setModalState(() {});
+                              },
+                            ),
+
+                            const SizedBox(height: AppDimensions.space16),
+
+                            // Section 2 : Filtrer par Région
+                            Text(
+                              'RÉGION DU MALI',
+                              style: (isDark
+                                      ? AppTextStyles.captionDark
+                                      : AppTextStyles.caption)
+                                  .copyWith(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.8,
+                                color: isDark
+                                    ? AppColors.darkPrimary
+                                    : AppColors.primary,
+                              ),
+                            ),
+                            const SizedBox(height: AppDimensions.space8),
+
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                'Bamako',
+                                'Koulikoro',
+                                'Sikasso',
+                                'Ségou',
+                                'Mopti',
+                                'Kayes',
+                              ].map((region) {
+                                final isSelected =
+                                    activeFilter.selectedRegion == region;
+                                return ChoiceChip(
+                                  label: Text(region),
+                                  selected: isSelected,
+                                  selectedColor: isDark
+                                      ? AppColors.darkPrimaryContainer
+                                      : AppColors.primaryLight,
+                                  labelStyle: TextStyle(
+                                    color: isSelected
+                                        ? (isDark
+                                            ? AppColors.darkPrimary
+                                            : AppColors.primaryDark)
+                                        : (isDark
+                                            ? Colors.white70
+                                            : Colors.black87),
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                  onSelected: (selected) {
+                                    ref
+                                        .read(carteFilterProvider.notifier)
+                                        .state = activeFilter.copyWith(
+                                      selectedRegion: selected ? region : null,
+                                    );
+                                    setModalState(() {});
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                            const SizedBox(height: AppDimensions.space16),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Barre d'action inférieure fixe, bien remontée au-dessus de tout et protégée des marges
+                    Container(
+                      padding: EdgeInsets.fromLTRB(
+                        AppDimensions.space20,
+                        AppDimensions.space12,
+                        AppDimensions.space20,
+                        MediaQuery.of(context).viewInsets.bottom +
+                            AppDimensions.space20,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            isDark ? AppColors.darkSurface : AppColors.surface,
+                        border: Border(
+                          top: BorderSide(
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.border,
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isDark
+                                ? AppColors.darkPrimary
+                                : AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  AppDimensions.radiusButton),
+                            ),
+                            elevation: 2,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text(
+                            'Appliquer les filtres',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      isDark ? AppColors.darkPrimary : AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppDimensions.radiusButton),
-                  ),
-                  elevation: 2,
-                ),
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text(
-                  'Appliquer les filtres',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+            );
           },
         );
       },
     );
-  }
-}
-
-/// Extension d'animation de recentrage souple pour MapController
-extension MapControllerAnimated on MapController {
-  void animateTo(LatLng destCenter, {double? zoom}) {
-    move(destCenter, zoom ?? camera.zoom);
   }
 }
