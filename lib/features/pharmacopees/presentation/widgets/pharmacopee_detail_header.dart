@@ -54,7 +54,8 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
               height: 220,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF142B20) : const Color(0xFFE8F5E9),
+                color:
+                    isDark ? const Color(0xFF142B20) : const Color(0xFFE8F5E9),
               ),
               child: _buildCoverImage(isDark),
             ),
@@ -104,7 +105,8 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
               top: MediaQuery.paddingOf(context).top + 14,
               right: AppDimensions.space16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(20),
@@ -268,9 +270,7 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
                 const SizedBox(height: AppDimensions.space8),
                 Text(
                   pharmacopee.description!,
-                  style: (isDark
-                          ? AppTextStyles.bodyDark
-                          : AppTextStyles.body)
+                  style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
                       .copyWith(
                     color: isDark
                         ? AppColors.darkTextSecondary
@@ -384,7 +384,8 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
               Icon(
                 Icons.local_pharmacy_rounded,
                 size: 54,
-                color: isDark ? const Color(0xFF2ECC71) : const Color(0xFF2E7D32),
+                color:
+                    isDark ? const Color(0xFF2ECC71) : const Color(0xFF2E7D32),
               ),
               const SizedBox(height: 8),
               Text(

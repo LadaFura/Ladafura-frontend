@@ -201,7 +201,8 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                           Icon(
                             Icons.search_off_rounded,
                             size: 54,
-                            color: isDark ? Colors.white30 : Colors.grey.shade400,
+                            color:
+                                isDark ? Colors.white30 : Colors.grey.shade400,
                           ),
                           const SizedBox(height: AppDimensions.space12),
                           Text(

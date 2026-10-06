@@ -151,7 +151,7 @@ class CitizenHomeScreen extends ConsumerWidget {
                 data: (plantes) {
                   if (plantes.isEmpty) return const SizedBox.shrink();
                   return SizedBox(
-                    height: 255,
+                    height: AppDimensions.cardPlantHomeHeight,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: plantes.length,
