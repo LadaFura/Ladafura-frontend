@@ -334,13 +334,13 @@ class _StickySearchBarDelegate extends SliverPersistentHeaderDelegate {
   });
 
   // Hauteur fixe lorsque la barre est épinglée sous la barre de statut (avec marge de confort)
-  double get pinnedHeight => baseHeight + topSafeArea;
+  double get pinnedHeight => (baseHeight) + (topSafeArea);
 
   @override
-  double get minExtent => pinnedHeight;
+  double get minExtent => pinnedHeight > 0.0 ? pinnedHeight : 66.0;
 
   @override
-  double get maxExtent => pinnedHeight;
+  double get maxExtent => pinnedHeight > 0.0 ? pinnedHeight : 66.0;
 
   @override
   Widget build(
