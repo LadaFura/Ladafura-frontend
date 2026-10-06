@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../auth/providers/auth_state_provider.dart';
 import '../../../panier/providers/panier_provider.dart';
 import '../../providers/pharmacopee_detail_controller.dart';
 import '../../providers/pharmacopee_provider.dart';
+import '../widgets/connexion_requise_dialog.dart';
 import '../widgets/pharmacopee_avis_section.dart';
 import '../widgets/pharmacopee_detail_header.dart';
 import '../widgets/pharmacopee_detail_skeleton.dart';
@@ -118,6 +120,7 @@ class PharmacopeeDetailPage extends ConsumerWidget {
               SliverPersistentHeader(
                 pinned: true,
                 delegate: _StickySearchBarDelegate(
+                  selectedCategory: controllerState.selectedCategory,
                   builder: (context, isPinned) => PharmacopeeSearchBar(
                     pharmacopeeNom: pharma.nom,
                     onSearchChanged: controller.setSearchQuery,
@@ -126,15 +129,14 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                     onCategorySelected: controller.selectCategory,
                     isPinned: isPinned,
                   ),
-                  baseHeight: categories.isNotEmpty ? 116.0 : 66.0,
+                  baseHeight: categories.isNotEmpty ? 104.0 : 58.0,
                   topSafeArea: MediaQuery.paddingOf(context).top,
                 ),
               ),
 
               const SliverToBoxAdapter(
-                child: SizedBox(height: AppDimensions.space8),
+                child: SizedBox(height: AppDimensions.space12),
               ),
-
               // 4. Choix du mode de retrait (Livraison vs Retrait sur place)
               if (pharma.modesRetrait.isNotEmpty) ...[
                 SliverToBoxAdapter(
@@ -249,6 +251,17 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                             );
                           },
                           onAddToCart: () {
+                            final authState = ref.read(authStateProvider);
+                            if (!authState.isAuthenticated) {
+                              ConnexionRequiseDialog.show(
+                                context,
+                                title: 'Connexion requise',
+                                description:
+                                    'Veuillez vous connecter pour ajouter ${produit.nom} à votre panier.',
+                              );
+                              return;
+                            }
+
                             ref
                                 .read(panierProvider.notifier)
                                 .ajouterProduit(produit.toProduitModel());
@@ -326,29 +339,32 @@ class _StickySearchBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget Function(BuildContext context, bool isPinned) builder;
   final double baseHeight;
   final double topSafeArea;
+  final String? selectedCategory;
 
   const _StickySearchBarDelegate({
     required this.builder,
     required this.baseHeight,
     required this.topSafeArea,
+    this.selectedCategory,
   });
 
-  // Hauteur fixe lorsque la barre est épinglée sous la barre de statut (avec marge de confort)
-  double get pinnedHeight => (baseHeight) + (topSafeArea);
+  // Lorsque non scrollé (shrinkOffset == 0), la hauteur est exactement baseHeight.
+  // Lors du scroll, elle atteint baseHeight + topSafeArea pour passer sous la barre d'état.
+  @override
+  double get minExtent =>
+      (baseHeight + topSafeArea) > 0.0 ? (baseHeight + topSafeArea) : 66.0;
 
   @override
-  double get minExtent => pinnedHeight > 0.0 ? pinnedHeight : 66.0;
-
-  @override
-  double get maxExtent => pinnedHeight > 0.0 ? pinnedHeight : 66.0;
+  double get maxExtent =>
+      (baseHeight + topSafeArea) > 0.0 ? (baseHeight + topSafeArea) : 66.0;
 
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     // La barre est considérée fixée / épinglée dès qu'il y a recouvrement ou défilement
     final isPinned = overlapsContent || shrinkOffset > 0;
-    return SizedBox(
-      height: pinnedHeight,
+    return Align(
+      alignment: Alignment.bottomCenter,
       child: builder(context, isPinned),
     );
   }
@@ -356,9 +372,7 @@ class _StickySearchBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant _StickySearchBarDelegate oldDelegate) {
     return oldDelegate.baseHeight != baseHeight ||
-        oldDelegate.topSafeArea != topSafeArea;
+        oldDelegate.topSafeArea != topSafeArea ||
+        oldDelegate.selectedCategory != selectedCategory;
   }
 }
-
-
-

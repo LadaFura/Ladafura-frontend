@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ladafura_frontend_flutter/features/auth/providers/auth_state_provider.dart';
 import 'package:ladafura_frontend_flutter/features/panier/providers/panier_provider.dart';
 import 'package:ladafura_frontend_flutter/features/pharmacopees/models/pharmacopee_detail_model.dart';
 import 'package:ladafura_frontend_flutter/features/pharmacopees/models/pharmacopee_produit_item_model.dart';
 import 'package:ladafura_frontend_flutter/features/pharmacopees/presentation/pages/pharmacopee_detail_page.dart';
 import 'package:ladafura_frontend_flutter/features/pharmacopees/presentation/widgets/pharmacopee_modes_retrait_selector.dart';
 import 'package:ladafura_frontend_flutter/features/pharmacopees/providers/pharmacopee_provider.dart';
+import 'package:ladafura_frontend_flutter/shared/enums/user_role.dart';
+import 'package:ladafura_frontend_flutter/shared/models/utilisateur_model.dart';
 
 void main() {
   const samplePharma = PharmacopeeDetailModel(
@@ -109,7 +112,7 @@ void main() {
       expect(find.text('2 500 FCFA'), findsOneWidget);
     });
 
-    testWidgets('Adding product to cart updates panierProvider',
+    testWidgets('Unauthenticated user attempting to add product sees login prompt',
         (tester) async {
       tester.view.physicalSize = const Size(800, 1600);
       tester.view.devicePixelRatio = 1.0;
@@ -126,6 +129,70 @@ void main() {
               .overrideWith((ref) => Future.value(sampleProduits)),
           pharmacopeeAvisProvider(1)
               .overrideWith((ref) => Future.value([])),
+          // Utilisateur non connecté par défaut
+          authStateProvider.overrideWith(
+            (ref) => _FakeTestAuthNotifier(const AuthState.unauthenticated()),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
+            home: PharmacopeeDetailPage(pharmacopeeId: 1),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Aucun article dans le panier
+      expect(container.read(panierProvider), isEmpty);
+
+      // Cliquer sur le bouton "+"
+      final addButtons = find.byIcon(Icons.add_rounded);
+      expect(addButtons, findsWidgets);
+      await tester.tap(addButtons.first);
+      await tester.pumpAndSettle();
+
+      // La modale Connexion requise doit être visible
+      expect(find.text('Connexion requise'), findsOneWidget);
+      expect(find.text('Se connecter'), findsOneWidget);
+
+      // Le panier ne doit pas avoir été modifié
+      expect(container.read(panierProvider), isEmpty);
+    });
+
+    testWidgets('Authenticated user can add product to cart',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      const dummyUser = UtilisateurModel(
+        id: 1,
+        nom: 'Traore',
+        prenom: 'Ousmane',
+        email: 'ousmane@ladafura.ml',
+        role: UserRole.population,
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          pharmacopeeFullDetailProvider(1)
+              .overrideWith((ref) => Future.value(samplePharma)),
+          pharmacopeeProduitsProvider(1)
+              .overrideWith((ref) => Future.value(sampleProduits)),
+          pharmacopeeAvisProvider(1)
+              .overrideWith((ref) => Future.value([])),
+          // Utilisateur connecté
+          authStateProvider.overrideWith(
+            (ref) => _FakeTestAuthNotifier(const AuthState.authenticated(dummyUser)),
+          ),
         ],
       );
 
@@ -186,4 +253,31 @@ void main() {
       expect(find.text('Livraison'), findsNothing);
     });
   });
+}
+
+class _FakeTestAuthNotifier extends StateNotifier<AuthState>
+    implements AuthNotifier {
+  _FakeTestAuthNotifier(super.state);
+
+  @override
+  Future<void> checkAuthStatus() async {}
+
+  @override
+  Future<bool> login({
+    required String email,
+    required String password,
+    UserRole? role,
+  }) async =>
+      true;
+
+  @override
+  Future<bool> register(dynamic request) async => true;
+
+  @override
+  Future<bool> signInWithGoogle({UserRole? role}) async => true;
+
+  @override
+  Future<void> logout() async {
+    state = const AuthState.unauthenticated();
+  }
 }

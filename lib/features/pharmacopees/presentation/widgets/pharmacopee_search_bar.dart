@@ -70,7 +70,7 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
         left: AppDimensions.space16,
         right: AppDimensions.space16,
         top: topPadding,
-        bottom: AppDimensions.space8,
+        bottom: AppDimensions.space4,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,7 +112,11 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
                   color: AppColors.textMuted,
                 ),
                 prefixIcon: const Icon(Icons.search_rounded,
-                    color: AppColors.primary, size: 22),
+                    color: AppColors.primary, size: 20),
+                prefixIconConstraints: const BoxConstraints(
+                  minWidth: 40,
+                  minHeight: 40,
+                ),
                 suffixIcon: _controller.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.close_rounded,
@@ -125,9 +129,10 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
                       )
                     : null,
                 border: InputBorder.none,
+                isDense: true,
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.space16,
-                  vertical: 14,
+                  horizontal: AppDimensions.space12,
+                  vertical: 10,
                 ),
               ),
             ),
@@ -149,7 +154,9 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
                   ),
                   const SizedBox(width: 8),
                   ...widget.categories.map((cat) {
-                    final isSelected = widget.selectedCategory == cat;
+                    final isSelected = widget.selectedCategory != null &&
+                        widget.selectedCategory!.trim().toLowerCase() ==
+                            cat.trim().toLowerCase();
                     return Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: _buildCategoryChip(

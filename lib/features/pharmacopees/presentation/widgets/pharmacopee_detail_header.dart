@@ -70,7 +70,7 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
                     colors: [
                       Colors.black.withAlpha(120),
                       Colors.transparent,
-                      Colors.black.withAlpha(140),
+                      Colors.black.withAlpha(80),
                     ],
                     stops: const [0.0, 0.5, 1.0],
                   ),
@@ -135,76 +135,6 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
                 ),
               ),
             ),
-
-            // Note et avis au bas de la couverture
-            Positioned(
-              bottom: 12,
-              left: AppDimensions.space16,
-              right: AppDimensions.space16,
-              child: Row(
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withAlpha(140),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.star_rounded,
-                            size: 16, color: AppColors.accent),
-                        const SizedBox(width: 4),
-                        Text(
-                          pharmacopee.noteMoyenne > 0
-                              ? pharmacopee.noteMoyenne.toStringAsFixed(1)
-                              : '5.0',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '(${pharmacopee.nombreAvis} avis)',
-                          style: TextStyle(
-                            color: Colors.white.withAlpha(200),
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  if (pharmacopee.nombreProduits > 0)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.darkPrimary.withAlpha(200),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.medication_rounded,
-                              size: 14, color: Colors.white),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${pharmacopee.nombreProduits} remèdes',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            ),
           ],
         ),
 
@@ -234,7 +164,7 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
             children: [
               // Nom & Bouton d'appel rapide
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
                     child: Text(
@@ -258,6 +188,62 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
                         foregroundColor: AppColors.primary,
                       ),
                       tooltip: 'Appeler la pharmacopée',
+                    ),
+                  ],
+                ],
+              ),
+
+              // Étoiles de note, nombre d'avis et remèdes disponibles VISUELLEMENT SOUS LE NOM
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.star_rounded,
+                      size: 18, color: AppColors.accent),
+                  const SizedBox(width: 4),
+                  Text(
+                    pharmacopee.noteMoyenne > 0
+                        ? pharmacopee.noteMoyenne.toStringAsFixed(1)
+                        : '5.0',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '(${pharmacopee.nombreAvis} avis)',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                  if (pharmacopee.nombreProduits > 0) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        '•',
+                        style: TextStyle(
+                          color: isDark ? Colors.white38 : Colors.grey.shade400,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.medication_rounded,
+                      size: 14,
+                      color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${pharmacopee.nombreProduits} remèdes',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                      ),
                     ),
                   ],
                 ],

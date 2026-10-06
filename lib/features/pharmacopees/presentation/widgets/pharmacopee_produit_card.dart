@@ -47,36 +47,13 @@ class PharmacopeeProduitCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Zone Image avec badge et bouton '+' circulaire flottant
+            // 1. Zone Image avec bouton '+' circulaire flottant
             Stack(
               children: [
                 SizedBox(
                   height: 130,
                   width: double.infinity,
                   child: _buildImage(isDark),
-                ),
-                // Badge de disponibilité
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: produit.disponible
-                          ? AppColors.success.withAlpha(220)
-                          : AppColors.danger.withAlpha(220),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      produit.stockLibelle,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
                 ),
                 // Bouton '+' circulaire moderne inspiré de l'interface de référence
                 Positioned(
