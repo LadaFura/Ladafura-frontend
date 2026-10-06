@@ -154,7 +154,9 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
                   ),
                   const SizedBox(width: 8),
                   ...widget.categories.map((cat) {
-                    final isSelected = widget.selectedCategory == cat;
+                    final isSelected = widget.selectedCategory != null &&
+                        widget.selectedCategory!.trim().toLowerCase() ==
+                            cat.trim().toLowerCase();
                     return Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: _buildCategoryChip(

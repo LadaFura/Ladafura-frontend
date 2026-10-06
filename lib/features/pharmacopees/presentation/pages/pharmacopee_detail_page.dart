@@ -120,6 +120,7 @@ class PharmacopeeDetailPage extends ConsumerWidget {
               SliverPersistentHeader(
                 pinned: true,
                 delegate: _StickySearchBarDelegate(
+                  selectedCategory: controllerState.selectedCategory,
                   builder: (context, isPinned) => PharmacopeeSearchBar(
                     pharmacopeeNom: pharma.nom,
                     onSearchChanged: controller.setSearchQuery,
@@ -133,6 +134,9 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                 ),
               ),
 
+              const SliverToBoxAdapter(
+                child: SizedBox(height: AppDimensions.space12),
+              ),
               // 4. Choix du mode de retrait (Livraison vs Retrait sur place)
               if (pharma.modesRetrait.isNotEmpty) ...[
                 SliverToBoxAdapter(
@@ -335,20 +339,24 @@ class _StickySearchBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget Function(BuildContext context, bool isPinned) builder;
   final double baseHeight;
   final double topSafeArea;
+  final String? selectedCategory;
 
   const _StickySearchBarDelegate({
     required this.builder,
     required this.baseHeight,
     required this.topSafeArea,
+    this.selectedCategory,
   });
 
   // Lorsque non scrollé (shrinkOffset == 0), la hauteur est exactement baseHeight.
   // Lors du scroll, elle atteint baseHeight + topSafeArea pour passer sous la barre d'état.
   @override
-  double get minExtent => (baseHeight + topSafeArea) > 0.0 ? (baseHeight + topSafeArea) : 66.0;
+  double get minExtent =>
+      (baseHeight + topSafeArea) > 0.0 ? (baseHeight + topSafeArea) : 66.0;
 
   @override
-  double get maxExtent => (baseHeight + topSafeArea) > 0.0 ? (baseHeight + topSafeArea) : 66.0;
+  double get maxExtent =>
+      (baseHeight + topSafeArea) > 0.0 ? (baseHeight + topSafeArea) : 66.0;
 
   @override
   Widget build(
@@ -364,9 +372,7 @@ class _StickySearchBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant _StickySearchBarDelegate oldDelegate) {
     return oldDelegate.baseHeight != baseHeight ||
-        oldDelegate.topSafeArea != topSafeArea;
+        oldDelegate.topSafeArea != topSafeArea ||
+        oldDelegate.selectedCategory != selectedCategory;
   }
 }
-
-
-
