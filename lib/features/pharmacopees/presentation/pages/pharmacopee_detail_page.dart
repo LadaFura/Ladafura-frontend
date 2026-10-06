@@ -128,13 +128,9 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                     onCategorySelected: controller.selectCategory,
                     isPinned: isPinned,
                   ),
-                  baseHeight: categories.isNotEmpty ? 116.0 : 66.0,
+                  baseHeight: categories.isNotEmpty ? 104.0 : 58.0,
                   topSafeArea: MediaQuery.paddingOf(context).top,
                 ),
-              ),
-
-              const SliverToBoxAdapter(
-                child: SizedBox(height: AppDimensions.space8),
               ),
 
               // 4. Choix du mode de retrait (Livraison vs Retrait sur place)
@@ -346,22 +342,21 @@ class _StickySearchBarDelegate extends SliverPersistentHeaderDelegate {
     required this.topSafeArea,
   });
 
-  // Hauteur fixe lorsque la barre est épinglée sous la barre de statut (avec marge de confort)
-  double get pinnedHeight => (baseHeight) + (topSafeArea);
+  // Lorsque non scrollé (shrinkOffset == 0), la hauteur est exactement baseHeight.
+  // Lors du scroll, elle atteint baseHeight + topSafeArea pour passer sous la barre d'état.
+  @override
+  double get minExtent => (baseHeight + topSafeArea) > 0.0 ? (baseHeight + topSafeArea) : 66.0;
 
   @override
-  double get minExtent => pinnedHeight > 0.0 ? pinnedHeight : 66.0;
-
-  @override
-  double get maxExtent => pinnedHeight > 0.0 ? pinnedHeight : 66.0;
+  double get maxExtent => (baseHeight + topSafeArea) > 0.0 ? (baseHeight + topSafeArea) : 66.0;
 
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     // La barre est considérée fixée / épinglée dès qu'il y a recouvrement ou défilement
     final isPinned = overlapsContent || shrinkOffset > 0;
-    return SizedBox(
-      height: pinnedHeight,
+    return Align(
+      alignment: Alignment.bottomCenter,
       child: builder(context, isPinned),
     );
   }
