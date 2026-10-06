@@ -230,7 +230,7 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.64,
+                      childAspectRatio: 0.78,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),

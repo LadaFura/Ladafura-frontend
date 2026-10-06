@@ -134,17 +134,22 @@ class PharmacopeeProduitCard extends StatelessWidget {
                     const SizedBox(height: 3),
 
                     // Forme galénique ou catégorie
-                    Text(
-                      produit.forme ?? produit.categorieNom ?? '',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textMuted,
+                    if ((produit.forme != null && produit.forme!.isNotEmpty) ||
+                        (produit.categorieNom != null &&
+                            produit.categorieNom!.isNotEmpty)) ...[
+                      Text(
+                        produit.forme ?? produit.categorieNom!,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textMuted,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const Spacer(),
+                      const SizedBox(height: 6),
+                    ] else ...[
+                      const SizedBox(height: 6),
+                    ],
 
                     // Prix en FCFA bien mis en valeur
                     Text(

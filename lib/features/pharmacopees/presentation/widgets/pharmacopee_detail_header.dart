@@ -281,8 +281,6 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
               ],
 
               const SizedBox(height: AppDimensions.space12),
-              const Divider(height: 1),
-              const SizedBox(height: AppDimensions.space12),
 
               // 3. Localisation & Distance & Action "Voir sur la carte"
               Row(
