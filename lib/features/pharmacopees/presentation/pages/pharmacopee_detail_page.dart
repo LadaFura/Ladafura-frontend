@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../auth/providers/auth_state_provider.dart';
 import '../../../panier/providers/panier_provider.dart';
 import '../../providers/pharmacopee_detail_controller.dart';
 import '../../providers/pharmacopee_provider.dart';
+import '../widgets/connexion_requise_dialog.dart';
 import '../widgets/pharmacopee_avis_section.dart';
 import '../widgets/pharmacopee_detail_header.dart';
 import '../widgets/pharmacopee_detail_skeleton.dart';
@@ -249,6 +251,17 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                             );
                           },
                           onAddToCart: () {
+                            final authState = ref.read(authStateProvider);
+                            if (!authState.isAuthenticated) {
+                              ConnexionRequiseDialog.show(
+                                context,
+                                title: 'Connexion requise',
+                                description:
+                                    'Veuillez vous connecter pour ajouter ${produit.nom} à votre panier.',
+                              );
+                              return;
+                            }
+
                             ref
                                 .read(panierProvider.notifier)
                                 .ajouterProduit(produit.toProduitModel());

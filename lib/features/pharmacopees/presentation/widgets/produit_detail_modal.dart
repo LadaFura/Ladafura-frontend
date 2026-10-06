@@ -4,9 +4,11 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/utils/image_utils.dart';
 import '../../../../shared/widgets/feedback/app_loading_indicator.dart';
+import '../../../auth/providers/auth_state_provider.dart';
 import '../../../panier/providers/panier_provider.dart';
 import '../../../plantes/providers/plante_provider.dart';
 import '../../models/pharmacopee_produit_item_model.dart';
+import 'connexion_requise_dialog.dart';
 
 /// Modal / BottomSheet moderne de consultation détaillée d'un remède traditionnel.
 /// Respecte scrupuleusement la séparation : Plante != Produit.
@@ -393,6 +395,17 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
                       child: ElevatedButton.icon(
                         onPressed: widget.produitItem.disponible
                             ? () {
+                                final authState = ref.read(authStateProvider);
+                                if (!authState.isAuthenticated) {
+                                  ConnexionRequiseDialog.show(
+                                    context,
+                                    title: 'Connexion requise',
+                                    description:
+                                        'Veuillez vous connecter pour ajouter ${widget.produitItem.nom} à votre panier.',
+                                  );
+                                  return;
+                                }
+
                                 final notifier =
                                     ref.read(panierProvider.notifier);
                                 for (int i = 0; i < _quantite; i++) {
