@@ -97,6 +97,11 @@ final pharmacopeeFilteredProduitsProvider =
     return produitsAsync.maybeWhen(
       data: (produits) {
         return produits.where((prod) {
+          // Filtre : uniquement les produits en stock
+          if (!prod.disponible || prod.quantiteStock <= 0) {
+            return false;
+          }
+
           // Filtre par catégorie
           if (controllerState.selectedCategory != null &&
               controllerState.selectedCategory!.isNotEmpty) {
