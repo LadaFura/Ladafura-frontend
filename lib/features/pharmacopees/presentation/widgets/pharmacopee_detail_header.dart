@@ -210,12 +210,11 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
 
         // 2. Fiche d'informations principales sous l'image avec coins arrondis élégants
         Container(
-          transform: Matrix4.translationValues(0.0, -16.0, 0.0),
           padding: const EdgeInsets.only(
             left: AppDimensions.space16,
             right: AppDimensions.space16,
-            top: AppDimensions.space20,
-            bottom: AppDimensions.space12,
+            top: AppDimensions.space16,
+            bottom: AppDimensions.space8,
           ),
           decoration: BoxDecoration(
             color: isDark ? AppColors.darkSurface : Colors.white,

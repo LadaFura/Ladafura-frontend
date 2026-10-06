@@ -114,23 +114,24 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                 child: PharmacopeeDetailHeader(pharmacopee: pharma),
               ),
 
-              const SliverToBoxAdapter(
-                child: SizedBox(height: AppDimensions.space16),
-              ),
-
-              // 3. Barre de recherche de produits, placée immédiatement après les informations de la pharmacopée
-              SliverToBoxAdapter(
-                child: PharmacopeeSearchBar(
-                  pharmacopeeNom: pharma.nom,
-                  onSearchChanged: controller.setSearchQuery,
-                  categories: categories,
-                  selectedCategory: controllerState.selectedCategory,
-                  onCategorySelected: controller.selectCategory,
+              // 3. Barre de recherche de produits fixée au défilement (Sticky pinned header)
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _StickySearchBarDelegate(
+                  builder: (context, isPinned) => PharmacopeeSearchBar(
+                    pharmacopeeNom: pharma.nom,
+                    onSearchChanged: controller.setSearchQuery,
+                    categories: categories,
+                    selectedCategory: controllerState.selectedCategory,
+                    onCategorySelected: controller.selectCategory,
+                    isPinned: isPinned,
+                  ),
+                  height: categories.isNotEmpty ? 116.0 : 66.0,
                 ),
               ),
 
               const SliverToBoxAdapter(
-                child: SizedBox(height: AppDimensions.space16),
+                child: SizedBox(height: AppDimensions.space8),
               ),
 
               // 4. Choix du mode de retrait (Livraison vs Retrait sur place)
@@ -317,3 +318,39 @@ class PharmacopeeDetailPage extends ConsumerWidget {
     );
   }
 }
+
+/// Délégué pour épingler la barre de recherche en haut au défilement (sticky header)
+/// avec animation fluide lors de la transition
+class _StickySearchBarDelegate extends SliverPersistentHeaderDelegate {
+  final Widget Function(BuildContext context, bool isPinned) builder;
+  final double height;
+
+  const _StickySearchBarDelegate({
+    required this.builder,
+    required this.height,
+  });
+
+  @override
+  double get minExtent => height;
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    // La barre est considérée fixée / épinglée dès qu'il y a recouvrement ou un léger défilement
+    final isPinned = overlapsContent || shrinkOffset > 0;
+    return SizedBox(
+      height: height,
+      child: builder(context, isPinned),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _StickySearchBarDelegate oldDelegate) {
+    return oldDelegate.height != height;
+  }
+}
+
+

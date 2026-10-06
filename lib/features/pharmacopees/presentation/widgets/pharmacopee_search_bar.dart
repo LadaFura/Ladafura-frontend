@@ -10,6 +10,7 @@ class PharmacopeeSearchBar extends StatefulWidget {
   final List<String> categories;
   final String? selectedCategory;
   final ValueChanged<String?> onCategorySelected;
+  final bool isPinned;
 
   const PharmacopeeSearchBar({
     super.key,
@@ -18,6 +19,7 @@ class PharmacopeeSearchBar extends StatefulWidget {
     required this.categories,
     required this.selectedCategory,
     required this.onCategorySelected,
+    this.isPinned = false,
   });
 
   @override
@@ -36,24 +38,57 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? AppColors.darkBackground : AppColors.surface;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.space16),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOutCubic,
+      decoration: BoxDecoration(
+        color: bgColor,
+        boxShadow: widget.isPinned
+            ? [
+                BoxShadow(
+                  color: Colors.black.withAlpha(isDark ? 45 : 20),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
+        border: widget.isPinned
+            ? Border(
+                bottom: BorderSide(
+                  color: isDark ? AppColors.darkBorder : AppColors.border.withAlpha(120),
+                  width: 0.8,
+                ),
+              )
+            : null,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.space16,
+        vertical: AppDimensions.space8,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Champ de recherche contextualisé
-          Container(
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
               color: isDark ? AppColors.darkSurface : Colors.white,
-              borderRadius: BorderRadius.circular(AppDimensions.radiusInput),
+              borderRadius: BorderRadius.circular(
+                widget.isPinned ? 12 : AppDimensions.radiusInput,
+              ),
               border: Border.all(
-                color: isDark ? AppColors.darkBorder : AppColors.border,
+                color: widget.isPinned
+                    ? (isDark ? AppColors.darkPrimary.withAlpha(100) : AppColors.primary.withAlpha(100))
+                    : (isDark ? AppColors.darkBorder : AppColors.border),
+                width: widget.isPinned ? 1.2 : 1.0,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withAlpha(8),
-                  blurRadius: 8,
+                  color: Colors.black.withAlpha(widget.isPinned ? 12 : 6),
+                  blurRadius: widget.isPinned ? 10 : 6,
                   offset: const Offset(0, 2),
                 ),
               ],
