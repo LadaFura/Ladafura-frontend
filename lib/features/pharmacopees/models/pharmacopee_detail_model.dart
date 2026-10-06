@@ -15,8 +15,8 @@ class PharmacopeeModeRetraitModel {
     required this.frais,
   });
 
-  bool get isLivraison => type.toUpperCase() == 'LIVRAISON';
-  bool get isPickup => type.toUpperCase() == 'PICKUP';
+  bool get isLivraison => type.trim().toUpperCase() == 'LIVRAISON';
+  bool get isPickup => type.trim().toUpperCase() == 'PICKUP';
 
   String get typeLibelle => isLivraison ? 'Livraison' : 'Retrait sur place';
 
@@ -34,7 +34,7 @@ class PharmacopeeModeRetraitModel {
     return PharmacopeeModeRetraitModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
       type: json['type']?.toString() ?? 'PICKUP',
-      actif: json['actif'] as bool? ?? true,
+      actif: (json['actif'] as bool?) ?? true,
       frais: (json['frais'] as num?)?.toDouble() ?? 0.0,
     );
   }
@@ -133,13 +133,13 @@ class PharmacopeeDetailModel {
   });
 
   bool get proposeLivraison =>
-      modesRetrait.any((m) => m.isLivraison && m.actif);
+      modesRetrait.any((m) => m.isLivraison && m.actif == true);
 
   bool get proposePickup =>
-      modesRetrait.any((m) => m.isPickup && m.actif);
+      modesRetrait.any((m) => m.isPickup && m.actif == true);
 
   double? get fraisLivraison {
-    final mode = modesRetrait.where((m) => m.isLivraison && m.actif).firstOrNull;
+    final mode = modesRetrait.where((m) => m.isLivraison && m.actif == true).firstOrNull;
     return mode?.frais;
   }
 

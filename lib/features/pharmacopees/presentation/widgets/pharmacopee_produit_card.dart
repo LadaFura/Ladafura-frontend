@@ -84,7 +84,9 @@ class PharmacopeeProduitCard extends StatelessWidget {
                   bottom: 8,
                   right: 8,
                   child: Material(
-                    color: produit.disponible ? Colors.white : Colors.grey.shade300,
+                    color: produit.disponible
+                        ? Colors.white
+                        : Colors.grey.shade300,
                     shape: const CircleBorder(),
                     elevation: 3,
                     shadowColor: Colors.black38,
@@ -157,9 +159,8 @@ class PharmacopeeProduitCard extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 13.5,
-                        color: isDark
-                            ? AppColors.darkPrimary
-                            : AppColors.primary,
+                        color:
+                            isDark ? AppColors.darkPrimary : AppColors.primary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
