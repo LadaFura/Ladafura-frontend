@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../features/panier/providers/panier_provider.dart';
 
 /// Notifier officiel gérant l'index de l'onglet actif dans la barre de navigation LADAFURA (0 à 4)
 class NavigationNotifier extends Notifier<int> {
@@ -37,5 +38,12 @@ final navigationIndexProvider =
 /// Provider Riverpod du nombre de favoris / notifications
 final favoritesBadgeCountProvider = StateProvider<int>((ref) => 0);
 
-/// Alias pour compatibilité
-final cartBadgeCountProvider = favoritesBadgeCountProvider;
+/// Badge du panier connecté au panier réel
+final cartBadgeCountProvider = Provider<int>((ref) {
+  try {
+    final items = ref.watch(panierProvider);
+    return items.fold<int>(0, (sum, item) => sum + item.quantite);
+  } catch (_) {
+    return 0;
+  }
+});

@@ -4,6 +4,8 @@ import '../models/plante_model.dart';
 
 import '../models/produit_detail_model.dart';
 
+import '../models/produit_model.dart';
+
 /// Service REST pour la consultation des plantes médicinales et des savoirs traditionnels.
 class PlanteService {
   final ApiClient _apiClient;
@@ -57,5 +59,24 @@ class PlanteService {
       return ProduitDetailModel.fromJson(response.data!);
     }
     return null;
+  }
+
+  /// Récupère les produits traditionnels formulés avec cette plante médicinale.
+  Future<List<ProduitModel>> getProduitsByPlante(int id) async {
+    final response = await _apiClient.get<dynamic>(
+      ApiEndpoints.populationPlanteProduits(id.toString()),
+    );
+
+    if (response.isSuccess && response.data != null) {
+      final List items = response.data is List
+          ? response.data as List
+          : (response.data is Map && response.data['content'] is List
+              ? response.data['content'] as List
+              : []);
+      return items
+          .map((e) => ProduitModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
   }
 }

@@ -5,6 +5,7 @@ import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/utils/image_utils.dart';
 import '../../../../shared/widgets/feedback/app_loading_indicator.dart';
 import '../../../auth/providers/auth_state_provider.dart';
+import '../../../commandes/providers/commande_provider.dart';
 import '../../../panier/providers/panier_provider.dart';
 import '../../../plantes/providers/plante_provider.dart';
 import '../../models/pharmacopee_produit_item_model.dart';
@@ -20,21 +21,31 @@ import 'connexion_requise_dialog.dart';
 /// - Sélecteur de quantité & Bouton d'ajout au panier direct
 class ProduitDetailModal extends ConsumerStatefulWidget {
   final PharmacopeeProduitItemModel produitItem;
+  final int? pharmacopeeId;
+  final String? nomPharmacopee;
 
   const ProduitDetailModal({
     super.key,
     required this.produitItem,
+    this.pharmacopeeId,
+    this.nomPharmacopee,
   });
 
   static Future<void> show(
     BuildContext context, {
     required PharmacopeeProduitItemModel produit,
+    int? pharmacopeeId,
+    String? nomPharmacopee,
   }) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => ProduitDetailModal(produitItem: produit),
+      builder: (ctx) => ProduitDetailModal(
+        produitItem: produit,
+        pharmacopeeId: pharmacopeeId,
+        nomPharmacopee: nomPharmacopee,
+      ),
     );
   }
 
@@ -44,6 +55,15 @@ class ProduitDetailModal extends ConsumerStatefulWidget {
 
 class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
   int _quantite = 1;
+  int? _selectedPharmacopeeId;
+  String? _selectedPharmacopeeNom;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedPharmacopeeId = widget.pharmacopeeId;
+    _selectedPharmacopeeNom = widget.nomPharmacopee;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -329,6 +349,96 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
                               ),
                               const SizedBox(height: AppDimensions.space16),
                             ],
+
+                            // Choix de la pharmacopée proposant ce remède (si ouvert sans pharmacopée préfixée)
+                            if (widget.pharmacopeeId == null &&
+                                detail.offresPharmacopees.isNotEmpty) ...[
+                              _buildSectionTitle(
+                                  'Sélectionnez la pharmacopée préparatrice',
+                                  isDark),
+                              const SizedBox(height: 8),
+                              ...detail.offresPharmacopees.map((offre) {
+                                final currentSelectedId = _selectedPharmacopeeId ??
+                                    detail.offresPharmacopees.first.pharmacopeeId;
+                                final isSelected =
+                                    currentSelectedId == offre.pharmacopeeId;
+                                return InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedPharmacopeeId = offre.pharmacopeeId;
+                                      _selectedPharmacopeeNom = offre.nomPharmacopee;
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Container(
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? AppColors.primary.withAlpha(20)
+                                          : (isDark
+                                              ? AppColors.darkSurfaceVariant
+                                              : Colors.grey.shade50),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? AppColors.primary
+                                            : (isDark
+                                                ? AppColors.darkBorder
+                                                : Colors.grey.shade300),
+                                        width: isSelected ? 1.5 : 1,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          isSelected
+                                              ? Icons.radio_button_checked
+                                              : Icons.radio_button_off,
+                                          color: isSelected
+                                              ? AppColors.primary
+                                              : (isDark
+                                                  ? Colors.white54
+                                                  : Colors.grey.shade500),
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                offre.nomPharmacopee,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                  color: isDark
+                                                      ? Colors.white
+                                                      : AppColors.textPrimary,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                '${offre.commune ?? offre.region ?? "Officine agréée"} • ${offre.prix.round()} FCFA',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: isDark
+                                                      ? Colors.white70
+                                                      : AppColors.textSecondary,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }),
+                              const SizedBox(height: AppDimensions.space16),
+                            ],
                           ],
                         );
                       },
@@ -394,7 +504,7 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: widget.produitItem.disponible
-                            ? () {
+                            ? () async {
                                 final authState = ref.read(authStateProvider);
                                 if (!authState.isAuthenticated) {
                                   ConnexionRequiseDialog.show(
@@ -407,29 +517,39 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
                                 }
 
                                 final notifier =
-                                    ref.read(panierProvider.notifier);
-                                for (int i = 0; i < _quantite; i++) {
-                                  notifier.ajouterProduit(
-                                    widget.produitItem.toProduitModel(),
-                                  );
+                                    ref.read(panierStateProvider.notifier);
+                                
+                                // Déterminer la pharmacopée finale (spécifiée par la page ou sélectionnée / première offre)
+                                int? finalPharmaId = _selectedPharmacopeeId ?? widget.pharmacopeeId;
+                                String? finalPharmaNom = _selectedPharmacopeeNom ?? widget.nomPharmacopee;
+                                
+                                if (finalPharmaId == null) {
+                                  final detail = detailAsync.asData?.value;
+                                  if (detail != null && detail.offresPharmacopees.isNotEmpty) {
+                                    finalPharmaId = detail.offresPharmacopees.first.pharmacopeeId;
+                                    finalPharmaNom = detail.offresPharmacopees.first.nomPharmacopee;
+                                  }
                                 }
-                                Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      '$_quantite x ${widget.produitItem.nom} ajouté au panier',
-                                    ),
-                                    backgroundColor: AppColors.primary,
-                                    behavior: SnackBarBehavior.floating,
-                                    action: SnackBarAction(
-                                      label: 'Voir panier',
-                                      textColor: Colors.white,
-                                      onPressed: () {
-                                        // Aller au panier
-                                      },
-                                    ),
-                                  ),
+
+                                await notifier.ajouterProduit(
+                                  widget.produitItem.produitId,
+                                  quantite: _quantite,
+                                  pharmacopeeId: finalPharmaId,
+                                  nomPharmacopee: finalPharmaNom,
                                 );
+
+                                if (finalPharmaId != null && finalPharmaNom != null) {
+                                  ref
+                                      .read(checkoutProvider.notifier)
+                                      .initCheckout(
+                                        pharmacopeeId: finalPharmaId,
+                                        nomPharmacopee: finalPharmaNom,
+                                      );
+                                }
+
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                }
                               }
                             : null,
                         icon: const Icon(Icons.add_shopping_cart_rounded),

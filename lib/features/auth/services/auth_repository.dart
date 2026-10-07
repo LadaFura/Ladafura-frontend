@@ -28,6 +28,9 @@ class AuthRepository {
     // Configurer l'intercepteur Dio pour qu'il injecte toujours le Bearer token
     _apiClient.authInterceptor
         .setTokenProvider(() async => _storageService.getToken());
+    _apiClient.setOnTokenExpired(() async {
+      await logout();
+    });
     final existingToken = _storageService.getToken();
     if (existingToken != null && existingToken.isNotEmpty) {
       _apiClient.setAuthToken(existingToken);

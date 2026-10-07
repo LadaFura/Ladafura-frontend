@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -226,4 +227,71 @@ class LocationService {
 
   /// Dernière position capturée en mémoire.
   GeoCoordinates? get lastKnownPosition => _lastKnownPosition;
+
+  /// Résout une position GPS en adresse textuelle (reverse-geocoding Nominatim OSM avec repli robuste).
+  Future<String> reverseGeocode({
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      final dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 6),
+          receiveTimeout: const Duration(seconds: 6),
+          headers: {
+            'User-Agent': 'LadafuraApp/1.0 (contact@ladafura.ml)',
+          },
+        ),
+      );
+
+      final response = await dio.get(
+        'https://nominatim.openstreetmap.org/reverse',
+        queryParameters: {
+          'format': 'json',
+          'lat': latitude,
+          'lon': longitude,
+          'zoom': 18,
+          'addressdetails': 1,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data as Map<String, dynamic>;
+        final address = data['address'] as Map<String, dynamic>?;
+
+        if (address != null) {
+          final parts = <String>[];
+          final road = address['road']?.toString();
+          final quarter = address['quarter']?.toString() ??
+              address['suburb']?.toString() ??
+              address['neighbourhood']?.toString();
+          final townOrCity = address['city']?.toString() ??
+              address['town']?.toString() ??
+              address['village']?.toString() ??
+              'Bamako';
+          final country = address['country']?.toString() ?? 'Mali';
+
+          if (road != null && road.trim().isNotEmpty) parts.add(road.trim());
+          if (quarter != null && quarter.trim().isNotEmpty) parts.add(quarter.trim());
+          if (townOrCity.trim().isNotEmpty) parts.add(townOrCity.trim());
+          if (country.trim().isNotEmpty) parts.add(country.trim());
+
+          if (parts.isNotEmpty) {
+            return parts.join(', ');
+          }
+        }
+
+        final displayName = data['display_name']?.toString();
+        if (displayName != null && displayName.trim().isNotEmpty) {
+          return displayName.trim();
+        }
+      }
+    } catch (e) {
+      debugPrint('[LocationService] Erreur reverse geocoding OSM: $e');
+    }
+
+    final latDir = latitude >= 0 ? 'N' : 'S';
+    final lngDir = longitude >= 0 ? 'E' : 'W';
+    return '${latitude.abs().toStringAsFixed(4)}° $latDir, ${longitude.abs().toStringAsFixed(4)}° $lngDir (Mali)';
+  }
 }

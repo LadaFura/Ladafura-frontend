@@ -76,12 +76,42 @@ class RouteNames {
 
   static const String citizenPanier = 'citizen-panier';
   static const String citizenPanierPath = '/citizen/panier';
+  static const String citizenPanierView = 'citizen-panier-view';
+  static const String citizenPanierViewPath = '/citizen/panier-view';
 
   static const String citizenCommandes = 'citizen-commandes';
   static const String citizenCommandesPath = '/citizen/commandes';
 
+  static const String citizenCommandeValidation = 'citizen-commande-validation';
+  static const String citizenCommandeValidationPath =
+      '/citizen/commandes/validation';
+
+  static const String citizenCommandePaiement = 'citizen-commande-paiement';
+  static const String citizenCommandePaiementPath =
+      '/citizen/commandes/paiement';
+
+  static const String citizenCommandeConfirmation =
+      'citizen-commande-confirmation';
+  static const String citizenCommandeConfirmationPath =
+      '/citizen/commandes/confirmation';
+
+  static const String citizenCommandeDetail = 'citizen-commande-detail';
+  static const String citizenCommandeDetailPath =
+      '/citizen/commandes/detail/:id';
+  static String citizenCommandeDetailUrl(String id) =>
+      '/citizen/commandes/detail/$id';
+
   static const String citizenProfil = 'citizen-profil';
   static const String citizenProfilPath = '/citizen/profil';
+
+  static const String citizenModifierProfil = 'citizen-modifier-profil';
+  static const String citizenModifierProfilPath = '/citizen/profil/modifier';
+
+  static const String citizenParametres = 'citizen-parametres';
+  static const String citizenParametresPath = '/citizen/profil/parametres';
+
+  static const String citizenNotifications = 'citizen-notifications';
+  static const String citizenNotificationsPath = '/citizen/notifications';
 
   // ===========================================================================
   // 4. ESPACE AGENT DE COLLECTE TERRAIN (BOTANIQUE & TERRAIN)

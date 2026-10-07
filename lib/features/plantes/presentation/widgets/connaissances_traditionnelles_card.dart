@@ -4,6 +4,12 @@ import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../models/plante_model.dart';
 
+/// Carte moderne présentant les savoirs traditionnels et usages ancestraux rapportés.
+/// Inclut :
+/// - Icônes explicites pour les parties de plantes utilisées (feuilles, écorce, racines)
+/// - Modes de préparation clairs (décoction, infusion, macération)
+/// - Précautions d'emploi et posologie
+/// - Badge déontologique "Usage Traditionnel Répertorié"
 class ConnaissancesTraditionnellesCard extends StatelessWidget {
   final List<PopulationConnaissanceTraditionnelleModel> connaissances;
 
@@ -33,8 +39,9 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
             const SizedBox(width: AppDimensions.space8),
             Expanded(
               child: Text(
-                'Aucune connaissance traditionnelle renseignée pour le moment.',
-                style: isDark ? AppTextStyles.captionDark : AppTextStyles.caption,
+                'Aucune connaissance traditionnelle documentée pour le moment.',
+                style:
+                    isDark ? AppTextStyles.captionDark : AppTextStyles.caption,
               ),
             ),
           ],
@@ -45,18 +52,51 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // En-tête de section avec badge
         Row(
           children: [
-            const Icon(Icons.history_edu_rounded,
-                color: AppColors.accent, size: 22),
-            const SizedBox(width: AppDimensions.space8),
-            Text(
-              'Savoirs Traditionnels & Usages (${connaissances.length})',
-              style: isDark ? AppTextStyles.h3Dark : AppTextStyles.h3,
+            Container(
+              padding: const EdgeInsets.all(AppDimensions.space8),
+              decoration: BoxDecoration(
+                color: AppColors.accent.withAlpha(25),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.auto_stories_rounded,
+                color: AppColors.accent,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: AppDimensions.space12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Savoirs Traditionnels & Usages',
+                    style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
+                        .copyWith(fontSize: 16),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${connaissances.length} usage(s) documenté(s) par les praticiens',
+                    style: (isDark
+                            ? AppTextStyles.captionDark
+                            : AppTextStyles.caption)
+                        .copyWith(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
+
         const SizedBox(height: AppDimensions.space12),
+
         ...connaissances.map((c) => _buildItemCard(context, c, isDark)),
       ],
     );
@@ -74,79 +114,120 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
         color: isDark ? AppColors.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
         border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.border,
+          color: isDark
+              ? AppColors.darkBorder
+              : AppColors.accent.withAlpha(40),
+          width: 1.1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: (isDark ? Colors.black : Colors.amber.shade100)
+                .withAlpha(25),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Titre / Usage principal
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.check_circle_outline_rounded,
-                  color: AppColors.primary, size: 18),
+              Container(
+                margin: const EdgeInsets.only(top: 2),
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: (isDark ? AppColors.darkAccent : AppColors.primary)
+                      .withAlpha(25),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.spa_rounded,
+                  color: isDark ? AppColors.darkAccent : AppColors.primary,
+                  size: 16,
+                ),
+              ),
               const SizedBox(width: AppDimensions.space8),
               Expanded(
                 child: Text(
                   item.usageRapporte,
                   style: (isDark ? AppTextStyles.h4Dark : AppTextStyles.h4)
-                      .copyWith(color: isDark ? AppColors.darkAccent : AppColors.primary),
+                      .copyWith(
+                    color: isDark
+                        ? AppColors.darkAccent
+                        : AppColors.primaryDark,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                 ),
               ),
             ],
           ),
 
-          if (item.partieUtilisee != null && item.partieUtilisee!.isNotEmpty) ...[
-            const SizedBox(height: AppDimensions.space8),
-            _buildDetailRow(
-              'Partie utilisée',
-              item.partieUtilisee!,
-              Icons.spa_outlined,
-              isDark,
-            ),
-          ],
+          const SizedBox(height: AppDimensions.space12),
 
-          if (item.modePreparation != null && item.modePreparation!.isNotEmpty) ...[
-            const SizedBox(height: AppDimensions.space8),
-            _buildDetailRow(
-              'Mode de préparation',
-              item.modePreparation!,
-              Icons.soup_kitchen_outlined,
-              isDark,
-            ),
-          ],
+          // Grille des paramètres d'usage : Partie utilisée & Préparation
+          Wrap(
+            spacing: AppDimensions.space12,
+            runSpacing: AppDimensions.space8,
+            children: [
+              if (item.partieUtilisee != null &&
+                  item.partieUtilisee!.isNotEmpty)
+                _buildTagChip(
+                  icon: Icons.eco_outlined,
+                  label: 'Partie : ${item.partieUtilisee}',
+                  isDark: isDark,
+                ),
+              if (item.modePreparation != null &&
+                  item.modePreparation!.isNotEmpty)
+                _buildTagChip(
+                  icon: Icons.coffee_maker_outlined,
+                  label: 'Préparation : ${item.modePreparation}',
+                  isDark: isDark,
+                ),
+              if (item.posologie != null && item.posologie!.isNotEmpty)
+                _buildTagChip(
+                  icon: Icons.medical_services_outlined,
+                  label: 'Posologie : ${item.posologie}',
+                  isDark: isDark,
+                ),
+            ],
+          ),
 
-          if (item.posologie != null && item.posologie!.isNotEmpty) ...[
-            const SizedBox(height: AppDimensions.space8),
-            _buildDetailRow(
-              'Posologie',
-              item.posologie!,
-              Icons.medical_services_outlined,
-              isDark,
-            ),
-          ],
-
+          // Précautions d'usage
           if (item.precautions != null && item.precautions!.isNotEmpty) ...[
-            const SizedBox(height: AppDimensions.space8),
+            const SizedBox(height: AppDimensions.space12),
             Container(
-              padding: const EdgeInsets.all(AppDimensions.space8),
+              padding: const EdgeInsets.all(AppDimensions.space12),
               decoration: BoxDecoration(
-                color: AppColors.warning.withAlpha(25),
-                borderRadius: BorderRadius.circular(AppDimensions.radiusButton),
-                border: Border.all(color: AppColors.warning.withAlpha(80)),
+                color: AppColors.warning.withAlpha(20),
+                borderRadius:
+                    BorderRadius.circular(AppDimensions.radiusButton),
+                border: Border.all(
+                  color: AppColors.warning.withAlpha(80),
+                  width: 0.8,
+                ),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(Icons.warning_amber_rounded,
-                      color: AppColors.warning, size: 16),
+                      color: AppColors.warning, size: 18),
                   const SizedBox(width: AppDimensions.space8),
                   Expanded(
                     child: Text(
                       'Précautions : ${item.precautions}',
-                      style: (isDark ? AppTextStyles.captionDark : AppTextStyles.caption)
+                      style: (isDark
+                              ? AppTextStyles.captionDark
+                              : AppTextStyles.caption)
                           .copyWith(
-                        color: AppColors.warning,
+                        color: isDark
+                            ? Colors.amber.shade200
+                            : const Color(0xFFB45309),
                         fontWeight: FontWeight.w600,
+                        fontSize: 12.5,
                       ),
                     ),
                   ),
@@ -155,15 +236,36 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
             ),
           ],
 
+          // Source / Informateur
           if (item.informateurSource != null &&
               item.informateurSource!.isNotEmpty) ...[
             const SizedBox(height: AppDimensions.space8),
-            Text(
-              'Source : ${item.informateurSource}',
-              style: (isDark ? AppTextStyles.captionDark : AppTextStyles.caption)
-                  .copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
-              ),
+            Row(
+              children: [
+                Icon(
+                  Icons.person_pin_circle_outlined,
+                  size: 14,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textMuted,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    'Source traditionnelle : ${item.informateurSource}',
+                    style: (isDark
+                            ? AppTextStyles.captionDark
+                            : AppTextStyles.caption)
+                        .copyWith(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textMuted,
+                      fontSize: 11.5,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ],
@@ -171,33 +273,48 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(
-    String label,
-    String value,
-    IconData icon,
-    bool isDark,
-  ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 16, color: isDark ? AppColors.darkAccent : AppColors.primary),
-        const SizedBox(width: AppDimensions.space8),
-        Text(
-          '$label : ',
-          style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-          ),
+  Widget _buildTagChip({
+    required IconData icon,
+    required String label,
+    required bool isDark,
+  }) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 340),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.darkSurfaceVariant
+            : AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusBadge),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : AppColors.border,
+          width: 0.8,
         ),
-        Expanded(
-          child: Text(
-            value,
-            style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
-              fontSize: 13,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: isDark ? AppColors.darkAccent : AppColors.primary,
+          ),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              label,
+              style:
+                  (isDark ? AppTextStyles.captionDark : AppTextStyles.caption)
+                      .copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -259,7 +259,32 @@ class StorageService {
   }
 
   // ===========================================================================
-  // 4. UTILITAIRES GÉNÉRIQUES
+  // 4. PHARMACOPÉE DU PANIER
+  // ===========================================================================
+
+  static const String _keyCartPharmacopeeId = 'ladafura_cart_pharmacopee_id';
+  static const String _keyCartPharmacopeeNom = 'ladafura_cart_pharmacopee_nom';
+
+  /// Enregistre la pharmacopée liée au panier actif.
+  Future<void> saveCartPharmacopee(int id, String nom) async {
+    await _prefs.setInt(_keyCartPharmacopeeId, id);
+    await _prefs.setString(_keyCartPharmacopeeNom, nom);
+  }
+
+  /// Récupère l'ID de la pharmacopée associée au panier.
+  int? getCartPharmacopeeId() => _prefs.getInt(_keyCartPharmacopeeId);
+
+  /// Récupère le nom de la pharmacopée associée au panier.
+  String? getCartPharmacopeeNom() => _prefs.getString(_keyCartPharmacopeeNom);
+
+  /// Supprime la pharmacopée associée au panier.
+  Future<void> clearCartPharmacopee() async {
+    await _prefs.remove(_keyCartPharmacopeeId);
+    await _prefs.remove(_keyCartPharmacopeeNom);
+  }
+
+  // ===========================================================================
+  // 5. UTILITAIRES GÉNÉRIQUES
   // ===========================================================================
 
   String? getString(String key) => _prefs.getString(key);

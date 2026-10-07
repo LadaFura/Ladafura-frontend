@@ -3,39 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
-import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routing/route_names.dart';
-import '../../../../core/theme/theme_provider.dart';
 import '../../../auth/providers/auth_state_provider.dart';
 import '../../providers/profil_provider.dart';
-import '../widgets/profil_menu_tile.dart';
+import '../widgets/profil_activite_section.dart';
+import '../widgets/profil_header.dart';
+import '../widgets/profil_info_section.dart';
+import '../widgets/profil_logout_dialog.dart';
+import '../widgets/profil_reglages_section.dart';
 
-/// Page Profil du Citoyen (Navigation principale).
+/// Page principale du Profil Population (Citoyen).
 class ProfilScreen extends ConsumerWidget {
   const ProfilScreen({super.key});
 
   Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
-    final shouldLogout = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Déconnexion'),
-        content: const Text('Voulez-vous vraiment vous déconnecter ?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.danger,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Déconnexion'),
-          ),
-        ],
-      ),
-    );
+    final shouldLogout = await ProfilLogoutDialog.show(context);
 
     if (shouldLogout == true && context.mounted) {
       await ref.read(authStateProvider.notifier).logout();
@@ -48,106 +30,120 @@ class ProfilScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final profilAsync = ref.watch(citoyenProfilProvider);
+    final auth = ref.watch(authStateProvider);
+    final profilState = ref.watch(profilProvider);
+
+    // Vérifier l'état d'authentification
+    if (!auth.isAuthenticated) {
+      return Scaffold(
+        backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
+        appBar: AppBar(
+          title: const Text('Mon Profil'),
+          automaticallyImplyLeading: false,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppDimensions.space24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.lock_outline_rounded,
+                    size: 64, color: Colors.grey),
+                const SizedBox(height: 16),
+                const Text(
+                  'Veuillez vous connecter pour accéder à votre profil.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 15),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: () => context.push(RouteNames.loginPath),
+                  icon: const Icon(Icons.login_rounded),
+                  label: const Text('Se connecter'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
       appBar: AppBar(
         title: const Text('Mon Profil'),
-        automaticallyImplyLeading: false, // Pas d'icône de retour sur page principale
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            tooltip: 'Actualiser',
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: () {
+              ref.read(profilProvider.notifier).chargerProfil();
+            },
+          ),
+        ],
       ),
-      body: profilAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Erreur de chargement')),
-        data: (profil) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(AppDimensions.space16),
-            child: Column(
-              children: [
-                // En-tête Avatar & Identité
-                Center(
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundColor: (isDark
-                                ? AppColors.darkAccent
-                                : AppColors.primary)
-                            .withAlpha(30),
-                        child: Text(
-                          profil?.prenom.isNotEmpty == true
-                              ? profil!.prenom[0].toUpperCase()
-                              : 'C',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: isDark
-                                ? AppColors.darkAccent
-                                : AppColors.primary,
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(profilProvider.notifier).chargerProfil(),
+        child: profilState.isLoading && profilState.profil == null
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(AppDimensions.space16),
+                child: Column(
+                  children: [
+                    // 1. En-tête : Avatar avec icône générique, identité et statut
+                    ProfilHeader(profil: profilState.profil),
+                    const SizedBox(height: AppDimensions.space16),
+
+                    // 2. Mes informations : Nom, Prénom, Téléphone, Email + Action Modifier
+                    ProfilInfoSection(
+                      profil: profilState.profil,
+                      onModifier: () {
+                        context.pushNamed(RouteNames.citizenModifierProfil);
+                      },
+                    ),
+                    const SizedBox(height: AppDimensions.space16),
+
+                    // 3. Mon activité : Commandes, Favoris, Notifications avec compteurs réels
+                    ProfilActiviteSection(
+                      totalCommandes:
+                          profilState.profil?.nombreTotalCommandes ?? 0,
+                      totalFavoris:
+                          profilState.profil?.nombreTotalFavoris ?? 0,
+                      unreadNotifications:
+                          profilState.unreadNotificationsCount,
+                      onTapCommandes: () {
+                        context.pushNamed(RouteNames.citizenCommandes);
+                      },
+                      onTapFavoris: () {
+                        context.pushNamed(RouteNames.citizenFavoris);
+                      },
+                      onTapNotifications: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              profilState.unreadNotificationsCount > 0
+                                  ? 'Vous avez ${profilState.unreadNotificationsCount} notification(s) non lue(s).'
+                                  : 'Aucune nouvelle notification pour le moment.',
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: AppDimensions.space12),
-                      Text(
-                        profil?.nomComplet ?? 'Citoyen LADAFURA',
-                        style: isDark ? AppTextStyles.h2Dark : AppTextStyles.h2,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        profil?.email ?? 'citoyen@ladafura.ml',
-                        style: isDark
-                            ? AppTextStyles.captionDark
-                            : AppTextStyles.caption,
-                      ),
-                    ],
-                  ),
-                ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: AppDimensions.space16),
 
-                const SizedBox(height: AppDimensions.space24),
-                const Divider(),
-
-                // Menu items
-                ProfilMenuTile(
-                  icon: Icons.history_rounded,
-                  title: 'Mes commandes',
-                  subtitle: 'Consulter mes commandes de remèdes',
-                  onTap: () {
-                    context.pushNamed(RouteNames.citizenCommandes);
-                  },
+                    // 4. Préférences & Déconnexion
+                    ProfilReglagesSection(
+                      onTapParametres: () {
+                        context.pushNamed(RouteNames.citizenParametres);
+                      },
+                      onTapLogout: () => _handleLogout(context, ref),
+                    ),
+                    const SizedBox(height: AppDimensions.space24),
+                  ],
                 ),
-                ProfilMenuTile(
-                  icon: Icons.favorite_border_rounded,
-                  title: 'Mes plantes favorites',
-                  subtitle: 'Accès rapide à vos plantes enregistrées',
-                  onTap: () {},
-                ),
-                ProfilMenuTile(
-                  icon: Icons.notifications_none_rounded,
-                  title: 'Notifications',
-                  onTap: () {},
-                ),
-                ProfilMenuTile(
-                  icon: isDark
-                      ? Icons.light_mode_outlined
-                      : Icons.dark_mode_outlined,
-                  title: isDark ? 'Mode clair' : 'Mode sombre',
-                  onTap: () {
-                    ref
-                        .read(themeModeProvider.notifier)
-                        .toggleTheme(currentIsDark: isDark);
-                  },
-                ),
-                const Divider(),
-                ProfilMenuTile(
-                  icon: Icons.logout_rounded,
-                  iconColor: AppColors.danger,
-                  title: 'Se déconnecter',
-                  onTap: () => _handleLogout(context, ref),
-                ),
-              ],
-            ),
-          );
-        },
+              ),
       ),
     );
   }

@@ -8,8 +8,41 @@ import 'package:ladafura_frontend_flutter/features/pharmacopees/models/pharmacop
 import 'package:ladafura_frontend_flutter/features/pharmacopees/presentation/pages/pharmacopee_detail_page.dart';
 import 'package:ladafura_frontend_flutter/features/pharmacopees/presentation/widgets/pharmacopee_modes_retrait_selector.dart';
 import 'package:ladafura_frontend_flutter/features/pharmacopees/providers/pharmacopee_provider.dart';
+import 'package:dio/dio.dart';
+import 'package:ladafura_frontend_flutter/features/panier/models/panier_model.dart';
+import 'package:ladafura_frontend_flutter/features/panier/services/panier_service.dart';
 import 'package:ladafura_frontend_flutter/shared/enums/user_role.dart';
 import 'package:ladafura_frontend_flutter/shared/models/utilisateur_model.dart';
+
+class _FakeTestPanierService extends PanierService {
+  _FakeTestPanierService() : super(Dio());
+
+  PanierModel _panier = PanierModel.vide();
+
+  @override
+  Future<PanierModel> getPanier() async => _panier;
+
+  @override
+  Future<PanierModel> ajouterProduit({required int produitId, int quantite = 1}) async {
+    final nouvelleLigne = LignePanierModel(
+      ligneId: 1,
+      produitId: produitId,
+      nomProduit: 'Tisane Kinkéliba Bio',
+      prixUnitaire: 1500.0,
+      quantite: quantite,
+      sousTotal: 1500.0 * quantite,
+      forme: 'Sachet 100g',
+      disponible: true,
+    );
+    _panier = PanierModel(
+      panierId: 1,
+      nombreArticles: quantite,
+      montantTotal: 1500.0 * quantite,
+      lignes: [nouvelleLigne],
+    );
+    return _panier;
+  }
+}
 
 void main() {
   const samplePharma = PharmacopeeDetailModel(
@@ -193,6 +226,7 @@ void main() {
           authStateProvider.overrideWith(
             (ref) => _FakeTestAuthNotifier(const AuthState.authenticated(dummyUser)),
           ),
+          panierServiceProvider.overrideWithValue(_FakeTestPanierService()),
         ],
       );
 
@@ -275,6 +309,11 @@ class _FakeTestAuthNotifier extends StateNotifier<AuthState>
 
   @override
   Future<bool> signInWithGoogle({UserRole? role}) async => true;
+
+  @override
+  Future<void> onSessionExpired() async {
+    state = const AuthState.unauthenticated();
+  }
 
   @override
   Future<void> logout() async {

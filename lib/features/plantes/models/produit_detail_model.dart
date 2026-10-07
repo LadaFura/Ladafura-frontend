@@ -69,6 +69,58 @@ class ProduitMaladieModel {
       };
 }
 
+/// DTO pour l'offre d'une pharmacopée sur un produit.
+/// Conforme à `PopulationOffrePharmacopeeDto.java`.
+class OffrePharmacopeeModel {
+  final int disponibiliteId;
+  final int pharmacopeeId;
+  final String nomPharmacopee;
+  final String? telephone;
+  final String? region;
+  final String? cercle;
+  final String? commune;
+  final String? localite;
+  final double? latitude;
+  final double? longitude;
+  final bool disponible;
+  final int quantiteStock;
+  final double prix;
+
+  const OffrePharmacopeeModel({
+    required this.disponibiliteId,
+    required this.pharmacopeeId,
+    required this.nomPharmacopee,
+    this.telephone,
+    this.region,
+    this.cercle,
+    this.commune,
+    this.localite,
+    this.latitude,
+    this.longitude,
+    required this.disponible,
+    required this.quantiteStock,
+    required this.prix,
+  });
+
+  factory OffrePharmacopeeModel.fromJson(Map<String, dynamic> json) {
+    return OffrePharmacopeeModel(
+      disponibiliteId: (json['disponibiliteId'] as num?)?.toInt() ?? 0,
+      pharmacopeeId: (json['pharmacopeeId'] as num?)?.toInt() ?? 0,
+      nomPharmacopee: json['nomPharmacopee']?.toString() ?? 'Officine agréée',
+      telephone: json['telephone']?.toString(),
+      region: json['region']?.toString(),
+      cercle: json['cercle']?.toString(),
+      commune: json['commune']?.toString(),
+      localite: json['localite']?.toString(),
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
+      disponible: json['disponible'] as bool? ?? true,
+      quantiteStock: (json['quantiteStock'] as num?)?.toInt() ?? 0,
+      prix: (json['prix'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+}
+
 /// Modèle complet du détail d'un produit traditionnel.
 /// Conforme à `PopulationProduitDetailResponse.java`.
 class ProduitDetailModel {
@@ -85,6 +137,7 @@ class ProduitDetailModel {
   final int nombreAvis;
   final List<CompositionItemModel> compositions;
   final List<ProduitMaladieModel> maladies;
+  final List<OffrePharmacopeeModel> offresPharmacopees;
 
   const ProduitDetailModel({
     required this.id,
@@ -100,6 +153,7 @@ class ProduitDetailModel {
     this.nombreAvis = 0,
     this.compositions = const [],
     this.maladies = const [],
+    this.offresPharmacopees = const [],
   });
 
   String get prixFormate {
@@ -130,6 +184,10 @@ class ProduitDetailModel {
           const [],
       maladies: (json['maladies'] as List<dynamic>?)
               ?.map((e) => ProduitMaladieModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      offresPharmacopees: (json['offresPharmacopees'] as List<dynamic>?)
+              ?.map((e) => OffrePharmacopeeModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
     );

@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/routing/route_names.dart';
 import '../../../auth/providers/auth_state_provider.dart';
+import '../../../commandes/providers/commande_provider.dart';
 import '../../../panier/providers/panier_provider.dart';
 import '../../providers/pharmacopee_detail_controller.dart';
 import '../../providers/pharmacopee_provider.dart';
@@ -248,6 +250,8 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                             ProduitDetailModal.show(
                               context,
                               produit: produit,
+                              pharmacopeeId: pharma.id,
+                              nomPharmacopee: pharma.nom,
                             );
                           },
                           onAddToCart: () {
@@ -263,25 +267,16 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                             }
 
                             ref
-                                .read(panierProvider.notifier)
-                                .ajouterProduit(produit.toProduitModel());
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  '${produit.nom} ajouté au panier !',
-                                ),
-                                backgroundColor: AppColors.primary,
-                                behavior: SnackBarBehavior.floating,
-                                duration: const Duration(seconds: 2),
-                                action: SnackBarAction(
-                                  label: 'Voir panier',
-                                  textColor: Colors.white,
-                                  onPressed: () {
-                                    // Naviguer vers le panier
-                                  },
-                                ),
-                              ),
-                            );
+                                .read(panierStateProvider.notifier)
+                                .ajouterProduit(
+                                  produit.produitId,
+                                  pharmacopeeId: pharma.id,
+                                  nomPharmacopee: pharma.nom,
+                                 );
+                            ref.read(checkoutProvider.notifier).initCheckout(
+                                  pharmacopeeId: pharma.id,
+                                  nomPharmacopee: pharma.nom,
+                                );
                           },
                         );
                       },
@@ -314,8 +309,9 @@ class PharmacopeeDetailPage extends ConsumerWidget {
       // Bouton flottant du panier si des articles ont été ajoutés
       floatingActionButton: nombreArticlesPanier > 0
           ? FloatingActionButton.extended(
+              heroTag: 'fab_pharmacopee_panier',
               onPressed: () {
-                // Navigation vers le panier
+                context.push(RouteNames.citizenPanierViewPath);
               },
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,

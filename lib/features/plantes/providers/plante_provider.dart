@@ -5,6 +5,8 @@ import '../services/plante_service.dart';
 
 import '../models/produit_detail_model.dart';
 
+import '../models/produit_model.dart';
+
 final planteServiceProvider = Provider<PlanteService>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   return PlanteService(apiClient: apiClient);
@@ -26,4 +28,10 @@ final produitDetailProvider = FutureProvider.autoDispose
     .family<ProduitDetailModel?, int>((ref, id) async {
   final service = ref.watch(planteServiceProvider);
   return service.getProduitDetail(id);
+});
+
+final produitsByPlanteProvider = FutureProvider.autoDispose
+    .family<List<ProduitModel>, int>((ref, id) async {
+  final service = ref.watch(planteServiceProvider);
+  return service.getProduitsByPlante(id);
 });
