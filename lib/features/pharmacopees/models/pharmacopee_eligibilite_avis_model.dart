@@ -37,3 +37,4 @@ class PharmacopeeEligibiliteAvisModel {
         'message': message,
       };
 }
+

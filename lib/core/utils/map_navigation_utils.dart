@@ -78,3 +78,4 @@ class MapNavigationUtils {
     return false;
   }
 }
+

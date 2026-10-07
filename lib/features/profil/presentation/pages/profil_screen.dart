@@ -143,10 +143,8 @@ class ProfilScreen extends ConsumerWidget {
                 ),
               ),
       ),
-      bottomNavigationBar: const BottomAppBar(
-        child: SizedBox(
-          height: 20,
-        ),
+      bottomNavigationBar: const SizedBox(
+        height: 110,
       ),
     );
   }

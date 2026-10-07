@@ -264,3 +264,4 @@ class PharmacopeeMiniMapCard extends StatelessWidget {
     );
   }
 }
+

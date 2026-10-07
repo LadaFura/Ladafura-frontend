@@ -9,6 +9,7 @@ import '../../../../core/utils/image_utils.dart';
 import '../../models/pharmacopee_detail_model.dart';
 import '../../../../core/routing/route_names.dart';
 import '../../../../core/utils/phone_call_utils.dart';
+import '../../../../shared/widgets/navigation/navigation_provider.dart';
 
 /// En-tête moderne et immersif pour la fiche d'une pharmacopée agréée.
 /// - Grande image avec overlay en dégradé
@@ -324,7 +325,8 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
                               onTap: () {
                                 final isCitizen = GoRouterState.of(context).uri.toString().startsWith('/citizen');
                                 final cartePath = isCitizen ? RouteNames.citizenCartePath : RouteNames.visitorCartePath;
-                                context.push(cartePath);
+                                ref.read(navigationIndexProvider.notifier).setIndex(2);
+                                context.go(cartePath);
                               },
                               child: const Text(
                                 'Voir sur la carte',
