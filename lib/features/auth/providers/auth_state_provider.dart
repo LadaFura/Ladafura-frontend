@@ -103,6 +103,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
   })  : _repository = repository,
         _ref = ref,
         super(_resolveInitialState(repository)) {
+    // Écouter l'invalidation automatique du jeton (401 Unauthorized) via ApiClient
+    _ref.read(apiClientProvider).setOnTokenExpired(() {
+      onSessionExpired();
+    });
+
     // Informer le routeur et vérifier le token de façon asynchrone après le montage initial
     Future.microtask(() {
       final cached = _repository.getCachedUser();
@@ -267,6 +272,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
             isInitializing: false,
           );
       return false;
+    }
+  }
+
+  /// Déconnexion automatique déclenchée lorsque le jeton expire ou devient invalide (401).
+  Future<void> onSessionExpired() async {
+    try {
+      await _repository.logout();
+    } catch (_) {
+      // Ignorer
+    } finally {
+      state = const AuthState.error('Votre session a expiré. Veuillez vous reconnecter.');
+      _ref.read(authRoutingStateProvider).update(
+            isAuthenticated: false,
+            role: null,
+            isInitializing: false,
+          );
     }
   }
 

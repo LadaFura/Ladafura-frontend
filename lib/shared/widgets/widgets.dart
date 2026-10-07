@@ -14,7 +14,7 @@ export 'inputs/search_bar_widget.dart';
 export 'cards/plante_card.dart';
 export 'cards/status_badge.dart';
 
-// Feedback & Alertes
+export 'feedback/app_confirmation_dialog.dart';
 export 'feedback/app_empty_state.dart';
 export 'feedback/app_error_widget.dart';
 export 'feedback/app_loading_indicator.dart';

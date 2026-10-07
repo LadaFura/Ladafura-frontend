@@ -73,10 +73,10 @@ class PopulationConnaissanceTraditionnelleModel {
       id: json['id'] as int?,
       usageRapporte: json['usageRapporte'] as String? ?? '',
       partieUtilisee: json['partieUtilisee'] as String?,
-      modePreparation: json['modePreparation'] as String?,
+      modePreparation: (json['modePreparation'] ?? json['preparation']) as String?,
       posologie: json['posologie'] as String?,
-      precautions: json['precautions'] as String?,
-      informateurSource: json['informateurSource'] as String?,
+      precautions: (json['precautions'] ?? json['precaution']) as String?,
+      informateurSource: (json['informateurSource'] ?? json['description']) as String?,
     );
   }
 
@@ -117,9 +117,9 @@ class PopulationEtudeScientifiqueModel {
       titre: json['titre'] as String? ?? '',
       auteurs: json['auteurs'] as String?,
       annee: json['annee']?.toString(),
-      revueOuInstitution: json['revueOuInstitution'] as String?,
+      revueOuInstitution: (json['revueOuInstitution'] ?? json['reference']) as String?,
       resume: json['resume'] as String?,
-      urlDocument: json['urlDocument'] as String?,
+      urlDocument: (json['urlDocument'] ?? json['documentUrl']) as String?,
     );
   }
 

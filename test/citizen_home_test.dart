@@ -85,6 +85,12 @@ class _FakeCitizenAuthNotifier extends StateNotifier<AuthState>
   Future<bool> signInWithGoogle({UserRole? role}) async => true;
 
   @override
+  Future<void> onSessionExpired() async {
+    logoutCalled = true;
+    state = const AuthState.unauthenticated();
+  }
+
+  @override
   Future<void> logout() async {
     logoutCalled = true;
     state = const AuthState.unauthenticated();
