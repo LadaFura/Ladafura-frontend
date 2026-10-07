@@ -58,10 +58,12 @@ class _CommandeValidationScreenState
     final checkout = ref.read(checkoutProvider);
     final notifier = ref.read(checkoutProvider.notifier);
 
-    if (checkout.selectedModeRetrait == null) {
+    if (checkout.selectedModeRetrait == null ||
+        !checkout.selectedModeRetrait!.actif) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Veuillez sélectionner un mode de mise à disposition.'),
+          content:
+              Text('Veuillez sélectionner un mode de mise à disposition valide et actif.'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -168,11 +170,15 @@ class _CommandeValidationScreenState
           ),
         ),
         data: (retraitOptions) {
-          // Si aucun mode n'est sélectionné, initialiser avec le premier disponible
+          // Filtrer les options de retrait actuellement actives
+          final activeOptions =
+              retraitOptions.options.where((o) => o.actif).toList();
+
+          // Si aucun mode n'est sélectionné, initialiser avec le premier mode ACTIF disponible
           if (checkout.selectedModeRetrait == null &&
-              retraitOptions.options.isNotEmpty) {
+              activeOptions.isNotEmpty) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              notifier.selectModeRetrait(retraitOptions.options.first);
+              notifier.selectModeRetrait(activeOptions.first);
             });
           }
 
@@ -196,6 +202,36 @@ class _CommandeValidationScreenState
                       .copyWith(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
+
+                if (activeOptions.isEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: AppDimensions.space12),
+                    padding: const EdgeInsets.all(AppDimensions.space12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withAlpha(25),
+                      borderRadius:
+                          BorderRadius.circular(AppDimensions.radiusCard),
+                      border: Border.all(color: Colors.orange.withAlpha(80)),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.warning_amber_rounded,
+                            color: Colors.orange, size: 22),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "Cette officine n'a actuellement aucun mode de retrait ou livraison actif.",
+                            style: TextStyle(
+                              color: Colors.orange,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                 CommandeModeRetraitSelector(
                   options: retraitOptions.options,
                   selected: checkout.selectedModeRetrait,

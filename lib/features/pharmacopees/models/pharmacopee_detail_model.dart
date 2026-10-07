@@ -1,4 +1,4 @@
-import '../../../../core/services/location_service.dart';
+import 'package:ladafura_frontend_flutter/core/services/location_service.dart';
 
 /// Mode de retrait proposé par la pharmacopée (Livraison ou Pickup).
 /// Conforme au DTO backend `PopulationPharmacopeeModeRetraitDto.java`.

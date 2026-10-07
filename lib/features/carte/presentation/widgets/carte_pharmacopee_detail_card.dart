@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
-import '../../../../core/services/location_service.dart';
+import 'package:ladafura_frontend_flutter/core/services/location_service.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../pharmacopees/models/pharmacopee_model.dart';
 

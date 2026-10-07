@@ -114,6 +114,13 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
   }
 
   void selectModeRetrait(ModeRetraitOptionModel mode) {
+    if (!mode.actif) {
+      state = state.copyWith(
+        errorMessage:
+            "Ce mode de retrait n'est actuellement pas disponible pour cette pharmacopée.",
+      );
+      return;
+    }
     state = state.copyWith(
       selectedModeRetrait: mode,
       errorMessage: null,

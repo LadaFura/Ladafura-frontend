@@ -1,4 +1,4 @@
-import '../../../../core/services/location_service.dart';
+import 'package:ladafura_frontend_flutter/core/services/location_service.dart';
 
 /// Modèle synthétique d'une pharmacopée traditionnelle agréée LADAFURA.
 ///

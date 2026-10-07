@@ -1,4 +1,4 @@
-import '../../../../core/services/location_service.dart';
+import 'package:ladafura_frontend_flutter/core/services/location_service.dart';
 
 /// Modèle de résultat consolidé de la recherche universelle LADAFURA.
 ///

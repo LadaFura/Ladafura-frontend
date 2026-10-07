@@ -8,7 +8,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routing/route_names.dart';
-import '../../../../core/services/location_service.dart';
+import 'package:ladafura_frontend_flutter/core/services/location_service.dart';
 import '../../../../shared/widgets/feedback/app_loading_indicator.dart';
 import '../../../home/providers/home_discovery_provider.dart';
 import '../../../pharmacopees/models/pharmacopee_model.dart';
