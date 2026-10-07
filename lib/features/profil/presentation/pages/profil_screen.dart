@@ -109,10 +109,8 @@ class ProfilScreen extends ConsumerWidget {
                     ProfilActiviteSection(
                       totalCommandes:
                           profilState.profil?.nombreTotalCommandes ?? 0,
-                      totalFavoris:
-                          profilState.profil?.nombreTotalFavoris ?? 0,
-                      unreadNotifications:
-                          profilState.unreadNotificationsCount,
+                      totalFavoris: profilState.profil?.nombreTotalFavoris ?? 0,
+                      unreadNotifications: profilState.unreadNotificationsCount,
                       onTapCommandes: () {
                         context.pushNamed(RouteNames.citizenCommandes);
                       },
@@ -144,6 +142,11 @@ class ProfilScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+      ),
+      bottomNavigationBar: const BottomAppBar(
+        child: SizedBox(
+          height: 20,
+        ),
       ),
     );
   }

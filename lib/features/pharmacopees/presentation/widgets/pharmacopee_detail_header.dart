@@ -7,6 +7,8 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/services/services_providers.dart';
 import '../../../../core/utils/image_utils.dart';
 import '../../models/pharmacopee_detail_model.dart';
+import '../../../../core/routing/route_names.dart';
+import '../../../../core/utils/phone_call_utils.dart';
 
 /// En-tête moderne et immersif pour la fiche d'une pharmacopée agréée.
 /// - Grande image avec overlay en dégradé
@@ -22,14 +24,17 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
     required this.pharmacopee,
   });
 
-  void _showContactInfo(BuildContext context, String phone) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Numéro de contact : $phone'),
-        backgroundColor: AppColors.primary,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+  void _callPharmacopee(BuildContext context, String phone) async {
+    final success = await PhoneCallUtils.makePhoneCall(phone);
+    if (!success && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Impossible de composer le $phone'),
+          backgroundColor: AppColors.primary,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   @override
@@ -181,7 +186,7 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
                     const SizedBox(width: 8),
                     IconButton.filledTonal(
                       onPressed: () =>
-                          _showContactInfo(context, pharmacopee.telephone!),
+                          _callPharmacopee(context, pharmacopee.telephone!),
                       icon: const Icon(Icons.phone_in_talk_rounded, size: 20),
                       style: IconButton.styleFrom(
                         backgroundColor: AppColors.primaryLight,
@@ -317,8 +322,9 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
                             ],
                             InkWell(
                               onTap: () {
-                                // Naviguer vers la carte avec focus sur cette pharmacopée
-                                context.push('/map?focusId=${pharmacopee.id}');
+                                final isCitizen = GoRouterState.of(context).uri.toString().startsWith('/citizen');
+                                final cartePath = isCitizen ? RouteNames.citizenCartePath : RouteNames.visitorCartePath;
+                                context.push(cartePath);
                               },
                               child: const Text(
                                 'Voir sur la carte',

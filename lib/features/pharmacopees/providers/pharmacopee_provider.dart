@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ladafura_frontend_flutter/core/network/network_providers.dart';
 import '../models/pharmacopee_avis_item_model.dart';
 import '../models/pharmacopee_detail_model.dart';
+import '../models/pharmacopee_eligibilite_avis_model.dart';
 import '../models/pharmacopee_model.dart';
 import '../models/pharmacopee_produit_item_model.dart';
 import '../services/pharmacopee_service.dart';
@@ -36,6 +37,13 @@ final pharmacopeeAvisProvider =
     FutureProvider.autoDispose.family<List<PharmacopeeAvisItemModel>, int>((ref, id) async {
   final service = ref.watch(pharmacopeeServiceProvider);
   return service.getAvisByPharmacopee(id);
+});
+
+/// Fournisseur d'éligibilité pour déposer/modifier un avis.
+final pharmacopeeEligibiliteAvisProvider =
+    FutureProvider.autoDispose.family<PharmacopeeEligibiliteAvisModel?, int>((ref, id) async {
+  final service = ref.watch(pharmacopeeServiceProvider);
+  return service.verifierEligibiliteAvis(id);
 });
 
 /// Fournisseur rétrocompatible

@@ -10,12 +10,16 @@ import '../../../commandes/providers/commande_provider.dart';
 import '../../../panier/providers/panier_provider.dart';
 import '../../providers/pharmacopee_detail_controller.dart';
 import '../../providers/pharmacopee_provider.dart';
+import '../../../../core/services/services_providers.dart';
 import '../widgets/connexion_requise_dialog.dart';
+import '../widgets/donner_avis_modal.dart';
 import '../widgets/pharmacopee_avis_section.dart';
 import '../widgets/pharmacopee_detail_header.dart';
 import '../widgets/pharmacopee_detail_skeleton.dart';
+import '../widgets/pharmacopee_mini_map_card.dart';
 import '../widgets/pharmacopee_modes_retrait_selector.dart';
 import '../widgets/pharmacopee_produit_card.dart';
+import '../widgets/pharmacopee_quick_actions_bar.dart';
 import '../widgets/pharmacopee_search_bar.dart';
 import '../widgets/produit_detail_modal.dart';
 
@@ -51,11 +55,56 @@ class PharmacopeeDetailPage extends ConsumerWidget {
         ref.watch(pharmacopeeFilteredProduitsProvider(pharmacopeeId));
     final categories = ref.watch(pharmacopeeCategoriesProvider(pharmacopeeId));
     final avisAsync = ref.watch(pharmacopeeAvisProvider(pharmacopeeId));
+    final eligibiliteAsync =
+        ref.watch(pharmacopeeEligibiliteAvisProvider(pharmacopeeId));
+    final userPositionAsync = ref.watch(userLocationProvider);
+    final userCoords = userPositionAsync.valueOrNull;
 
     // Panier pour le badge flottant ou en haut
     final panierItems = ref.watch(panierProvider);
     final nombreArticlesPanier =
         panierItems.fold(0, (sum, item) => sum + item.quantite);
+
+    void handleDonnerAvis(String nomPharma) {
+      final authState = ref.read(authStateProvider);
+      if (!authState.isAuthenticated) {
+        ConnexionRequiseDialog.show(
+          context,
+          title: 'Connexion requise',
+          description:
+              'Vous devez être connecté à votre compte citoyen pour donner votre avis sur cette pharmacopée.',
+        );
+        return;
+      }
+
+      final eligibilite = eligibiliteAsync.valueOrNull;
+      if (eligibilite != null && !eligibilite.eligible && !eligibilite.dejaEvalue) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              eligibilite.message ??
+                  'Vous devez avoir passé au moins une commande livrée auprès de cette pharmacopée pour déposer un avis.',
+            ),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        return;
+      }
+
+      DonnerAvisModal.show(
+        context,
+        pharmacopeeId: pharmacopeeId,
+        nomPharmacopee: nomPharma,
+        eligibilite: eligibilite,
+        pharmacopeeService: ref.read(pharmacopeeServiceProvider),
+        onAvisSubmitted: () {
+          ref.invalidate(pharmacopeeAvisProvider(pharmacopeeId));
+          ref.invalidate(pharmacopeeFullDetailProvider(pharmacopeeId));
+          ref.invalidate(pharmacopeeEligibiliteAvisProvider(pharmacopeeId));
+        },
+      );
+    }
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
@@ -116,6 +165,35 @@ class PharmacopeeDetailPage extends ConsumerWidget {
               // 1 & 2. En-tête moderne (Couverture, infos principales de la pharmacopée)
               SliverToBoxAdapter(
                 child: PharmacopeeDetailHeader(pharmacopee: pharma),
+              ),
+
+              const SliverToBoxAdapter(
+                child: SizedBox(height: AppDimensions.space12),
+              ),
+
+              // Actions rapides : 📞 Appeler | 📍 Itinéraire | ⭐ Donner un avis
+              SliverToBoxAdapter(
+                child: PharmacopeeQuickActionsBar(
+                  pharmacopee: pharma,
+                  userCoordinates: userCoords,
+                  onDonnerAvis: () => handleDonnerAvis(pharma.nom),
+                ),
+              ),
+
+              const SliverToBoxAdapter(
+                child: SizedBox(height: AppDimensions.space16),
+              ),
+
+              // Carte interactive & Itinéraire Google Maps
+              SliverToBoxAdapter(
+                child: PharmacopeeMiniMapCard(
+                  pharmacopee: pharma,
+                  userCoordinates: userCoords,
+                ),
+              ),
+
+              const SliverToBoxAdapter(
+                child: SizedBox(height: AppDimensions.space16),
               ),
 
               // 3. Barre de recherche de produits fixée au défilement (Sticky pinned header)
@@ -294,7 +372,13 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                 child: avisAsync.when(
                   loading: () => const SizedBox.shrink(),
                   error: (_, __) => const SizedBox.shrink(),
-                  data: (avis) => PharmacopeeAvisSection(avis: avis),
+                  data: (avis) => PharmacopeeAvisSection(
+                    avis: avis,
+                    noteMoyenne: pharma.noteMoyenne,
+                    nombreAvis: pharma.nombreAvis,
+                    eligibilite: eligibiliteAsync.valueOrNull,
+                    onDonnerAvis: () => handleDonnerAvis(pharma.nom),
+                  ),
                 ),
               ),
 
