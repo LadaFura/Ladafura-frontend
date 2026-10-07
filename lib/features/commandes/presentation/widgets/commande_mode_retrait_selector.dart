@@ -30,25 +30,30 @@ class CommandeModeRetraitSelector extends StatelessWidget {
     return Column(
       children: options.map((opt) {
         final isSelected = selected?.id == opt.id;
+        final isAvailable = opt.actif;
         final icon = opt.isLivraison
             ? Icons.delivery_dining_rounded
             : Icons.store_mall_directory_rounded;
 
         return InkWell(
-          onTap: () => onSelected(opt),
+          onTap: isAvailable ? () => onSelected(opt) : null,
           borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
           child: Container(
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(AppDimensions.space12),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? primaryColor.withAlpha(20)
-                  : (isDark ? AppColors.darkSurface : Colors.white),
+              color: !isAvailable
+                  ? (isDark ? Colors.grey.shade900 : Colors.grey.shade100)
+                  : isSelected
+                      ? primaryColor.withAlpha(20)
+                      : (isDark ? AppColors.darkSurface : Colors.white),
               borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
               border: Border.all(
-                color: isSelected
-                    ? primaryColor
-                    : (isDark ? AppColors.darkBorder : AppColors.border),
+                color: !isAvailable
+                    ? (isDark ? Colors.grey.shade800 : Colors.grey.shade300)
+                    : isSelected
+                        ? primaryColor
+                        : (isDark ? AppColors.darkBorder : AppColors.border),
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -56,9 +61,11 @@ class CommandeModeRetraitSelector extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  color: isSelected
-                      ? primaryColor
-                      : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                  color: !isAvailable
+                      ? AppColors.textMuted
+                      : isSelected
+                          ? primaryColor
+                          : (isDark ? Colors.grey[400] : Colors.grey[600]),
                   size: 24,
                 ),
                 const SizedBox(width: 12),

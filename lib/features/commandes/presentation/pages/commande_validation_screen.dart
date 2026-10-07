@@ -168,11 +168,13 @@ class _CommandeValidationScreenState
           ),
         ),
         data: (retraitOptions) {
-          // Si aucun mode n'est sélectionné, initialiser avec le premier disponible
-          if (checkout.selectedModeRetrait == null &&
-              retraitOptions.options.isNotEmpty) {
+          // Filtrer uniquement les modes de mise à disposition réellement actifs
+          final activeOptions = retraitOptions.options.where((o) => o.actif).toList();
+
+          // Si aucun mode n'est sélectionné, initialiser avec le premier mode actif
+          if (checkout.selectedModeRetrait == null && activeOptions.isNotEmpty) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              notifier.selectModeRetrait(retraitOptions.options.first);
+              notifier.selectModeRetrait(activeOptions.first);
             });
           }
 
@@ -196,11 +198,38 @@ class _CommandeValidationScreenState
                       .copyWith(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
-                CommandeModeRetraitSelector(
-                  options: retraitOptions.options,
-                  selected: checkout.selectedModeRetrait,
-                  onSelected: (opt) => notifier.selectModeRetrait(opt),
-                ),
+                if (activeOptions.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(AppDimensions.space16),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.darkSurface : Colors.amber.shade50,
+                      borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+                      border: Border.all(color: Colors.amber.shade300),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.warning_amber_rounded,
+                            color: Colors.amber, size: 28),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Cette pharmacopée n\'a actuellement aucun mode de retrait ou livraison actif.',
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.amber.shade900,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  CommandeModeRetraitSelector(
+                    options: activeOptions,
+                    selected: checkout.selectedModeRetrait,
+                    onSelected: (opt) => notifier.selectModeRetrait(opt),
+                  ),
                 const SizedBox(height: AppDimensions.space16),
 
                 // 3. Formulaire de livraison conditionnel ou infos retrait
