@@ -6,8 +6,23 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/agent/presentation/dashboard/screens/agent_dashboard_screen.dart';
 import '../../features/collectes/presentations/screen/ListeCollectes.dart';
 import '../../features/auth/auth.dart';
-import '../../features/population/presentation/home/screens/citizen_home_screen.dart';
-import '../../features/visitor/presentation/screens/accueil_screen.dart';
+import '../../features/home/presentation/pages/citizen_home_screen.dart';
+import '../../features/recherche/presentation/pages/citizen_search_screen.dart';
+import '../../features/home/presentation/pages/accueil_screen.dart';
+import '../../features/carte/presentation/pages/carte_screen.dart';
+import '../../features/panier/presentation/pages/panier_screen.dart';
+import '../../features/profil/presentation/pages/profil_screen.dart';
+import '../../features/profil/presentation/pages/modifier_profil_screen.dart';
+import '../../features/profil/presentation/pages/parametres_screen.dart';
+import '../../features/plantes/presentation/pages/plante_detail_page.dart';
+import '../../features/commandes/presentation/pages/commandes_screen.dart';
+import '../../features/commandes/presentation/pages/commande_validation_screen.dart';
+import '../../features/commandes/presentation/pages/commande_paiement_screen.dart';
+import '../../features/commandes/presentation/pages/commande_confirmation_screen.dart';
+import '../../features/commandes/presentation/pages/commande_detail_page.dart';
+import '../../features/commandes/models/commande_model.dart';
+import '../../features/commandes/models/paiement_model.dart';
+import '../../features/pharmacopees/presentation/pages/pharmacopee_detail_page.dart';
 import '../../shared/enums/user_role.dart';
 import '../../shared/widgets/navigation/app_shell.dart';
 import '../../shared/widgets/navigation/navigation_provider.dart';
@@ -20,6 +35,11 @@ part 'app_router.g.dart';
 /// Clé globale de navigation permettant la navigation sans contexte si nécessaire.
 final GlobalKey<NavigatorState> rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'rootNavigator');
+
+final GlobalKey<NavigatorState> visitorShellNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'visitorShellNavigator');
+final GlobalKey<NavigatorState> citizenShellNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'citizenShellNavigator');
 
 /// Modèle d'état d'authentification pour le routeur.
 class AuthRoutingState extends ChangeNotifier {
@@ -139,8 +159,9 @@ GoRouter appRouter(AppRouterRef ref) {
         builder: (context, state) => const RoleSelectionScreen(),
       ),
 
-      // 3. Espace Visiteur (Public libre avec barre de navigation)
+      // 3. Espace Visiteur (Navigation principale avec barre de navigation)
       ShellRoute(
+        navigatorKey: visitorShellNavigatorKey,
         builder: (context, state, child) =>
             AppShell(location: state.matchedLocation, child: child),
         routes: [
@@ -152,40 +173,29 @@ GoRouter appRouter(AppRouterRef ref) {
           GoRoute(
             path: RouteNames.visitorRecherchePath,
             name: RouteNames.visitorRecherche,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Recherche Universelle'),
+            builder: (context, state) => const CitizenSearchScreen(),
           ),
           GoRoute(
             path: RouteNames.visitorCartePath,
             name: RouteNames.visitorCarte,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Carte de la Flore Malienne'),
+            builder: (context, state) => const CarteScreen(),
           ),
           GoRoute(
             path: RouteNames.visitorPanierPath,
             name: RouteNames.visitorPanier,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Mon Panier'),
+            builder: (context, state) => const PanierScreen(),
           ),
           GoRoute(
             path: RouteNames.visitorProfilPath,
             name: RouteNames.visitorProfil,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Mon Profil'),
-          ),
-          GoRoute(
-            path: RouteNames.visitorPlanteDetailPath,
-            name: RouteNames.visitorPlanteDetail,
-            builder: (context, state) => _RoutePlaceholder(
-              title: 'Détail Plante (${state.pathParameters['id']})',
-              isSecondary: true,
-            ),
+            builder: (context, state) => const ProfilScreen(),
           ),
         ],
       ),
 
-      // 4. Espace Citoyen / Population (Flore & Savoirs ancestraux)
+      // 4. Espace Citoyen / Population (5 Onglets principaux avec barre de navigation)
       ShellRoute(
+        navigatorKey: citizenShellNavigatorKey,
         builder: (context, state, child) =>
             AppShell(location: state.matchedLocation, child: child),
         routes: [
@@ -193,50 +203,146 @@ GoRouter appRouter(AppRouterRef ref) {
             path: RouteNames.citizenHomePath,
             name: RouteNames.citizenHome,
             builder: (context, state) => const CitizenHomeScreen(),
-            routes: [
-              GoRoute(
-                path: 'recherche',
-                name: RouteNames.citizenRecherche,
-                builder: (context, state) => const _RoutePlaceholder(
-                    title: 'Recherche Flore & Maladies'),
-              ),
-              GoRoute(
-                path: 'plantes/:id',
-                name: RouteNames.citizenPlanteDetail,
-                builder: (context, state) => _RoutePlaceholder(
-                  title: 'Fiche Plante (${state.pathParameters['id']})',
-                  isSecondary: true,
-                ),
-              ),
-              GoRoute(
-                path: 'carte',
-                name: RouteNames.citizenCarte,
-                builder: (context, state) => const _RoutePlaceholder(
-                    title: 'Carte de la Flore Malienne'),
-              ),
-              GoRoute(
-                path: 'panier',
-                name: RouteNames.citizenPanier,
-                builder: (context, state) =>
-                    const _RoutePlaceholder(title: 'Mon Panier'),
-              ),
-              GoRoute(
-                path: 'favoris',
-                name: RouteNames.citizenFavoris,
-                builder: (context, state) => const _RoutePlaceholder(
-                  title: 'Plantes Favorites',
-                  isSecondary: true,
-                ),
-              ),
-              GoRoute(
-                path: 'profil',
-                name: RouteNames.citizenProfil,
-                builder: (context, state) =>
-                    const _RoutePlaceholder(title: 'Profil Citoyen'),
-              ),
-            ],
+          ),
+          GoRoute(
+            path: RouteNames.citizenRecherchePath,
+            name: RouteNames.citizenRecherche,
+            builder: (context, state) => const CitizenSearchScreen(),
+          ),
+          GoRoute(
+            path: RouteNames.citizenCartePath,
+            name: RouteNames.citizenCarte,
+            builder: (context, state) => const CarteScreen(),
+          ),
+          GoRoute(
+            path: RouteNames.citizenPanierPath,
+            name: RouteNames.citizenPanier,
+            builder: (context, state) => const PanierScreen(),
+          ),
+          GoRoute(
+            path: RouteNames.citizenProfilPath,
+            name: RouteNames.citizenProfil,
+            builder: (context, state) => const ProfilScreen(),
           ),
         ],
+      ),
+
+      // =======================================================================
+      // PAGES SECONDAIRES CITOYEN (SANS Bottom Navigation Bar - Plein écran avec retour)
+      // =======================================================================
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.citizenPlanteDetailPath,
+        name: RouteNames.citizenPlanteDetail,
+        builder: (context, state) => PlanteDetailPage(
+          planteId:
+              int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+        ),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.citizenPharmacopeeDetailPath,
+        name: RouteNames.citizenPharmacopeeDetail,
+        builder: (context, state) => PharmacopeeDetailPage(
+          pharmacopeeId:
+              int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+        ),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.citizenCommandesPath,
+        name: RouteNames.citizenCommandes,
+        builder: (context, state) => const CommandesScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.citizenCommandeValidationPath,
+        name: RouteNames.citizenCommandeValidation,
+        builder: (context, state) => const CommandeValidationScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.citizenCommandePaiementPath,
+        name: RouteNames.citizenCommandePaiement,
+        builder: (context, state) {
+          final commande = state.extra as CommandeDetailModel?;
+          if (commande == null) {
+            return const CommandesScreen();
+          }
+          return CommandePaiementScreen(commande: commande);
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.citizenCommandeConfirmationPath,
+        name: RouteNames.citizenCommandeConfirmation,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final commande = extra?['commande'] as CommandeDetailModel?;
+          final paiement = extra?['paiement'] as PaiementResponseModel?;
+          if (commande == null || paiement == null) {
+            return const CommandesScreen();
+          }
+          return CommandeConfirmationScreen(
+            commande: commande,
+            paiement: paiement,
+          );
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.citizenCommandeDetailPath,
+        name: RouteNames.citizenCommandeDetail,
+        builder: (context, state) => CommandeDetailPage(
+          commandeId: int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+        ),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.citizenFavorisPath,
+        name: RouteNames.citizenFavoris,
+        builder: (context, state) => const _RoutePlaceholder(
+          title: 'Plantes Favorites',
+          isSecondary: true,
+        ),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.citizenPanierViewPath,
+        name: RouteNames.citizenPanierView,
+        builder: (context, state) => const PanierScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.citizenModifierProfilPath,
+        name: RouteNames.citizenModifierProfil,
+        builder: (context, state) => const ModifierProfilScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.citizenParametresPath,
+        name: RouteNames.citizenParametres,
+        builder: (context, state) => const ParametresScreen(),
+      ),
+
+      // =======================================================================
+      // PAGES SECONDAIRES VISITEUR (SANS Bottom Navigation Bar - Plein écran avec retour)
+      // =======================================================================
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.visitorPlanteDetailPath,
+        name: RouteNames.visitorPlanteDetail,
+        builder: (context, state) => PlanteDetailPage(
+          planteId: int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+        ),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.visitorPharmacopeeDetailPath,
+        name: RouteNames.visitorPharmacopeeDetail,
+        builder: (context, state) => PharmacopeeDetailPage(
+          pharmacopeeId: int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+        ),
       ),
 
       // 5. Espace Agent de Collecte Terrain (Collectes botaniques & Récits oraux)

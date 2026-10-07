@@ -19,6 +19,15 @@ class StorageService {
   static const String _keyUserName = 'ladafura_user_name';
   static const String _keyOnboardingDone = 'ladafura_onboarding_completed';
   static const String _keyThemeMode = 'ladafura_theme_mode';
+  static const String _keyRecentSearches = 'ladafura_recent_searches';
+
+  static const List<String> defaultRecentSearches = [
+    'Moringa',
+    'Pharmacopée dagaba',
+    'Diabète',
+    'Kinkeliba',
+    'Bissap',
+  ];
 
   final SharedPreferences _prefs;
   static StorageService? _instance;
@@ -216,7 +225,66 @@ class StorageService {
   }
 
   // ===========================================================================
-  // 3. UTILITAIRES GÉNÉRIQUES
+  // 3. HISTORIQUE DES RECHERCHES RÉCENTES
+  // ===========================================================================
+
+  /// Récupère la liste des termes recherchés récemment.
+  List<String> getRecentSearches() {
+    return _prefs.getStringList(_keyRecentSearches) ?? defaultRecentSearches;
+  }
+
+  /// Sauvegarde la liste complète des recherches récentes.
+  Future<bool> saveRecentSearches(List<String> searches) {
+    return _prefs.setStringList(_keyRecentSearches, searches);
+  }
+
+  /// Ajoute un terme en tête de l'historique sans doublon (max 10 éléments).
+  Future<bool> addRecentSearch(String term) {
+    final clean = term.trim();
+    if (clean.isEmpty) return Future.value(false);
+    final list = List<String>.from(getRecentSearches());
+    list.removeWhere((item) => item.toLowerCase() == clean.toLowerCase());
+    list.insert(0, clean);
+    if (list.length > 10) {
+      list.removeRange(10, list.length);
+    }
+    return saveRecentSearches(list);
+  }
+
+  /// Supprime un terme de l'historique de recherche.
+  Future<bool> removeRecentSearch(String term) {
+    final list = List<String>.from(getRecentSearches());
+    list.removeWhere((item) => item.toLowerCase() == term.toLowerCase());
+    return saveRecentSearches(list);
+  }
+
+  // ===========================================================================
+  // 4. PHARMACOPÉE DU PANIER
+  // ===========================================================================
+
+  static const String _keyCartPharmacopeeId = 'ladafura_cart_pharmacopee_id';
+  static const String _keyCartPharmacopeeNom = 'ladafura_cart_pharmacopee_nom';
+
+  /// Enregistre la pharmacopée liée au panier actif.
+  Future<void> saveCartPharmacopee(int id, String nom) async {
+    await _prefs.setInt(_keyCartPharmacopeeId, id);
+    await _prefs.setString(_keyCartPharmacopeeNom, nom);
+  }
+
+  /// Récupère l'ID de la pharmacopée associée au panier.
+  int? getCartPharmacopeeId() => _prefs.getInt(_keyCartPharmacopeeId);
+
+  /// Récupère le nom de la pharmacopée associée au panier.
+  String? getCartPharmacopeeNom() => _prefs.getString(_keyCartPharmacopeeNom);
+
+  /// Supprime la pharmacopée associée au panier.
+  Future<void> clearCartPharmacopee() async {
+    await _prefs.remove(_keyCartPharmacopeeId);
+    await _prefs.remove(_keyCartPharmacopeeNom);
+  }
+
+  // ===========================================================================
+  // 5. UTILITAIRES GÉNÉRIQUES
   // ===========================================================================
 
   String? getString(String key) => _prefs.getString(key);

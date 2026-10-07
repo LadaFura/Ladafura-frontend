@@ -80,12 +80,68 @@ class ApiEndpoints {
 
   // --- Recherche & Découverte Flore ---
   static const String populationRecherche = '/population/recherche';
+  static const String populationRecherchePharmacopees =
+      '/population/recherche/pharmacopees';
   static const String populationRecherchePlantes =
       '/population/recherche/plantes';
   static const String populationRechercheVernaculaires =
       '/population/recherche/vernaculaires';
   static const String populationRechercheMaladies =
       '/population/recherche/maladies';
+  static const String populationRechercheProduits =
+      '/population/recherche/produits';
+
+  // --- Carte & Proximité GPS ---
+  static const String populationCartePharmacopees =
+      '/population/carte/pharmacopees';
+  static String populationCartePharmacopeeDetail(String id) =>
+      '/population/carte/pharmacopees/$id';
+  static const String populationCarteProduit = '/population/carte/produit';
+
+  // --- Pharmacopées Traditionnelles Agréées ---
+  static const String populationPharmacopees = '/population/pharmacopees';
+  static String populationPharmacopeeDetail(String id) =>
+      '/population/pharmacopees/$id';
+  static String populationPharmacopeeProduits(String id) =>
+      '/population/pharmacopees/$id/produits';
+  static String populationPharmacopeeModesRetrait(String id) =>
+      '/population/pharmacopees/$id/modes-retrait';
+  static String populationPharmacopeeAvis(String id) =>
+      '/population/pharmacopees/$id/avis';
+
+  // --- Produits & Remèdes Traditionnels (Fura) ---
+  static const String populationProduits = '/population/produits';
+  static String populationProduitDetail(String id) =>
+      '/population/produits/$id';
+
+  // --- Panier Citoyen ---
+  static const String populationPanier = '/population/panier';
+  static const String populationPanierLignes = '/population/panier/lignes';
+  static String populationPanierLigneDetail(String id) =>
+      '/population/panier/lignes/$id';
+
+  // --- Commandes Citoyen & Retrait ---
+  static const String populationCommandes = '/population/commandes';
+  static const String populationCommandesRecapitulatif =
+      '/population/commandes/recapitulatif';
+  static String populationCommandeDetail(String id) =>
+      '/population/commandes/$id';
+  static String populationCommandeStatut(String id) =>
+      '/population/commandes/$id/statut';
+  static String populationCommandeAnnuler(String id) =>
+      '/population/commandes/$id/annuler';
+
+  // --- Modes de Retrait & Livraison ---
+  static String populationRetraitPharmacopee(String pharmacopeeId) =>
+      '/population/retrait/pharmacopees/$pharmacopeeId';
+  static const String populationRetraitEstimer = '/population/retrait/estimer';
+
+  // --- Paiements Citoyen ---
+  static const String populationPaiements = '/population/paiements';
+  static const String populationPaiementsMethodes =
+      '/population/paiements/methodes';
+  static String populationPaiementCommande(String commandeId) =>
+      '/population/paiements/commandes/$commandeId';
 
   // --- Plantes Médicinales Maliennes ---
   static const String populationPlantes = '/population/plantes';
@@ -94,6 +150,8 @@ class ApiEndpoints {
       '/population/plantes/$id/connaissances';
   static String populationPlanteEtudes(String id) =>
       '/population/plantes/$id/etudes';
+  static String populationPlanteProduits(String id) =>
+      '/population/plantes/$id/produits';
 
   // --- Favoris (Bookmarks personnels) ---
   static const String populationFavoris = '/population/favoris';

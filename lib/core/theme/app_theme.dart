@@ -13,7 +13,7 @@ class AppTheme {
   // ☀️ THÈME CLAIR (LIGHT THEME)
   // ===========================================================================
   static ThemeData get lightTheme {
-    final baseTextTheme = GoogleFonts.poppinsTextTheme();
+    final baseTextTheme = GoogleFonts.robotoTextTheme();
 
     return ThemeData(
       useMaterial3: true,
@@ -34,7 +34,7 @@ class AppTheme {
         outline: AppColors.border,
       ),
 
-      // Typographie Poppins stricte (Light)
+      // Typographie Roboto stricte (Light)
       textTheme: baseTextTheme.copyWith(
         displayLarge: AppTextStyles.h1,
         headlineLarge: AppTextStyles.h1,
@@ -158,7 +158,7 @@ class AppTheme {
   // 🌙 THÈME SOMBRE (DARK THEME)
   // ===========================================================================
   static ThemeData get darkTheme {
-    final baseTextTheme = GoogleFonts.poppinsTextTheme();
+    final baseTextTheme = GoogleFonts.robotoTextTheme();
 
     return ThemeData(
       useMaterial3: true,

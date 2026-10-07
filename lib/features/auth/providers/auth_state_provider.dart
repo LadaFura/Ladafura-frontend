@@ -4,10 +4,10 @@ import 'package:ladafura_frontend_flutter/core/routing/app_router.dart';
 import 'package:ladafura_frontend_flutter/core/services/services_providers.dart';
 import 'package:ladafura_frontend_flutter/shared/enums/user_role.dart';
 import 'package:ladafura_frontend_flutter/shared/models/utilisateur_model.dart';
-import '../data/models/register_request_model.dart';
-import '../data/repositories/auth_repository.dart';
-import '../data/services/firebase_auth_service.dart';
-import '../data/services/google_auth_service.dart';
+import '../models/register_request_model.dart';
+import '../services/auth_repository.dart';
+import '../services/firebase_auth_service.dart';
+import '../services/google_auth_service.dart';
 import '../../../core/config/firebase_options.dart';
 
 /// Statut de l'état d'authentification de l'utilisateur.
@@ -103,6 +103,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
   })  : _repository = repository,
         _ref = ref,
         super(_resolveInitialState(repository)) {
+    // Écouter l'invalidation automatique du jeton (401 Unauthorized) via ApiClient
+    _ref.read(apiClientProvider).setOnTokenExpired(() {
+      onSessionExpired();
+    });
+
     // Informer le routeur et vérifier le token de façon asynchrone après le montage initial
     Future.microtask(() {
       final cached = _repository.getCachedUser();
@@ -270,6 +275,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /// Déconnexion automatique déclenchée lorsque le jeton expire ou devient invalide (401).
+  Future<void> onSessionExpired() async {
+    try {
+      await _repository.logout();
+    } catch (_) {
+      // Ignorer
+    } finally {
+      state = const AuthState.error('Votre session a expiré. Veuillez vous reconnecter.');
+      _ref.read(authRoutingStateProvider).update(
+            isAuthenticated: false,
+            role: null,
+            isInitializing: false,
+          );
+    }
+  }
+
   /// Déconnexion complète de l'utilisateur.
   Future<void> logout() async {
     try {
@@ -291,4 +312,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   return AuthNotifier(repository: repository, ref: ref);
+});
+
+/// Fournisseur pratique pour accéder directement à l'utilisateur connecté courant.
+final currentUserProvider = Provider<UtilisateurModel?>((ref) {
+  return ref.watch(authStateProvider).user;
 });

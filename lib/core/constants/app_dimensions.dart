@@ -150,7 +150,7 @@ class AppDimensions {
   static const double radiusInput = 8.0;
   static const double radiusButton = 8.0;
 
-  /// 12 px : Cartes de plantes, produits et officines (cards)
+  /// 12 px : Cartes de plantes, produits et pharmacopées (cards)
   static const double radiusCard = 12.0;
 
   /// 16 px : Modales, popups et conteneurs surélevés
@@ -219,6 +219,12 @@ class AppDimensions {
 
   /// Hauteur totale d'une carte plante dans la grille du catalogue : 240 px
   static const double cardPlantGridHeight = 240.0;
+
+  /// Largeur d'une carte plante dans le carrousel d'accueil horizontal : 190 px
+  static const double cardPlantHomeWidth = 190.0;
+
+  /// Hauteur ajustée d'une carte plante dans le carrousel d'accueil : 230 px
+  static const double cardPlantHomeHeight = 230.0;
 
   /// Largeur d'une carte produit dans un carrousel horizontal : 160 px
   static const double cardMarketplaceWidth = 160.0;
