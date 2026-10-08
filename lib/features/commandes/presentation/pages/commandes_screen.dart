@@ -32,7 +32,7 @@ class _CommandesScreenState extends ConsumerState<CommandesScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? AppColors.darkAccent : AppColors.primary;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
     final auth = ref.watch(authStateProvider);
 
     if (!auth.isAuthenticated) {
@@ -60,9 +60,18 @@ class _CommandesScreenState extends ConsumerState<CommandesScreen> {
         ref.watch(commandesHistoriqueProvider(_selectedStatutFilter));
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
+      backgroundColor:
+          isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
-        title: const Text('Mes Commandes'),
+        title: Text(
+          'Mes Commandes',
+          style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () {

@@ -20,7 +20,7 @@ class CommandeModeRetraitSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? AppColors.darkAccent : AppColors.primary;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
 
     if (options.isEmpty) {
       return const Text(
@@ -43,18 +43,18 @@ class CommandeModeRetraitSelector extends StatelessWidget {
             padding: const EdgeInsets.all(AppDimensions.space12),
             decoration: BoxDecoration(
               color: !isAvailable
-                  ? (isDark ? Colors.grey.shade900 : Colors.grey.shade100)
+                  ? (isDark ? AppColors.darkSurfaceVariant : const Color(0xFFF1F5F9))
                   : isSelected
                       ? primaryColor.withAlpha(20)
-                      : (isDark ? AppColors.darkSurface : Colors.white),
+                      : (isDark ? AppColors.darkSurface : AppColors.surface),
               borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
               border: Border.all(
                 color: !isAvailable
-                    ? (isDark ? Colors.grey.shade800 : Colors.grey.shade300)
+                    ? (isDark ? AppColors.darkBorder : AppColors.border)
                     : isSelected
                         ? primaryColor
                         : (isDark ? AppColors.darkBorder : AppColors.border),
-                width: isSelected ? 2 : 1,
+                width: isSelected ? 1.5 : AppDimensions.cardBorderWidth,
               ),
             ),
             child: Row(

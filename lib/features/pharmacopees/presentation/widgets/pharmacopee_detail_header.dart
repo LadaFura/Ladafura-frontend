@@ -237,12 +237,6 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    Icon(
-                      Icons.medication_rounded,
-                      size: 14,
-                      color: isDark ? AppColors.darkPrimary : AppColors.primary,
-                    ),
-                    const SizedBox(width: 4),
                     Text(
                       '${pharmacopee.nombreProduits} remèdes',
                       style: TextStyle(

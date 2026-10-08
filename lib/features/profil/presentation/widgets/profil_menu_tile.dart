@@ -30,7 +30,7 @@ class ProfilMenuTile extends StatelessWidget {
       ),
       leading: Icon(
         icon,
-        color: iconColor ?? (isDark ? AppColors.darkAccent : AppColors.primary),
+        color: iconColor ?? (isDark ? AppColors.darkPrimary : AppColors.primary),
       ),
       title: Text(
         title,

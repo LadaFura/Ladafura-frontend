@@ -24,20 +24,21 @@ class CommandeConfirmationReceiptCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? AppColors.darkAccent : AppColors.primary;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
 
     return Container(
       padding: const EdgeInsets.all(AppDimensions.space20),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusModal),
         border: Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.border,
+          width: AppDimensions.cardBorderWidth,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(isDark ? 30 : 10),
-            blurRadius: 10,
+            color: Colors.black.withAlpha(isDark ? 16 : 4),
+            blurRadius: 12,
             offset: const Offset(0, 3),
           ),
         ],
@@ -49,29 +50,29 @@ class CommandeConfirmationReceiptCard extends StatelessWidget {
             value: commande.numero,
             isBold: true,
           ),
-          const Divider(height: 16),
+          Divider(height: 16, thickness: 1, color: isDark ? AppColors.darkBorder : AppColors.border.withAlpha(120)),
           CommandeConfirmationInfoRow(
             label: 'Date & heure',
             value: _formatDate(commande.dateCommande),
           ),
-          const Divider(height: 16),
+          Divider(height: 16, thickness: 1, color: isDark ? AppColors.darkBorder : AppColors.border.withAlpha(120)),
           CommandeConfirmationInfoRow(
             label: 'Pharmacopée',
             value: commande.nomPharmacopee,
           ),
-          const Divider(height: 16),
+          Divider(height: 16, thickness: 1, color: isDark ? AppColors.darkBorder : AppColors.border.withAlpha(120)),
           CommandeConfirmationInfoRow(
             label: 'Mode de retrait',
             value: commande.modeRetrait,
           ),
-          const Divider(height: 16),
+          Divider(height: 16, thickness: 1, color: isDark ? AppColors.darkBorder : AppColors.border.withAlpha(120)),
           CommandeConfirmationInfoRow(
             label: 'Règlement',
             value: paiement.libelleMethode.isNotEmpty
                 ? paiement.libelleMethode
                 : paiement.methode,
           ),
-          const Divider(height: 16),
+          Divider(height: 16, thickness: 1, color: isDark ? AppColors.darkBorder : AppColors.border.withAlpha(120)),
           CommandeConfirmationInfoRow(
             label: 'Statut paiement',
             value: paiement.statut == 'REUSSI'
@@ -83,7 +84,7 @@ class CommandeConfirmationReceiptCard extends StatelessWidget {
                 ? Colors.green
                 : Colors.orange,
           ),
-          const Divider(height: 20),
+          Divider(height: 20, thickness: 1, color: isDark ? AppColors.darkBorder : AppColors.border.withAlpha(120)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

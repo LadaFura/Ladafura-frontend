@@ -231,7 +231,7 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                 ),
               ],
 
-              // Titre de section "Remèdes & Produits disponibles"
+              // Titre de section "Remèdes disponibles" (Design épuré et moderne sans icône superflue)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -240,21 +240,13 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.medication_rounded,
-                              color: AppColors.primary, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Remèdes disponibles (${filteredProduits.length})',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  isDark ? Colors.white : AppColors.textPrimary,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'Remèdes disponibles (${filteredProduits.length})',
+                        style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
+                            .copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       if (controllerState.searchQuery.isNotEmpty ||
                           controllerState.selectedCategory != null)
@@ -315,7 +307,7 @@ class PharmacopeeDetailPage extends ConsumerWidget {
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.78,
+                      childAspectRatio: 0.72,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),

@@ -63,7 +63,7 @@ class GoogleSignInButton extends StatelessWidget {
                 child: CircularProgressIndicator(
                   strokeWidth: 2.2,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    isDark ? AppColors.darkAccent : AppColors.primary,
+                    isDark ? AppColors.darkPrimary : AppColors.primary,
                   ),
                 ),
               )

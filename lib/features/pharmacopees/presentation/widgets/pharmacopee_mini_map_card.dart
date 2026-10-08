@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../core/utils/map_navigation_utils.dart';
 import '../../models/pharmacopee_detail_model.dart';
@@ -81,37 +82,27 @@ class PharmacopeeMiniMapCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // En-tête de la carte
+          // En-tête de la carte (Design sobre et moderne)
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkPrimaryContainer : AppColors.primaryLight,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.pin_drop_rounded, size: 18, color: AppColors.primary),
-                ),
-                const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Emplacement & Accès',
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: (isDark ? AppTextStyles.h4Dark : AppTextStyles.h4).copyWith(
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : AppColors.textPrimary,
                         ),
                       ),
+                      const SizedBox(height: 2),
                       Text(
                         pharmacopee.localisation?.adresseComplete ?? 'Mali',
-                        style: TextStyle(
+                        style: (isDark ? AppTextStyles.captionDark : AppTextStyles.caption).copyWith(
                           fontSize: 12,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

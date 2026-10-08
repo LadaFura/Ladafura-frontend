@@ -102,7 +102,7 @@ class AgentDashboardScreen extends ConsumerWidget {
             tooltip: isDark ? 'Mode clair' : 'Mode sombre',
             icon: Icon(
               isDark ? Icons.light_mode_rounded : Icons.dark_mode_outlined,
-              color: isDark ? AppColors.darkAccent : AppColors.primary,
+              color: isDark ? Colors.white : AppColors.primary,
             ),
             onPressed: () {
               ref
@@ -321,6 +321,7 @@ class AgentDashboardScreen extends ConsumerWidget {
     required Color iconColor,
     required VoidCallback onTap,
   }) {
+    final effectiveIconColor = isDark ? Colors.white : iconColor;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
@@ -339,10 +340,12 @@ class AgentDashboardScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(AppDimensions.space12),
               decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.12),
+                color: isDark
+                    ? AppColors.darkPrimaryContainer
+                    : iconColor.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: iconColor, size: 24),
+              child: Icon(icon, color: effectiveIconColor, size: 24),
             ),
             const SizedBox(width: AppDimensions.space16),
             Expanded(

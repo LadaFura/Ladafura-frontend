@@ -29,45 +29,25 @@ class PlanteProduitsAssociesWidget extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // En-tête de section
-        Row(
+        // En-tête de section (Design moderne et épuré)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(AppDimensions.space8),
-              decoration: BoxDecoration(
-                color: (isDark ? AppColors.darkAccent : AppColors.primary)
-                    .withAlpha(25),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.medication_rounded,
-                color: isDark ? AppColors.darkAccent : AppColors.primary,
-                size: 20,
-              ),
+            Text(
+              'Produits & Formulations Associés',
+              style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
+                  .copyWith(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(width: AppDimensions.space12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Produits & Formulations Associés',
-                    style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                        .copyWith(fontSize: 16),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Remèdes traditionnels préparés contenant cette plante',
-                    style: (isDark
-                            ? AppTextStyles.captionDark
-                            : AppTextStyles.caption)
-                        .copyWith(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 2),
+            Text(
+              'Remèdes traditionnels préparés contenant cette plante',
+              style: (isDark
+                      ? AppTextStyles.captionDark
+                      : AppTextStyles.caption)
+                  .copyWith(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ],
@@ -215,14 +195,14 @@ class PlanteProduitsAssociesWidget extends ConsumerWidget {
                         errorBuilder: (_, __, ___) => Icon(
                           Icons.medication_outlined,
                           color:
-                              isDark ? AppColors.darkAccent : AppColors.primary,
+                              isDark ? AppColors.darkPrimary : AppColors.primary,
                           size: 32,
                         ),
                       )
                     : Icon(
                         Icons.medication_outlined,
                         color:
-                            isDark ? AppColors.darkAccent : AppColors.primary,
+                            isDark ? AppColors.darkPrimary : AppColors.primary,
                         size: 32,
                       ),
               ),
@@ -245,7 +225,7 @@ class PlanteProduitsAssociesWidget extends ConsumerWidget {
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         color: isDark
-                            ? AppColors.darkAccent
+                            ? AppColors.darkPrimary
                             : AppColors.primary,
                       ),
                     ),
@@ -298,7 +278,7 @@ class PlanteProduitsAssociesWidget extends ConsumerWidget {
                         ),
                         decoration: BoxDecoration(
                           color: (isDark
-                                  ? AppColors.darkAccent
+                                  ? AppColors.darkPrimary
                                   : AppColors.primary)
                               .withAlpha(25),
                           borderRadius:
@@ -314,7 +294,7 @@ class PlanteProduitsAssociesWidget extends ConsumerWidget {
                                       : AppTextStyles.caption)
                                   .copyWith(
                                 color: isDark
-                                    ? AppColors.darkAccent
+                                    ? AppColors.darkPrimary
                                     : AppColors.primary,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 11,
@@ -325,7 +305,7 @@ class PlanteProduitsAssociesWidget extends ConsumerWidget {
                               Icons.arrow_forward_ios_rounded,
                               size: 10,
                               color: isDark
-                                  ? AppColors.darkAccent
+                                  ? AppColors.darkPrimary
                                   : AppColors.primary,
                             ),
                           ],

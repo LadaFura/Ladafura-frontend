@@ -359,7 +359,7 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage>
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? AppColors.darkAccent : AppColors.primary)
+              ? (isDark ? AppColors.darkPrimary : AppColors.primary)
               : Colors.transparent,
           borderRadius:
               BorderRadius.circular(AppDimensions.radiusCard - 2),
@@ -367,7 +367,7 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage>
               ? [
                   BoxShadow(
                     color: (isDark
-                            ? AppColors.darkAccent
+                            ? AppColors.darkPrimary
                             : AppColors.primary)
                         .withAlpha(50),
                     blurRadius: 8,
@@ -383,8 +383,8 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage>
               icon,
               size: 16,
               color: isSelected
-                  ? Colors.white
-                  : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                  ? (isDark ? AppColors.darkBackground : Colors.white)
+                  : (isDark ? Colors.white70 : AppColors.textSecondary),
             ),
             const SizedBox(width: 6),
             Flexible(
@@ -397,9 +397,9 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage>
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                   fontSize: 12,
                   color: isSelected
-                      ? Colors.white
+                      ? (isDark ? AppColors.darkBackground : Colors.white)
                       : (isDark
-                          ? AppColors.darkTextSecondary
+                          ? Colors.white70
                           : AppColors.textSecondary),
                 ),
                 maxLines: 1,
@@ -415,7 +415,7 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage>
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? Colors.white.withAlpha(60)
+                      ? (isDark ? Colors.black26 : Colors.white.withAlpha(60))
                       : (isDark
                               ? AppColors.darkSurfaceVariant
                               : AppColors.surface)
@@ -429,9 +429,9 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage>
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     color: isSelected
-                        ? Colors.white
+                        ? (isDark ? AppColors.darkBackground : Colors.white)
                         : (isDark
-                            ? AppColors.darkAccent
+                            ? AppColors.darkPrimary
                             : AppColors.primary),
                   ),
                 ),

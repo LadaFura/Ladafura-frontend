@@ -147,7 +147,15 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
     }
   }
 
-  Future<CommandeDetailModel?> passerCommande() async {
+  /// Valide la commande et son paiement simultanément de façon atomique.
+  /// Si le paiement échoue, aucune commande n'est créée et le panier reste intact.
+  Future<CommandeDetailModel?> passerEtPayerCommande({
+    required String methode,
+    String? operateur,
+    String? telephoneMobileMoney,
+    String? referenceTransaction,
+    bool simulerSucces = true,
+  }) async {
     if (state.pharmacopeeId == null || state.selectedModeRetrait == null) {
       state = state.copyWith(
           errorMessage: "Veuillez sélectionner un mode de mise à disposition.");
@@ -169,6 +177,11 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
         modeRetraitId: state.selectedModeRetrait!.id,
         adresseLivraison: state.adresseLivraison,
         notes: state.notes,
+        methode: methode,
+        operateur: operateur,
+        telephoneMobileMoney: telephoneMobileMoney,
+        referenceTransaction: referenceTransaction,
+        simulerSucces: simulerSucces,
       );
       state = state.copyWith(
         isLoading: false,
@@ -178,10 +191,15 @@ class CheckoutNotifier extends StateNotifier<CheckoutState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: "Erreur lors de la validation : $e",
+        errorMessage: "Échec du règlement : $e",
       );
-      return null;
+      rethrow;
     }
+  }
+
+  /// Rétrocompatibilité : passe la commande avec la méthode CASH par défaut
+  Future<CommandeDetailModel?> passerCommande({String methode = 'CASH'}) async {
+    return passerEtPayerCommande(methode: methode);
   }
 
   void reset() {

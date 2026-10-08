@@ -71,9 +71,18 @@ class CommandeDetailPage extends ConsumerWidget {
     final commandeAsync = ref.watch(commandeDetailProvider(commandeId));
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
+      backgroundColor:
+          isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
-        title: const Text('Détail de la commande'),
+        title: Text(
+          'Détail de la commande',
+          style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),

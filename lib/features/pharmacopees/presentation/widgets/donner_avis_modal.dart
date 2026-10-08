@@ -98,7 +98,7 @@ class _DonnerAvisModalState extends State<DonnerAvisModal> {
           content: Text(
             dejaEvalue
                 ? 'Votre avis a été mis à jour avec succès.'
-                : 'Merci pour votre avis ! Il sera visible dès modération.',
+                : 'Merci pour votre avis ! Il a été publié avec succès.',
           ),
           backgroundColor: AppColors.primary,
           behavior: SnackBarBehavior.floating,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/constants/app_text_styles.dart';
 import '../../models/pharmacopee_avis_item_model.dart';
 import '../../models/pharmacopee_eligibilite_avis_model.dart';
 
@@ -29,47 +30,20 @@ class PharmacopeeAvisSection extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final noteAffichee = noteMoyenne > 0 ? noteMoyenne.toStringAsFixed(1) : '5.0';
 
-    final dejaEvalue = eligibilite?.dejaEvalue == true;
-    final boutonLabel = dejaEvalue ? 'Modifier mon avis' : 'Donner mon avis';
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppDimensions.space16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Titre de la section avec bouton action
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.rate_review_rounded, color: AppColors.primary, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Avis & Expériences ($nombreAvis)',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : AppColors.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-              TextButton.icon(
-                onPressed: onDonnerAvis,
-                icon: Icon(
-                  dejaEvalue ? Icons.edit_note_rounded : Icons.star_border_rounded,
-                  size: 18,
-                  color: AppColors.primary,
-                ),
-                label: Text(
-                  boutonLabel,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                ),
-              ),
-            ],
+          // Titre de la section (Design épuré sans bouton redondant)
+          Text(
+            'Avis & Expériences ($nombreAvis)',
+            style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const SizedBox(height: AppDimensions.space8),
+          const SizedBox(height: AppDimensions.space12),
 
           // Carte de synthèse de note
           Container(

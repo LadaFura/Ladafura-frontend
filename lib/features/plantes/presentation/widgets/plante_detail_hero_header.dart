@@ -168,7 +168,7 @@ class PlanteDetailHeroHeader extends StatelessWidget {
         Text(
           plante.nomScientifique,
           style: (isDark ? AppTextStyles.h1Dark : AppTextStyles.h1).copyWith(
-            color: isDark ? AppColors.darkAccent : AppColors.primary,
+            color: isDark ? AppColors.darkPrimary : AppColors.primary,
             fontStyle: FontStyle.italic,
             letterSpacing: 0.2,
           ),
@@ -187,39 +187,28 @@ class PlanteDetailHeroHeader extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: (isDark ? AppColors.darkAccent : AppColors.primary)
+                  color: (isDark ? AppColors.darkPrimary : AppColors.primary)
                       .withAlpha(20),
                   borderRadius: BorderRadius.circular(AppDimensions.radiusBadge),
                   border: Border.all(
-                    color: (isDark ? AppColors.darkAccent : AppColors.primary)
+                    color: (isDark ? AppColors.darkPrimary : AppColors.primary)
                         .withAlpha(70),
                   ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.translate_rounded,
-                      size: 13,
-                      color: isDark ? AppColors.darkAccent : AppColors.primary,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      v.langue.trim().isNotEmpty
-                          ? '${v.nom} (${v.langue})'
-                          : v.nom,
-                      style: (isDark
-                              ? AppTextStyles.captionDark
-                              : AppTextStyles.caption)
-                          .copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                        color: isDark
-                            ? AppColors.darkTextPrimary
-                            : AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  v.langue.trim().isNotEmpty
+                      ? '${v.nom} (${v.langue})'
+                      : v.nom,
+                  style: (isDark
+                          ? AppTextStyles.captionDark
+                          : AppTextStyles.caption)
+                      .copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                  ),
                 ),
               );
             }).toList(),
@@ -274,7 +263,7 @@ class PlanteDetailHeroHeader extends StatelessWidget {
             Icon(
               Icons.eco_rounded,
               size: 64,
-              color: isDark ? AppColors.darkAccent : AppColors.primary,
+              color: isDark ? AppColors.darkPrimary : AppColors.primary,
             ),
             const SizedBox(height: AppDimensions.space8),
             Text(

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/constants/app_text_styles.dart';
 import '../../models/profil_model.dart';
 
 /// Carte utilisateur moderne en en-tête inspirée de la référence visuelle :
-/// - Avatar circulaire élégant avec initiales ou icône utilisateur générique
-/// - Nom complet en gras
-/// - Email ou téléphone en secondaire
-/// - Lien discret "Modifier mon profil" avec icône stylo
+/// - Avatar circulaire élégant avec initiales
+/// - Nom complet en gras avec typographie officielle
+/// - Email ou téléphone avec texte secondaire officiel
+/// - Bouton d'action "Modifier mon profil"
 class ModernProfileUserCard extends StatelessWidget {
   final ProfilModel? profil;
   final VoidCallback onEditProfile;
@@ -21,7 +22,7 @@ class ModernProfileUserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? AppColors.darkAccent : AppColors.primary;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
 
     final nomComplet = profil?.nomComplet.isNotEmpty == true
         ? profil!.nomComplet
@@ -30,12 +31,13 @@ class ModernProfileUserCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.space16),
+      padding: AppDimensions.paddingCard,
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusModal),
         border: Border.all(
-          color: isDark ? AppColors.darkBorder : Colors.black.withAlpha(8),
+          color: isDark ? AppColors.darkBorder : AppColors.border,
+          width: AppDimensions.cardBorderWidth,
         ),
         boxShadow: [
           BoxShadow(
@@ -49,8 +51,8 @@ class ModernProfileUserCard extends StatelessWidget {
         children: [
           // Avatar circulaire
           Container(
-            width: 60,
-            height: 60,
+            width: AppDimensions.avatarLarge,
+            height: AppDimensions.avatarLarge,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: primaryColor.withAlpha(25),
@@ -62,10 +64,9 @@ class ModernProfileUserCard extends StatelessWidget {
             child: Center(
               child: Text(
                 profil?.initiales ?? 'U',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+                style: (isDark ? AppTextStyles.h2Dark : AppTextStyles.h2).copyWith(
                   color: primaryColor,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -80,46 +81,42 @@ class ModernProfileUserCard extends StatelessWidget {
               children: [
                 Text(
                   nomComplet,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? Colors.white : const Color(0xFF1E293B),
-                    letterSpacing: -0.2,
-                  ),
+                  style: isDark ? AppTextStyles.h4Dark : AppTextStyles.h4,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: AppDimensions.space4),
                 Text(
                   email,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
-                  ),
+                  style: isDark
+                      ? AppTextStyles.bodySecondaryDark
+                      : AppTextStyles.bodySecondary,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: AppDimensions.space8),
                 InkWell(
                   onTap: onEditProfile,
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppDimensions.space2,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           Icons.edit_outlined,
-                          size: 14,
+                          size: AppDimensions.iconSizeSmall,
                           color: primaryColor,
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: AppDimensions.space4),
                         Text(
                           'Modifier mon profil',
-                          style: TextStyle(
+                          style: AppTextStyles.label.copyWith(
                             fontSize: 13,
-                            fontWeight: FontWeight.w600,
                             color: primaryColor,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],

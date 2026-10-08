@@ -25,11 +25,19 @@ class CommandeDetailHeaderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.space16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusModal),
         border: Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.border,
+          width: AppDimensions.cardBorderWidth,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(isDark ? 16 : 4),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,7 +64,7 @@ class CommandeDetailHeaderCard extends StatelessWidget {
             style: (isDark ? AppTextStyles.captionDark : AppTextStyles.caption)
                 .copyWith(fontSize: 12),
           ),
-          const Divider(height: 16),
+          Divider(height: 16, thickness: 1, color: isDark ? AppColors.darkBorder : AppColors.border.withAlpha(120)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

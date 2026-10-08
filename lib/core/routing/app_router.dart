@@ -265,9 +265,6 @@ GoRouter appRouter(AppRouterRef ref) {
         name: RouteNames.citizenCommandePaiement,
         builder: (context, state) {
           final commande = state.extra as CommandeDetailModel?;
-          if (commande == null) {
-            return const CommandesScreen();
-          }
           return CommandePaiementScreen(commande: commande);
         },
       ),

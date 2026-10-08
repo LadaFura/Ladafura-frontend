@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routing/route_names.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../auth/providers/auth_state_provider.dart';
@@ -12,6 +13,7 @@ import '../widgets/modern_setting_section.dart';
 import '../widgets/profil_logout_dialog.dart';
 
 /// Page principale du Profil & Paramètres inspirée de l'interface moderne fournie.
+/// Intègre rigoureusement les constantes de design system (AppDimensions, AppTextStyles, AppColors).
 /// Organisée en sections cartes arrondies avec titres clairs :
 /// - En-tête : Avatar rond, Nom, Email, Action "Modifier mon profil"
 /// - Détails du compte : Mes informations, Mes commandes
@@ -32,56 +34,54 @@ class ProfilScreen extends ConsumerWidget {
     }
   }
 
-  String _getThemeLabel(ThemeMode mode, bool isDarkSystem) {
-    switch (mode) {
-      case ThemeMode.light:
-        return 'Clair';
-      case ThemeMode.dark:
-        return 'Sombre';
-      case ThemeMode.system:
-        return isDarkSystem ? 'Système (Sombre)' : 'Système (Clair)';
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final auth = ref.watch(authStateProvider);
     final profilState = ref.watch(profilProvider);
-    final currentTheme = ref.watch(themeModeProvider);
 
     // Vérifier l'état d'authentification
     if (!auth.isAuthenticated) {
       return Scaffold(
-        backgroundColor: isDark ? AppColors.darkBackground : const Color(0xFFF8FAFC),
+        backgroundColor:
+            isDark ? AppColors.darkBackground : AppColors.background,
         appBar: AppBar(
-          title: const Text('Profil'),
+          title: Text(
+            'Profil',
+            style: isDark ? AppTextStyles.h3Dark : AppTextStyles.h3,
+          ),
           centerTitle: true,
           automaticallyImplyLeading: false,
           elevation: 0,
         ),
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(AppDimensions.space24),
+            padding: AppDimensions.paddingModal,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.lock_outline_rounded,
-                    size: 64, color: Color(0xFF94A3B8)),
-                const SizedBox(height: 16),
-                const Text(
+                const Icon(
+                  Icons.lock_outline_rounded,
+                  size: AppDimensions.space64,
+                  color: AppColors.textMuted,
+                ),
+                const SizedBox(height: AppDimensions.space16),
+                Text(
                   'Veuillez vous connecter pour accéder à votre profil.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                  style: isDark ? AppTextStyles.bodyDark : AppTextStyles.body,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppDimensions.space20),
                 ElevatedButton.icon(
                   onPressed: () => context.push(RouteNames.loginPath),
                   icon: const Icon(Icons.login_rounded),
-                  label: const Text('Se connecter'),
+                  label: Text('Se connecter', style: AppTextStyles.button),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: AppDimensions.paddingButton,
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppDimensions.radiusButton),
+                    ),
                   ),
                 ),
               ],
@@ -97,15 +97,11 @@ class ProfilScreen extends ConsumerWidget {
     final unreadNotifs = profilState.unreadNotificationsCount;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : const Color(0xFFF8FAFC),
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Profil & Paramètres',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.3,
-          ),
+        title: Text(
+          'Profil',
+          style: isDark ? AppTextStyles.h3Dark : AppTextStyles.h3,
         ),
         centerTitle: true,
         automaticallyImplyLeading: false,
@@ -114,7 +110,10 @@ class ProfilScreen extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: 'Actualiser',
-            icon: const Icon(Icons.refresh_rounded, size: 22),
+            icon: const Icon(
+              Icons.refresh_rounded,
+              size: AppDimensions.iconSizeLarge,
+            ),
             onPressed: () {
               ref.read(profilProvider.notifier).chargerProfil();
             },
@@ -128,7 +127,7 @@ class ProfilScreen extends ConsumerWidget {
             : SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.space16,
+                  horizontal: AppDimensions.screenPaddingMobileH,
                   vertical: AppDimensions.space12,
                 ),
                 child: Column(
@@ -159,20 +158,23 @@ class ProfilScreen extends ConsumerWidget {
                           title: 'Mes commandes',
                           trailingBadge: totalCommandes > 0
                               ? Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 3,
-                                  ),
+                                  padding: AppDimensions.paddingBadge,
                                   decoration: BoxDecoration(
-                                    color: (isDark ? AppColors.darkAccent : AppColors.primary).withAlpha(30),
-                                    borderRadius: BorderRadius.circular(10),
+                                    color: (isDark
+                                            ? AppColors.darkPrimary
+                                            : AppColors.primary)
+                                        .withAlpha(30),
+                                    borderRadius: BorderRadius.circular(
+                                      AppDimensions.radiusBadge,
+                                    ),
                                   ),
                                   child: Text(
                                     '$totalCommandes',
-                                    style: TextStyle(
-                                      fontSize: 12,
+                                    style: AppTextStyles.badge.copyWith(
+                                      color: isDark
+                                          ? AppColors.darkPrimary
+                                          : AppColors.primary,
                                       fontWeight: FontWeight.bold,
-                                      color: isDark ? AppColors.darkAccent : AppColors.primary,
                                     ),
                                   ),
                                 )
@@ -194,20 +196,20 @@ class ProfilScreen extends ConsumerWidget {
                           title: 'Mes remèdes favoris',
                           trailingBadge: totalFavoris > 0
                               ? Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 3,
-                                  ),
+                                  padding: AppDimensions.paddingBadge,
                                   decoration: BoxDecoration(
-                                    color: Colors.red.withAlpha(20),
-                                    borderRadius: BorderRadius.circular(10),
+                                    color: AppColors.danger.withAlpha(20),
+                                    borderRadius: BorderRadius.circular(
+                                      AppDimensions.radiusBadge,
+                                    ),
                                   ),
                                   child: Text(
                                     '$totalFavoris',
-                                    style: const TextStyle(
-                                      fontSize: 12,
+                                    style: AppTextStyles.badge.copyWith(
+                                      color: isDark
+                                          ? AppColors.darkDanger
+                                          : AppColors.danger,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.redAccent,
                                     ),
                                   ),
                                 )
@@ -221,20 +223,20 @@ class ProfilScreen extends ConsumerWidget {
                           title: 'Notifications',
                           trailingBadge: unreadNotifs > 0
                               ? Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 3,
-                                  ),
+                                  padding: AppDimensions.paddingBadge,
                                   decoration: BoxDecoration(
-                                    color: Colors.orange.withAlpha(25),
-                                    borderRadius: BorderRadius.circular(10),
+                                    color: AppColors.warning.withAlpha(25),
+                                    borderRadius: BorderRadius.circular(
+                                      AppDimensions.radiusBadge,
+                                    ),
                                   ),
                                   child: Text(
                                     '$unreadNotifs non lue${unreadNotifs > 1 ? 's' : ''}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
+                                    style: AppTextStyles.badge.copyWith(
+                                      color: isDark
+                                          ? AppColors.darkWarning
+                                          : AppColors.warning,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.orange,
                                     ),
                                   ),
                                 )
@@ -246,6 +248,7 @@ class ProfilScreen extends ConsumerWidget {
                                   unreadNotifs > 0
                                       ? 'Vous avez $unreadNotifs notification(s) non lue(s).'
                                       : 'Aucune nouvelle notification pour le moment.',
+                                  style: AppTextStyles.bodySecondary,
                                 ),
                                 behavior: SnackBarBehavior.floating,
                               ),
@@ -269,11 +272,26 @@ class ProfilScreen extends ConsumerWidget {
                           },
                         ),
                         ModernSettingItem(
-                          icon: Icons.brightness_medium_outlined,
-                          title: 'Mode Clair / Sombre',
-                          valueText: _getThemeLabel(currentTheme, isDark),
+                          icon: isDark
+                              ? Icons.dark_mode_rounded
+                              : Icons.light_mode_rounded,
+                          title: 'Mode Sombre',
+                          iconColor: isDark ? Colors.white : AppColors.primary,
+                          showChevron: false,
+                          customTrailing: Switch.adaptive(
+                            value: isDark,
+                            activeThumbColor: AppColors.primary,
+                            activeTrackColor: AppColors.primary.withAlpha(80),
+                            onChanged: (val) {
+                              ref
+                                  .read(themeModeProvider.notifier)
+                                  .setThemeMode(val ? ThemeMode.dark : ThemeMode.light);
+                            },
+                          ),
                           onTap: () {
-                            ref.read(themeModeProvider.notifier).toggleTheme(currentIsDark: isDark);
+                            ref
+                                .read(themeModeProvider.notifier)
+                                .toggleTheme(currentIsDark: isDark);
                           },
                         ),
                         ModernSettingItem(
@@ -302,16 +320,20 @@ class ProfilScreen extends ConsumerWidget {
                         ModernSettingItem(
                           icon: Icons.logout_rounded,
                           title: 'Se déconnecter',
-                          iconColor: const Color(0xFFEF4444),
-                          titleColor: const Color(0xFFEF4444),
+                          iconColor: AppColors.danger,
+                          titleColor: AppColors.danger,
                           onTap: () => _handleLogout(context, ref),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 120),
+                    const SizedBox(
+                        height: AppDimensions.space96 + AppDimensions.space24),
                   ],
                 ),
               ),
+      ),
+      bottomNavigationBar: const SizedBox(
+        height: 110,
       ),
     );
   }

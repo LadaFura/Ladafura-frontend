@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/routing/route_names.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../auth/auth.dart';
 import '../../providers/commande_provider.dart';
@@ -111,13 +112,8 @@ class _CommandeValidationScreenState
     notifier.updateAdresseLivraison(fullAdresse ?? '');
     notifier.updateNotes(fullNotes);
 
-    final commande = await notifier.passerCommande();
-    if (commande != null && mounted) {
-      context.push(
-        '/citizen/commandes/paiement',
-        extra: commande,
-      );
-    }
+    // Navigation vers l'étape de paiement sans créer de commande préalable
+    context.push(RouteNames.citizenCommandePaiementPath);
   }
 
   @override
@@ -151,9 +147,18 @@ class _CommandeValidationScreenState
         ref.watch(pharmacopeeRetraitOptionsProvider(pharmacopeeId));
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
+      backgroundColor:
+          isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
-        title: const Text('Validation de commande'),
+        title: Text(
+          'Validation de commande',
+          style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),

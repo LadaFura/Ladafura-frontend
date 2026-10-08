@@ -17,11 +17,19 @@ class CommandeCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppDimensions.space12),
       padding: const EdgeInsets.all(AppDimensions.space16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusModal),
         border: Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.border,
+          width: AppDimensions.cardBorderWidth,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(isDark ? 16 : 4),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,7 +54,7 @@ class CommandeCard extends StatelessWidget {
                 child: Text(
                   commande.statut,
                   style: AppTextStyles.caption.copyWith(
-                    color: isDark ? AppColors.darkAccent : AppColors.primary,
+                    color: isDark ? AppColors.darkPrimary : AppColors.primary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -71,7 +79,7 @@ class CommandeCard extends StatelessWidget {
                 style: (isDark ? AppTextStyles.h4Dark : AppTextStyles.h4)
                     .copyWith(
                   fontWeight: FontWeight.bold,
-                  color: isDark ? AppColors.darkAccent : AppColors.primary,
+                  color: isDark ? AppColors.darkPrimary : AppColors.primary,
                 ),
               ),
             ],
