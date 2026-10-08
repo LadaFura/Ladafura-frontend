@@ -53,45 +53,25 @@ class EtudesScientifiquesCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // En-tête de section
-        Row(
+        // En-tête de section (Design moderne et épuré)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(AppDimensions.space8),
-              decoration: BoxDecoration(
-                color: (isDark ? AppColors.darkAccent : AppColors.primary)
-                    .withAlpha(25),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.biotech_rounded,
-                color: isDark ? AppColors.darkAccent : AppColors.primary,
-                size: 20,
-              ),
+            Text(
+              'Études Scientifiques & Validations',
+              style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
+                  .copyWith(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(width: AppDimensions.space12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Études Scientifiques & Validations',
-                    style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                        .copyWith(fontSize: 16),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${etudes.length} publication(s) universitaire(s) indexée(s)',
-                    style: (isDark
-                            ? AppTextStyles.captionDark
-                            : AppTextStyles.caption)
-                        .copyWith(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 2),
+            Text(
+              '${etudes.length} publication(s) universitaire(s) indexée(s)',
+              style: (isDark
+                      ? AppTextStyles.captionDark
+                      : AppTextStyles.caption)
+                  .copyWith(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ],
@@ -133,36 +113,14 @@ class EtudesScientifiquesCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Titre de l'étude
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 2),
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: (isDark ? AppColors.darkAccent : AppColors.primary)
-                      .withAlpha(25),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.menu_book_rounded,
-                  color: isDark ? AppColors.darkAccent : AppColors.primary,
-                  size: 16,
-                ),
-              ),
-              const SizedBox(width: AppDimensions.space8),
-              Expanded(
-                child: Text(
-                  etude.titre,
-                  style: (isDark ? AppTextStyles.h4Dark : AppTextStyles.h4)
-                      .copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ],
+          // Titre de l'étude (Design sobre et moderne)
+          Text(
+            etude.titre,
+            style: (isDark ? AppTextStyles.h4Dark : AppTextStyles.h4)
+                .copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
           ),
 
           const SizedBox(height: AppDimensions.space8),
@@ -228,7 +186,7 @@ class EtudesScientifiquesCard extends StatelessWidget {
                                   : AppTextStyles.caption)
                               .copyWith(
                             color: isDark
-                                ? AppColors.darkAccent
+                                ? AppColors.darkPrimary
                                 : AppColors.primary,
                             fontWeight: FontWeight.w600,
                           ),

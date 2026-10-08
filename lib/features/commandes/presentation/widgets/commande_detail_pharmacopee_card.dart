@@ -16,16 +16,24 @@ class CommandeDetailPharmacopeeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? AppColors.darkAccent : AppColors.primary;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
 
     return Container(
       padding: const EdgeInsets.all(AppDimensions.space16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusModal),
         border: Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.border,
+          width: AppDimensions.cardBorderWidth,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(isDark ? 16 : 4),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -150,7 +150,7 @@ class _PanierScreenState extends ConsumerState<PanierScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? AppColors.darkAccent : AppColors.primary;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
     final panierState = ref.watch(panierStateProvider);
     final notifier = ref.read(panierStateProvider.notifier);
 
@@ -299,11 +299,19 @@ class _PanierScreenState extends ConsumerState<PanierScreen> {
           ),
         ),
 
-        // Liste des articles
+        // Liste des articles avec séparateurs fins
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(AppDimensions.space16),
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.space16,
+              vertical: AppDimensions.space12,
+            ),
             itemCount: panierState.lignes.length,
+            separatorBuilder: (_, __) => Divider(
+              height: AppDimensions.space24,
+              thickness: 0.8,
+              color: isDark ? AppColors.darkBorder : const Color(0xFFF1F5F9),
+            ),
             itemBuilder: (context, index) {
               final ligne = panierState.lignes[index];
               return PanierItemCard(

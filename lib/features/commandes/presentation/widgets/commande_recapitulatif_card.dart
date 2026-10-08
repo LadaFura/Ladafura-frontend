@@ -18,7 +18,7 @@ class CommandeRecapitulatifCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? AppColors.darkAccent : AppColors.primary;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
 
     if (isLoading && recap == null) {
       return const Center(child: CircularProgressIndicator());
@@ -31,11 +31,19 @@ class CommandeRecapitulatifCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.space16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusModal),
         border: Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.border,
+          width: AppDimensions.cardBorderWidth,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(isDark ? 16 : 4),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -65,7 +73,13 @@ class CommandeRecapitulatifCard extends StatelessWidget {
                   ],
                 ),
               )),
-          const Divider(height: 16),
+          Divider(
+            height: 16,
+            thickness: 1,
+            color: isDark
+                ? AppColors.darkBorder
+                : AppColors.border.withAlpha(120),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -92,7 +106,13 @@ class CommandeRecapitulatifCard extends StatelessWidget {
               ),
             ],
           ),
-          const Divider(height: 20),
+          Divider(
+            height: 20,
+            thickness: 1,
+            color: isDark
+                ? AppColors.darkBorder
+                : AppColors.border.withAlpha(120),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

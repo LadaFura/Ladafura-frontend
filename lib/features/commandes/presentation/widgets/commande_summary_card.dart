@@ -19,25 +19,26 @@ class CommandeSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? AppColors.darkAccent : AppColors.primary;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+      borderRadius: BorderRadius.circular(AppDimensions.radiusModal),
       child: Container(
         margin: const EdgeInsets.only(bottom: AppDimensions.space12),
         padding: const EdgeInsets.all(AppDimensions.space16),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface : Colors.white,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+          color: isDark ? AppColors.darkSurface : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusModal),
           border: Border.all(
             color: isDark ? AppColors.darkBorder : AppColors.border,
+            width: AppDimensions.cardBorderWidth,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(isDark ? 25 : 8),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: Colors.black.withAlpha(isDark ? 16 : 4),
+              blurRadius: 12,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -88,9 +89,15 @@ class CommandeSummaryCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 8),
-            const Divider(height: 12),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppDimensions.space8),
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: isDark
+                  ? AppColors.darkBorder
+                  : AppColors.border.withAlpha(120),
+            ),
+            const SizedBox(height: AppDimensions.space8),
 
             // Mode de retrait, nombre d'articles et montant
             Row(

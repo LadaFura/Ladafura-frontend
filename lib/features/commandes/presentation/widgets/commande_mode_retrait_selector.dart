@@ -20,7 +20,7 @@ class CommandeModeRetraitSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? AppColors.darkAccent : AppColors.primary;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
 
     if (options.isEmpty) {
       return const Text(
@@ -30,35 +30,42 @@ class CommandeModeRetraitSelector extends StatelessWidget {
     return Column(
       children: options.map((opt) {
         final isSelected = selected?.id == opt.id;
+        final isAvailable = opt.actif;
         final icon = opt.isLivraison
             ? Icons.delivery_dining_rounded
             : Icons.store_mall_directory_rounded;
 
         return InkWell(
-          onTap: () => onSelected(opt),
+          onTap: isAvailable ? () => onSelected(opt) : null,
           borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
           child: Container(
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(AppDimensions.space12),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? primaryColor.withAlpha(20)
-                  : (isDark ? AppColors.darkSurface : Colors.white),
+              color: !isAvailable
+                  ? (isDark ? AppColors.darkSurfaceVariant : const Color(0xFFF1F5F9))
+                  : isSelected
+                      ? primaryColor.withAlpha(20)
+                      : (isDark ? AppColors.darkSurface : AppColors.surface),
               borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
               border: Border.all(
-                color: isSelected
-                    ? primaryColor
-                    : (isDark ? AppColors.darkBorder : AppColors.border),
-                width: isSelected ? 2 : 1,
+                color: !isAvailable
+                    ? (isDark ? AppColors.darkBorder : AppColors.border)
+                    : isSelected
+                        ? primaryColor
+                        : (isDark ? AppColors.darkBorder : AppColors.border),
+                width: isSelected ? 1.5 : AppDimensions.cardBorderWidth,
               ),
             ),
             child: Row(
               children: [
                 Icon(
                   icon,
-                  color: isSelected
-                      ? primaryColor
-                      : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                  color: !isAvailable
+                      ? AppColors.textMuted
+                      : isSelected
+                          ? primaryColor
+                          : (isDark ? Colors.grey[400] : Colors.grey[600]),
                   size: 24,
                 ),
                 const SizedBox(width: 12),

@@ -25,9 +25,18 @@ class CommandeConfirmationScreen extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
+      backgroundColor:
+          isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
-        title: const Text('Confirmation de commande'),
+        title: Text(
+          'Confirmation de commande',
+          style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         automaticallyImplyLeading: false,
       ),
       body: SafeArea(

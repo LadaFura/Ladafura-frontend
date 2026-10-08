@@ -32,44 +32,25 @@ class PlanteGalerieMediasSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        // En-tête (Design sobre et moderne)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(AppDimensions.space8),
-              decoration: BoxDecoration(
-                color: (isDark ? AppColors.darkAccent : AppColors.primary)
-                    .withAlpha(25),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.photo_library_rounded,
-                color: isDark ? AppColors.darkAccent : AppColors.primary,
-                size: 20,
-              ),
+            Text(
+              'Galerie & Photos de Terrain',
+              style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
+                  .copyWith(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(width: AppDimensions.space12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Galerie & Photos de Terrain',
-                    style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                        .copyWith(fontSize: 16),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Clichés photographiques pris in situ lors des collectes botaniques',
-                    style: (isDark
-                            ? AppTextStyles.captionDark
-                            : AppTextStyles.caption)
-                        .copyWith(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 2),
+            Text(
+              'Illustrations et clichés botaniques collectés sur le terrain',
+              style: (isDark
+                      ? AppTextStyles.captionDark
+                      : AppTextStyles.caption)
+                  .copyWith(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ],

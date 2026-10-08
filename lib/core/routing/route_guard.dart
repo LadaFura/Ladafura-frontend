@@ -41,7 +41,8 @@ class RouteGuard {
     // 2. Utilisateur NON authentifié (Visiteur)
     if (!isAuthenticated) {
       if (isSplash) {
-        return RouteNames.visitorHomePath;
+        // Laisser SplashScreen gérer la vérification d'onboarding et la redirection fluide
+        return null;
       }
 
       // Si le visiteur tente d'accéder à un espace nécessitant un compte

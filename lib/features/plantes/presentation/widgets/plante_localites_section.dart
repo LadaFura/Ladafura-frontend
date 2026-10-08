@@ -22,44 +22,25 @@ class PlanteLocalitesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        // En-tête (Design sobre et moderne)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(AppDimensions.space8),
-              decoration: BoxDecoration(
-                color: (isDark ? AppColors.darkAccent : AppColors.primary)
-                    .withAlpha(25),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.map_rounded,
-                color: isDark ? AppColors.darkAccent : AppColors.primary,
-                size: 20,
-              ),
+            Text(
+              'Répartition Géographique au Mali',
+              style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
+                  .copyWith(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(width: AppDimensions.space12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Répartition Géographique au Mali',
-                    style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                        .copyWith(fontSize: 16),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Zones et localités de cueillette identifiées sur le terrain',
-                    style: (isDark
-                            ? AppTextStyles.captionDark
-                            : AppTextStyles.caption)
-                        .copyWith(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 2),
+            Text(
+              'Zones et localités de cueillette identifiées sur le terrain',
+              style: (isDark
+                      ? AppTextStyles.captionDark
+                      : AppTextStyles.caption)
+                  .copyWith(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ],
@@ -85,37 +66,26 @@ class PlanteLocalitesSection extends StatelessWidget {
             return Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppDimensions.space12,
-                vertical: 7,
+                vertical: 6,
               ),
               decoration: BoxDecoration(
                 color: isDark ? AppColors.darkSurface : Colors.white,
-                borderRadius: BorderRadius.circular(AppDimensions.radiusBadge),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusButton),
                 border: Border.all(
                   color: isDark
                       ? AppColors.darkBorder
                       : AppColors.border,
                 ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.location_on_rounded,
-                    size: 14,
-                    color: isDark ? AppColors.darkAccent : AppColors.primary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    label,
-                    style: (isDark
-                            ? AppTextStyles.captionDark
-                            : AppTextStyles.caption)
-                        .copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+              child: Text(
+                label,
+                style: (isDark
+                        ? AppTextStyles.captionDark
+                        : AppTextStyles.caption)
+                    .copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
               ),
             );
           }).toList(),

@@ -36,7 +36,7 @@ class AgentDashboardScreen extends ConsumerWidget {
             tooltip: isDark ? 'Mode clair' : 'Mode sombre',
             icon: Icon(
               isDark ? Icons.light_mode_rounded : Icons.dark_mode_outlined,
-              color: isDark ? AppColors.darkAccent : AppColors.primary,
+              color: isDark ? Colors.white : AppColors.primary,
             ),
             onPressed: () {
               ref

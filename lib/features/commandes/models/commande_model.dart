@@ -1,3 +1,5 @@
+import 'paiement_model.dart';
+
 /// Ligne d'article détaillée dans une commande ou un devis récapitulatif.
 ///
 /// Conforme au DTO backend `PopulationLigneCommandeDto.java`.
@@ -219,6 +221,10 @@ class CommandeDetailModel {
   final bool annulable;
   final List<CommandeLigneModel> lignes;
   final String statutPaiement;
+  final int? paiementId;
+  final String? referencePaiement;
+  final String? methodePaiement;
+  final String? libellePaiement;
 
   const CommandeDetailModel({
     required this.id,
@@ -238,6 +244,10 @@ class CommandeDetailModel {
     this.annulable = false,
     this.lignes = const [],
     this.statutPaiement = 'EN_ATTENTE',
+    this.paiementId,
+    this.referencePaiement,
+    this.methodePaiement,
+    this.libellePaiement,
   });
 
   bool get isLivraison => modeRetrait.toUpperCase() == 'LIVRAISON';
@@ -271,6 +281,25 @@ class CommandeDetailModel {
     return '$formatted FCFA';
   }
 
+  PaiementResponseModel toPaiementResponse() {
+    return PaiementResponseModel(
+      id: paiementId ?? 0,
+      reference: referencePaiement ?? '',
+      commandeId: id,
+      numeroCommande: numero,
+      montant: montantTotal,
+      methode: methodePaiement ?? 'CASH',
+      libelleMethode: libellePaiement ?? (methodePaiement ?? 'Règlement'),
+      statut: statutPaiement,
+      datePaiement: dateCommande,
+      succes: statutPaiement == 'REUSSI' || statutPaiement == 'EN_ATTENTE',
+      message: statutPaiement == 'REUSSI'
+          ? 'Votre paiement a été validé avec succès.'
+          : 'Règlement en attente de perception.',
+      statutCommande: statut,
+    );
+  }
+
   factory CommandeDetailModel.fromJson(Map<String, dynamic> json) {
     return CommandeDetailModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
@@ -297,6 +326,10 @@ class CommandeDetailModel {
               .toList() ??
           const [],
       statutPaiement: json['statutPaiement']?.toString() ?? 'EN_ATTENTE',
+      paiementId: (json['paiementId'] as num?)?.toInt(),
+      referencePaiement: json['referencePaiement']?.toString(),
+      methodePaiement: json['methodePaiement']?.toString(),
+      libellePaiement: json['libellePaiement']?.toString(),
     );
   }
 }

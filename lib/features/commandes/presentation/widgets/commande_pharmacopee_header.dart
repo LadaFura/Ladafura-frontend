@@ -15,14 +15,17 @@ class CommandePharmacopeeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? AppColors.darkAccent : AppColors.primary;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
 
     return Container(
       padding: const EdgeInsets.all(AppDimensions.space12),
       decoration: BoxDecoration(
         color: primaryColor.withAlpha(15),
-        borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-        border: Border.all(color: primaryColor.withAlpha(40)),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusModal),
+        border: Border.all(
+          color: primaryColor.withAlpha(40),
+          width: AppDimensions.cardBorderWidth,
+        ),
       ),
       child: Row(
         children: [

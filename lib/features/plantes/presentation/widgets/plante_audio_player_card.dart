@@ -214,14 +214,13 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
               Container(
                 padding: const EdgeInsets.all(AppDimensions.space8),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.darkAccent.withAlpha(40)
-                      : AppColors.primary.withAlpha(30),
+                  color: (isDark ? AppColors.darkPrimary : AppColors.primary)
+                      .withAlpha(25),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.volume_up_rounded,
-                  color: isDark ? AppColors.darkAccent : AppColors.primary,
+                  color: isDark ? AppColors.darkPrimary : AppColors.primary,
                   size: 20,
                 ),
               ),
@@ -266,14 +265,14 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: (isDark ? AppColors.darkAccent : AppColors.primary)
-                        .withAlpha(35),
+                    color: (isDark ? AppColors.darkPrimary : AppColors.primary)
+                        .withAlpha(25),
                     borderRadius:
                         BorderRadius.circular(AppDimensions.radiusBadge),
                     border: Border.all(
                       color:
-                          (isDark ? AppColors.darkAccent : AppColors.primary)
-                              .withAlpha(80),
+                          (isDark ? AppColors.darkPrimary : AppColors.primary)
+                              .withAlpha(60),
                     ),
                   ),
                   child: Text(
@@ -285,7 +284,7 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
                       fontWeight: FontWeight.w700,
                       fontSize: 11,
                       color:
-                          isDark ? AppColors.darkAccent : AppColors.primaryDark,
+                          isDark ? AppColors.darkPrimary : AppColors.primaryDark,
                     ),
                   ),
                 ),
@@ -318,9 +317,9 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
                         colors: [
-                          isDark ? AppColors.darkAccent : AppColors.primary,
+                          isDark ? AppColors.darkPrimary : AppColors.primary,
                           isDark
-                              ? AppColors.darkAccent.withAlpha(200)
+                              ? AppColors.darkPrimaryDark
                               : AppColors.primaryDark,
                         ],
                         begin: Alignment.topLeft,
@@ -329,7 +328,7 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
                       boxShadow: [
                         BoxShadow(
                           color: (isDark
-                                  ? AppColors.darkAccent
+                                  ? AppColors.darkPrimary
                                   : AppColors.primary)
                               .withAlpha(isPlaying ? 80 : 40),
                           blurRadius: isPlaying ? 10 : 6,
@@ -376,14 +375,14 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
                           overlayRadius: 14,
                         ),
                         activeTrackColor: isDark
-                            ? AppColors.darkAccent
+                            ? AppColors.darkPrimary
                             : AppColors.primary,
                         inactiveTrackColor: (isDark
                                 ? AppColors.darkBorder
                                 : AppColors.border)
                             .withAlpha(120),
                         thumbColor: isDark
-                            ? AppColors.darkAccent
+                            ? AppColors.darkPrimary
                             : AppColors.primary,
                       ),
                       child: Slider(

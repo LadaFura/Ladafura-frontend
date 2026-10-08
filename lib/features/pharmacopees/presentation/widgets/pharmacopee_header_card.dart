@@ -43,13 +43,13 @@ class PharmacopeeHeaderCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: (isDark ? AppColors.darkAccent : AppColors.primary)
+                  color: (isDark ? AppColors.darkPrimary : AppColors.primary)
                       .withAlpha(25),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.local_pharmacy_rounded,
-                  color: isDark ? AppColors.darkAccent : AppColors.primary,
+                  color: isDark ? AppColors.darkPrimary : AppColors.primary,
                   size: 26,
                 ),
               ),

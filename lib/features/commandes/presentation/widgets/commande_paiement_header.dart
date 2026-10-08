@@ -6,26 +6,50 @@ import '../../models/commande_model.dart';
 
 /// En-tête récapitulatif de la commande affiché sur l'écran de paiement.
 class CommandePaiementHeader extends StatelessWidget {
-  final CommandeDetailModel commande;
+  final CommandeDetailModel? commande;
+  final String? nomPharmacopee;
+  final String? modeRetrait;
+  final String? montantTotalFormate;
 
   const CommandePaiementHeader({
     super.key,
-    required this.commande,
+    this.commande,
+    this.nomPharmacopee,
+    this.modeRetrait,
+    this.montantTotalFormate,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? AppColors.darkAccent : AppColors.primary;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
+
+    final String affichageTitre = commande != null
+        ? 'Commande #${commande!.numero}'
+        : 'Règlement de votre panier';
+    final String affichageMode =
+        commande?.modeRetrait ?? modeRetrait ?? 'Retrait';
+    final String affichagePharmacie =
+        commande?.nomPharmacopee ?? nomPharmacopee ?? 'Pharmacopée';
+    final String affichageTotal =
+        commande?.montantTotalFormate ?? montantTotalFormate ?? '0 FCFA';
 
     return Container(
       padding: const EdgeInsets.all(AppDimensions.space16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusModal),
         border: Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.border,
+          width: AppDimensions.cardBorderWidth,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(isDark ? 16 : 4),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -33,7 +57,7 @@ class CommandePaiementHeader extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Commande #${commande.numero}',
+                affichageTitre,
                 style: (isDark ? AppTextStyles.h4Dark : AppTextStyles.h4)
                     .copyWith(fontWeight: FontWeight.bold),
               ),
@@ -44,7 +68,7 @@ class CommandePaiementHeader extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  commande.modeRetrait,
+                  affichageMode,
                   style: TextStyle(
                     color: primaryColor,
                     fontSize: 11,
@@ -60,11 +84,11 @@ class CommandePaiementHeader extends StatelessWidget {
               Icon(
                 Icons.storefront_outlined,
                 size: 16,
-                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                color: isDark ? Colors.white70 : Colors.grey[600],
               ),
               const SizedBox(width: 6),
               Text(
-                commande.nomPharmacopee,
+                affichagePharmacie,
                 style: (isDark
                         ? AppTextStyles.captionDark
                         : AppTextStyles.caption)
@@ -72,7 +96,13 @@ class CommandePaiementHeader extends StatelessWidget {
               ),
             ],
           ),
-          const Divider(height: 20),
+          Divider(
+            height: 20,
+            thickness: 1,
+            color: isDark
+                ? AppColors.darkBorder
+                : AppColors.border.withAlpha(120),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -82,7 +112,7 @@ class CommandePaiementHeader extends StatelessWidget {
                     .copyWith(fontSize: 15),
               ),
               Text(
-                commande.montantTotalFormate,
+                affichageTotal,
                 style: (isDark ? AppTextStyles.h2Dark : AppTextStyles.h2)
                     .copyWith(
                   fontWeight: FontWeight.bold,

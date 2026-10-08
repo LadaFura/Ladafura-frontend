@@ -20,7 +20,7 @@ class CommandeMethodePaiementTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? AppColors.darkAccent : AppColors.primary;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
 
     final icon = methode.isMobileMoney
         ? Icons.phone_android_rounded
@@ -37,13 +37,13 @@ class CommandeMethodePaiementTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? primaryColor.withAlpha(20)
-              : (isDark ? AppColors.darkSurface : Colors.white),
+              : (isDark ? AppColors.darkSurface : AppColors.surface),
           borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
           border: Border.all(
             color: isSelected
                 ? primaryColor
                 : (isDark ? AppColors.darkBorder : AppColors.border),
-            width: isSelected ? 2 : 1,
+            width: isSelected ? 1.5 : AppDimensions.cardBorderWidth,
           ),
         ),
         child: Row(

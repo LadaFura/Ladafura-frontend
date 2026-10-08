@@ -1,7 +1,9 @@
 import 'package:ladafura_frontend_flutter/core/constants/api_endpoints.dart';
 import 'package:ladafura_frontend_flutter/core/network/api_client.dart';
+import 'package:ladafura_frontend_flutter/core/network/api_response.dart';
 import '../models/pharmacopee_avis_item_model.dart';
 import '../models/pharmacopee_detail_model.dart';
+import '../models/pharmacopee_eligibilite_avis_model.dart';
 import '../models/pharmacopee_model.dart';
 import '../models/pharmacopee_produit_item_model.dart';
 
@@ -105,5 +107,66 @@ class PharmacopeeService {
       return PharmacopeeModel.fromJson(response.data!);
     }
     return null;
+  }
+
+  /// Vérifie l'éligibilité du citoyen à noter cette pharmacopée.
+  Future<PharmacopeeEligibiliteAvisModel?> verifierEligibiliteAvis(int pharmacopeeId) async {
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      ApiEndpoints.populationAvisEligibilite(pharmacopeeId.toString()),
+    );
+
+    if (response.isSuccess && response.data != null) {
+      return PharmacopeeEligibiliteAvisModel.fromJson(response.data!);
+    }
+    return null;
+  }
+
+  /// Dépose un nouvel avis client (note + commentaire) sur la pharmacopée.
+  Future<ApiResponse<PharmacopeeAvisItemModel>> creerAvis({
+    required int pharmacopeeId,
+    required int note,
+    String? commentaire,
+  }) async {
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      ApiEndpoints.populationAvis,
+      data: {
+        'pharmacopeeId': pharmacopeeId,
+        'note': note,
+        'commentaire': commentaire?.trim(),
+      },
+    );
+
+    if (response.isSuccess && response.data != null) {
+      final item = PharmacopeeAvisItemModel.fromJson(response.data!);
+      return ApiResponse.success(item, message: 'Avis enregistré avec succès');
+    }
+    return ApiResponse.error(
+      response.message ?? 'Impossible d\'enregistrer votre avis.',
+      statusCode: response.statusCode,
+    );
+  }
+
+  /// Met à jour un avis existant (note et/ou commentaire).
+  Future<ApiResponse<PharmacopeeAvisItemModel>> modifierAvis({
+    required int avisId,
+    required int note,
+    String? commentaire,
+  }) async {
+    final response = await _apiClient.put<Map<String, dynamic>>(
+      ApiEndpoints.populationAvisDetail(avisId.toString()),
+      data: {
+        'note': note,
+        'commentaire': commentaire?.trim(),
+      },
+    );
+
+    if (response.isSuccess && response.data != null) {
+      final item = PharmacopeeAvisItemModel.fromJson(response.data!);
+      return ApiResponse.success(item, message: 'Avis mis à jour avec succès');
+    }
+    return ApiResponse.error(
+      response.message ?? 'Impossible de modifier votre avis.',
+      statusCode: response.statusCode,
+    );
   }
 }

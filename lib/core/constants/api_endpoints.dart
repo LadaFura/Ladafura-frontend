@@ -107,7 +107,11 @@ class ApiEndpoints {
   static String populationPharmacopeeModesRetrait(String id) =>
       '/population/pharmacopees/$id/modes-retrait';
   static String populationPharmacopeeAvis(String id) =>
-      '/population/pharmacopees/$id/avis';
+      '/population/avis/pharmacopee/$id';
+  static const String populationAvis = '/population/avis';
+  static String populationAvisDetail(String id) => '/population/avis/$id';
+  static String populationAvisEligibilite(String pharmacopeeId) =>
+      '/population/avis/eligibilite/$pharmacopeeId';
 
   // --- Produits & Remèdes Traditionnels (Fura) ---
   static const String populationProduits = '/population/produits';

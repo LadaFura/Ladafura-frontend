@@ -49,12 +49,18 @@ class CommandeService {
     throw Exception("Impossible de générer le récapitulatif");
   }
 
-  /// Passe et confirme définitivement la commande dans le backend.
+  /// Valide, règle et enregistre définitivement la commande dans le backend.
+  /// La commande n'est persistée en base qu'après validation réussie du règlement.
   Future<CommandeDetailModel> passerCommande({
     required int pharmacopeeId,
     required int modeRetraitId,
     String? adresseLivraison,
     String? notes,
+    required String methode,
+    String? operateur,
+    String? telephoneMobileMoney,
+    String? referenceTransaction,
+    bool simulerSucces = true,
   }) async {
     final response = await _dio.post(
       ApiEndpoints.populationCommandes,
@@ -63,6 +69,11 @@ class CommandeService {
         'modeRetraitId': modeRetraitId,
         'adresseLivraison': adresseLivraison,
         'notes': notes,
+        'methode': methode,
+        'operateur': operateur,
+        'telephoneMobileMoney': telephoneMobileMoney,
+        'referenceTransaction': referenceTransaction,
+        'simulerSucces': simulerSucces,
       },
     );
     if ((response.statusCode == 200 || response.statusCode == 201) &&
@@ -70,7 +81,7 @@ class CommandeService {
       return CommandeDetailModel.fromJson(
           response.data as Map<String, dynamic>);
     }
-    throw Exception("Échec de création de la commande");
+    throw Exception("Échec de validation et d'enregistrement de la commande");
   }
 
   /// Récupère l'historique paginé des commandes de l'utilisateur.

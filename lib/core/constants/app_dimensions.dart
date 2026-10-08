@@ -220,11 +220,11 @@ class AppDimensions {
   /// Hauteur totale d'une carte plante dans la grille du catalogue : 240 px
   static const double cardPlantGridHeight = 240.0;
 
-  /// Largeur d'une carte plante dans le carrousel d'accueil horizontal : 190 px
-  static const double cardPlantHomeWidth = 190.0;
+  /// Largeur d'une carte plante dans le carrousel d'accueil horizontal : 175 px
+  static const double cardPlantHomeWidth = 175.0;
 
-  /// Hauteur ajustée d'une carte plante dans le carrousel d'accueil : 230 px
-  static const double cardPlantHomeHeight = 230.0;
+  /// Hauteur ajustée d'une carte plante dans le carrousel d'accueil : 235 px
+  static const double cardPlantHomeHeight = 235.0;
 
   /// Largeur d'une carte produit dans un carrousel horizontal : 160 px
   static const double cardMarketplaceWidth = 160.0;

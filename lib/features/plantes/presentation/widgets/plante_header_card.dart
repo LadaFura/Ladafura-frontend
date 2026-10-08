@@ -34,7 +34,7 @@ class PlanteHeaderCard extends StatelessWidget {
         Text(
           plante.nomScientifique,
           style: (isDark ? AppTextStyles.h1Dark : AppTextStyles.h1).copyWith(
-            color: isDark ? AppColors.darkAccent : AppColors.primary,
+            color: isDark ? AppColors.darkPrimary : AppColors.primary,
           ),
         ),
 
@@ -51,11 +51,11 @@ class PlanteHeaderCard extends StatelessWidget {
                   vertical: AppDimensions.space4,
                 ),
                 decoration: BoxDecoration(
-                  color: (isDark ? AppColors.darkAccent : AppColors.primary)
+                  color: (isDark ? AppColors.darkPrimary : AppColors.primary)
                       .withAlpha(25),
                   borderRadius: BorderRadius.circular(AppDimensions.radiusBadge),
                   border: Border.all(
-                    color: (isDark ? AppColors.darkAccent : AppColors.primary)
+                    color: (isDark ? AppColors.darkPrimary : AppColors.primary)
                         .withAlpha(60),
                   ),
                 ),
@@ -107,7 +107,7 @@ class PlanteHeaderCard extends StatelessWidget {
           Icon(
             Icons.eco_rounded,
             size: 64,
-            color: isDark ? AppColors.darkAccent : AppColors.primary,
+            color: isDark ? AppColors.darkPrimary : AppColors.primary,
           ),
           const SizedBox(height: AppDimensions.space8),
           Text(

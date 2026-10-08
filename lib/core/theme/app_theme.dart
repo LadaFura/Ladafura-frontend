@@ -204,7 +204,12 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
         titleTextStyle: AppTextStyles.h2Dark,
-        iconTheme: const IconThemeData(color: AppColors.darkTextPrimary),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+
+      // Thème global des icônes (Dark Mode : blanc par défaut)
+      iconTheme: const IconThemeData(
+        color: Colors.white,
       ),
 
       // Boutons principaux (Dark)
