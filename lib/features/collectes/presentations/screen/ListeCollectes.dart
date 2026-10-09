@@ -1,409 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ladafura_frontend_flutter/features/collectes/providers/collect_provider.dart';
 
-import '../../../../core/routing/route_names.dart';
-
-class ListeCollectes extends StatelessWidget {
+class ListeCollectes extends ConsumerWidget {
   const ListeCollectes({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Listecollectes();
-  }
-}
-
-class Listecollectes extends StatelessWidget {
-  const Listecollectes({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final items = [
-      _CollecteItem(
-        name: 'Moringa alfeita',
-        location: 'Dijon',
-        date: '12 septembre 2025',
-        status: 'En attente',
-        statusColor: const Color(0xFFEFFAF1),
-        statusTextColor: const Color(0xFF2D7A4B),
-        iconColor: const Color(0xFF7CBF73),
-      ),
-      _CollecteItem(
-        name: 'Kinkeliba',
-        location: 'Séloua',
-        date: '15 septembre 2025',
-        status: 'Validée',
-        statusColor: const Color(0xFFE2F3E8),
-        statusTextColor: const Color(0xFF2C8C5B),
-        iconColor: const Color(0xFF8DCB78),
-      ),
-      _CollecteItem(
-        name: 'Moringa',
-        location: 'Ségou',
-        date: '18 septembre 2025',
-        status: 'Brouillon',
-        statusColor: const Color(0xFFF1F1F1),
-        statusTextColor: const Color(0xFF6B6B6B),
-        iconColor: const Color(0xFF88B97A),
-      ),
-      _CollecteItem(
-        name: 'Moringa',
-        location: 'Ségou',
-        date: '18 septembre 2025',
-        status: 'Rejeter',
-        statusColor: const Color(0xFFFDEDED),
-        statusTextColor: const Color(0xFFD14A4A),
-        iconColor: const Color(0xFF7FBC62),
-      ),
-    ];
-
-    const filters = ['Toutes', 'Brouillon', 'En attente', 'Validées'];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final listeCollect = ref.watch(collectListProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F3),
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Mes collectes',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1F2629),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.search, color: Color(0xFF1F2629)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Rechercher une collecte...',
-                  hintStyle: const TextStyle(
-                    color: Color(0xFF9FA7A3),
-                    fontSize: 14,
-                  ),
-                  prefixIcon:
-                      const Icon(Icons.search, color: Color(0xFF9BA4A0)),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 42,
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                scrollDirection: Axis.horizontal,
-                itemCount: filters.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final label = filters[index];
-                  final selected = index == 0;
+        child: listeCollect.when(
+          loading: () => const Center(
+            child: CircularProgressIndicator(),
+          ),
 
-                  return Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: selected ? const Color(0xFFE7F6EA) : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: selected
-                            ? const Color(0xFF2E7D32)
-                            : const Color(0xFF636A69),
-                        fontWeight:
-                            selected ? FontWeight.w700 : FontWeight.w500,
-                      ),
-                    ),
-                  );
-                },
-              ),
+          error: (error, stackTrace) => Center(
+            child: Text(
+              'Échec de récupération des collectes : $error',
+              textAlign: TextAlign.center,
             ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 10),
+          ),
+
+          data: (collects) {
+            // Aucune collecte
+            if (collects.isEmpty) {
+              return const Center(
                 child: Text(
-                  '24 collectes',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade700,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  "L'agent n'a effectué aucune collecte.",
+                  textAlign: TextAlign.center,
                 ),
-              ),
-            ),
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 84),
-                itemCount: items.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final item = items[index];
+              );
+            }
 
-                  return Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: item.iconColor.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            Icons.eco_rounded,
-                            color: item.iconColor,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.name,
-                                style: const TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF1F2629),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(Icons.location_on_outlined,
-                                      size: 14, color: Colors.grey.shade600),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    item.location,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 3),
-                              Row(
-                                children: [
-                                  Icon(Icons.calendar_today_outlined,
-                                      size: 13, color: Colors.grey.shade600),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    item.date,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: item.statusColor,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            item.status,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: item.statusTextColor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        height: 82,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 10, bottom: 6),
-          child: Row(
-            children: [
-              Expanded(
-                child: _BottomNavItem(
-                  icon: Icons.home_outlined,
-                  label: 'Accueil',
-                  active: false,
-                  onTap: () => context.go(RouteNames.agentDashboardPath),
-                ),
-              ),
-              Expanded(
-                child: _BottomNavItem(
-                  icon: Icons.list_alt_outlined,
-                  label: 'Collectes',
-                  active: true,
-                  onTap: () => context.go(RouteNames.agentCollectesPath),
-                ),
-              ),
-              Expanded(
-                child: Center(
-                  child: SizedBox(
-                    width: 42,
-                    height: 42,
-                    child: FloatingActionButton(
-                      onPressed: () =>
-                          context.go(RouteNames.agentNouvelleCollectePath),
-                      backgroundColor: const Color(0xFF2E7D32),
-                      elevation: 0,
-                      shape: const CircleBorder(),
-                      child: const Icon(
-                        Icons.add,
-                        size: 25,
-                        color: Colors.white,
-                      ),
+            // Liste des collectes
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: collects.length,
+              itemBuilder: (context, index) {
+                final collect = collects[index];
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    title: Text(
+                      collect.description ?? "Aucune description",
                     ),
                   ),
-                ),
-              ),
-              Expanded(
-                child: _BottomNavItem(
-                  icon: Icons.notifications_none_outlined,
-                  label: 'Notif.',
-                  active: false,
-                  onTap: () => context.go(RouteNames.agentNotificationsPath),
-                ),
-              ),
-              Expanded(
-                child: _BottomNavItem(
-                  icon: Icons.person_outline,
-                  label: 'Profil',
-                  active: false,
-                  onTap: () => context.go(RouteNames.agentProfilPath),
-                ),
-              ),
-            ],
-          ),
+                );
+              },
+            );
+          },
         ),
-      ),
-    );
-  }
-}
-
-class _CollecteItem {
-  final String name;
-  final String location;
-  final String date;
-  final String status;
-  final Color statusColor;
-  final Color statusTextColor;
-  final Color iconColor;
-
-  const _CollecteItem({
-    required this.name,
-    required this.location,
-    required this.date,
-    required this.status,
-    required this.statusColor,
-    required this.statusTextColor,
-    required this.iconColor,
-  });
-}
-
-class _BottomNavItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-
-  const _BottomNavItem({
-    required this.icon,
-    required this.label,
-    required this.active,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 22,
-            color: active ? const Color(0xFF2D7A4B) : const Color(0xFF7E8A86),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              color: active ? const Color(0xFF2D7A4B) : const Color(0xFF7E8A86),
-              fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-        ],
       ),
     );
   }

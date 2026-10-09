@@ -1,31 +1,40 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ladafura_frontend_flutter/core/constants/api_endpoints.dart';
+import 'package:ladafura_frontend_flutter/core/network/api_client.dart';
 import 'package:ladafura_frontend_flutter/core/network/network_providers.dart';
 import 'package:ladafura_frontend_flutter/features/collectes/models/agent_collecte_summary_model.dart';
-
-final collectServiceProvider = Provider<CollectService>((ref) {
-  final dio = ref.watch(dioProvider);
-  return CollectService(dio);
-});
-
+import 'package:ladafura_frontend_flutter/features/collectes/models/agent_collecte_summary_response.dart';
 
 class CollectService {
-  final Dio dio;
+  final ApiClient _apiClient;
 
-  CollectService(this.dio);
+  CollectService({required ApiClient apiClient}): _apiClient = apiClient;
 
-  Future<List<AgentCollecteSummaryModel>> getAgentCollectes() async {
-    final response = await dio.get('/agent/collectes',);
+  Future<List<AgentCollecteSummaryResponse>> getAgentCollectes() async {
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      ApiEndpoints.agentCollectes,
+    );
 
     
-if (response.statusCode == 200) {
-      final List<dynamic> data = response.data;
-      final List<AgentCollecteSummaryModel> agentCollectes = data.map((data)=> AgentCollecteSummaryModel.fromJson(data)).toList();
-
-
-      return agentCollectes;
-    } else {
-      throw Exception('Failed to load agent collectes');
+if (!response.isSuccess && response.data == null) {
+      throw Exception('Failed to fetch agent collectes');
     }
+
+
+final data = response.data;
+    if (data == null) {
+      throw Exception('Response data is null');
+    }
+
+    final content = data['content'] as List<dynamic>?;
+    if (content == null) {
+      throw Exception('Content field is missing in the response');
+    }
+
+    return content
+        .map((json) => AgentCollecteSummaryResponse.fromJson(json))
+        .toList();
+
    
-}}
+  }}

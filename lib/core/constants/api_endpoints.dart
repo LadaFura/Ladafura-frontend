@@ -18,7 +18,7 @@ class ApiEndpoints {
 
   /// Adresse IPv4 de la machine de développement sur le réseau Wi-Fi local.
   /// Peut être remplacée au lancement avec --dart-define=API_HOST=<adresse>.
-  static const String devMachineIp = '192.168.10.118';
+  static const String devMachineIp = '172.25.36.133';
 
   /// Hôte par défaut pour simulateur iOS et Web
   static const String defaultHost = 'http://localhost:8080';
@@ -178,7 +178,7 @@ class ApiEndpoints {
   // ===========================================================================
 
   // --- Tableau de bord & Activités ---
-  static const String agentDashboardStats = '/agent/dashboard/stats';
+  static const String agentDashboard = '/agent/dashboard';
   static const String agentDashboardSummary = '/agent/dashboard/summary';
 
   // --- Collectes Botaniques ---
