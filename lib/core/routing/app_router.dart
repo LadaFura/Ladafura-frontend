@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/agent/presentation/dashboard/screens/agent_dashboard_screen.dart';
+import '../../features/collectes/presentations/screen/ListeCollectes.dart';
 import '../../features/auth/auth.dart';
 import '../../features/home/presentation/pages/citizen_home_screen.dart';
 import '../../features/recherche/presentation/pages/citizen_search_screen.dart';
@@ -350,8 +351,7 @@ GoRouter appRouter(AppRouterRef ref) {
           GoRoute(
             path: 'collectes',
             name: RouteNames.agentCollectes,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Collectes Botaniques'),
+            builder: (context, state) => const ListeCollectes(),
             routes: [
               GoRoute(
                 path: 'nouvelle',
@@ -387,6 +387,12 @@ GoRouter appRouter(AppRouterRef ref) {
             name: RouteNames.agentSources,
             builder: (context, state) =>
                 const _RoutePlaceholder(title: 'Sources & Tradipraticiens'),
+          ),
+          GoRoute(
+            path: 'notifications',
+            name: RouteNames.agentNotifications,
+            builder: (context, state) =>
+                const _RoutePlaceholder(title: 'Notifications'),
           ),
           GoRoute(
             path: 'profil',

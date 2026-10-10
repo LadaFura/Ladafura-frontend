@@ -139,6 +139,9 @@ class RouteNames {
   static const String agentSources = 'agent-sources';
   static const String agentSourcesPath = '/agent/sources';
 
+  static const String agentNotifications = 'agent-notifications';
+  static const String agentNotificationsPath = '/agent/notifications';
+
   static const String agentProfil = 'agent-profil';
   static const String agentProfilPath = '/agent/profil';
 }

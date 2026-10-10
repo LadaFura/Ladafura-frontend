@@ -24,7 +24,7 @@ void main() {
           ApiEndpoints.populationFavorisPlantes, '/population/favoris/plantes');
 
       // Routes Agent
-      expect(ApiEndpoints.agentDashboardStats, '/agent/dashboard/stats');
+      expect(ApiEndpoints.agentDashboard, '/agent/dashboard');
       expect(ApiEndpoints.agentCollectes, '/agent/collectes');
       expect(ApiEndpoints.agentCollecteDetail('456'), '/agent/collectes/456');
       expect(ApiEndpoints.agentMediasUpload, '/agent/medias/upload');
