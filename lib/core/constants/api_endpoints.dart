@@ -211,6 +211,8 @@ class ApiEndpoints {
 
   // --- Référentiel des Plantes pour Agents ---
   static const String agentPlantes = '/agent/plantes';
+  static const String agentMaladies = '/agent/maladies';
+  static const String agentSuivi = '/agent/suivi';
 
   // --- Notifications & Profil Agent ---
   static const String agentNotifications = '/agent/notifications';

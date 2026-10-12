@@ -62,13 +62,16 @@ class PharmacopeeProduitCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Zone Image centrée
+                // 1. Zone Image prenant tout l'espace du composant vert clair
                 Expanded(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppDimensions.space4),
-                      child: _buildProductImage(isDark),
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E3A2F) : const Color(0xFFF1F8F4),
+                      borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
                     ),
+                    clipBehavior: Clip.antiAlias,
+                    child: _buildProductImage(isDark),
                   ),
                 ),
 
@@ -175,7 +178,9 @@ class PharmacopeeProduitCard extends StatelessWidget {
     if (resolved != null) {
       return Image.network(
         resolved,
-        fit: BoxFit.contain,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
         errorBuilder: (_, __, ___) => _buildFallback(isDark),
       );
     }
@@ -183,18 +188,11 @@ class PharmacopeeProduitCard extends StatelessWidget {
   }
 
   Widget _buildFallback(bool isDark) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E3A2F) : const Color(0xFFF1F8F4),
-        borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-      ),
-      child: Center(
-        child: Icon(
-          Icons.medication_liquid_rounded,
-          size: 48,
-          color: isDark ? AppColors.darkPrimary : AppColors.primary,
-        ),
+    return Center(
+      child: Icon(
+        Icons.medication_liquid_rounded,
+        size: 48,
+        color: isDark ? AppColors.darkPrimary : AppColors.primary,
       ),
     );
   }

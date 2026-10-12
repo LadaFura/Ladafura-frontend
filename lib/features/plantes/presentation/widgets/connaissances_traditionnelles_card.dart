@@ -195,38 +195,8 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
             ),
           ],
 
-          // Source / Informateur
-          if (item.informateurSource != null &&
-              item.informateurSource!.isNotEmpty) ...[
-            const SizedBox(height: AppDimensions.space8),
-            Row(
-              children: [
-                Icon(
-                  Icons.person_pin_circle_outlined,
-                  size: 14,
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.textMuted,
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    'Source traditionnelle : ${item.informateurSource}',
-                    style: (isDark
-                            ? AppTextStyles.captionDark
-                            : AppTextStyles.caption)
-                        .copyWith(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textMuted,
-                      fontSize: 11.5,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+          // 4. Source traditionnelle (Tradithérapeute, informateur, spécialité, localité)
+          _buildSourceSection(item, isDark),
         ],
       ),
     );
@@ -259,6 +229,127 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
         ),
         overflow: TextOverflow.ellipsis,
         maxLines: 2,
+      ),
+    );
+  }
+
+  Widget _buildSourceSection(
+    PopulationConnaissanceTraditionnelleModel item,
+    bool isDark,
+  ) {
+    // Déterminer le nom de la source ou fallback
+    final sourceNom = item.sourceNom?.trim().isNotEmpty == true
+        ? item.sourceNom!
+        : (item.informateurSource?.trim().isNotEmpty == true
+            ? item.informateurSource!
+            : null);
+
+    if (sourceNom == null &&
+        (item.sourceSpecialite == null || item.sourceSpecialite!.isEmpty) &&
+        (item.sourceLocalite == null || item.sourceLocalite!.isEmpty)) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: AppDimensions.space12),
+      padding: const EdgeInsets.all(AppDimensions.space12),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurfaceVariant : const Color(0xFFF8FAF7),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : const Color(0xFFE2E8F0),
+          width: 0.8,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withAlpha(20),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.person_pin_rounded,
+              color: AppColors.primary,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Source traditionnelle vérifiée',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                if (sourceNom != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    sourceNom,
+                    style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
+                        .copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+                if (item.sourceSpecialite != null &&
+                    item.sourceSpecialite!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    item.sourceSpecialite!,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+                if (item.sourceLocalite != null &&
+                    item.sourceLocalite!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 13,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textMuted,
+                      ),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          item.sourceLocalite!,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textMuted,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

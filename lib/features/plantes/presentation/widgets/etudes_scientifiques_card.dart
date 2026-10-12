@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
@@ -223,8 +224,83 @@ class EtudesScientifiquesCard extends StatelessWidget {
               ),
             ),
           ],
+
+          // Bouton Consulter l'article / publication scientifique
+          const SizedBox(height: AppDimensions.space12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _ouvrirArticle(context, etude),
+              icon: const Icon(Icons.open_in_new_rounded, size: 16),
+              label: Text(
+                etude.urlDocument != null && etude.urlDocument!.trim().isNotEmpty
+                    ? 'Consulter l\'article scientifique'
+                    : 'Rechercher la publication (Google Scholar)',
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: isDark ? AppColors.darkPrimary : AppColors.primary,
+                side: BorderSide(
+                  color: isDark
+                      ? AppColors.darkPrimary.withAlpha(120)
+                      : AppColors.primary.withAlpha(120),
+                  width: 1.1,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _ouvrirArticle(
+    BuildContext context,
+    PopulationEtudeScientifiqueModel etude,
+  ) async {
+    String? targetUrl = etude.urlDocument?.trim();
+
+    // Si aucune URL directe n'est renseignée, ouvrir Google Scholar avec le titre
+    if (targetUrl == null || targetUrl.isEmpty) {
+      final query = Uri.encodeComponent('${etude.titre} ${etude.auteurs ?? ""}');
+      targetUrl = 'https://scholar.google.com/scholar?q=$query';
+    }
+
+    final uri = Uri.tryParse(targetUrl);
+    if (uri != null) {
+      try {
+        final launched = await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+        if (!launched && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Impossible d\'ouvrir l\'article : $targetUrl'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erreur lors de l\'ouverture du document : $e'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
   }
 }

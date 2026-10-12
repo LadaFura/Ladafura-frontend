@@ -118,6 +118,10 @@ class AppShell extends ConsumerWidget {
         ? _calculateIndexFromLocation(location!)
         : ref.watch(navigationIndexProvider);
 
+    final authState = ref.watch(authStateProvider);
+    final isAgent =
+        authState.isAuthenticated && authState.role == UserRole.agentCollecte;
+
     return PopScope(
       canPop: activeIndex == 0,
       onPopInvokedWithResult: (didPop, result) {
@@ -131,6 +135,7 @@ class AppShell extends ConsumerWidget {
         body: child,
         bottomNavigationBar: LadafuraBottomNavBar(
           currentIndex: activeIndex,
+          items: isAgent ? NavItemData.agentItems() : null,
           onTap: (index) => _onTabTapped(context, ref, index),
         ),
       ),

@@ -48,8 +48,10 @@ class RouteNames {
   static String visitorPlanteDetailUrl(String id) => '/visitor/plantes/$id';
 
   static const String visitorPharmacopeeDetail = 'visitor-pharmacopee-detail';
-  static const String visitorPharmacopeeDetailPath = '/visitor/pharmacopees/:id';
-  static String visitorPharmacopeeDetailUrl(String id) => '/visitor/pharmacopees/$id';
+  static const String visitorPharmacopeeDetailPath =
+      '/visitor/pharmacopees/:id';
+  static String visitorPharmacopeeDetailUrl(String id) =>
+      '/visitor/pharmacopees/$id';
 
   // ===========================================================================
   // 3. ESPACE CITOYEN / POPULATION (FLORE & SAVOIRS)
@@ -65,8 +67,10 @@ class RouteNames {
   static String citizenPlanteDetailUrl(String id) => '/citizen/plantes/$id';
 
   static const String citizenPharmacopeeDetail = 'citizen-pharmacopee-detail';
-  static const String citizenPharmacopeeDetailPath = '/citizen/pharmacopees/:id';
-  static String citizenPharmacopeeDetailUrl(String id) => '/citizen/pharmacopees/$id';
+  static const String citizenPharmacopeeDetailPath =
+      '/citizen/pharmacopees/:id';
+  static String citizenPharmacopeeDetailUrl(String id) =>
+      '/citizen/pharmacopees/$id';
 
   static const String citizenCarte = 'citizen-carte';
   static const String citizenCartePath = '/citizen/carte';

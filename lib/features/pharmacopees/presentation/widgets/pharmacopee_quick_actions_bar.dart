@@ -86,7 +86,7 @@ class PharmacopeeQuickActionsBar extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppDimensions.space16),
-      padding: const EdgeInsets.all(AppDimensions.space12),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(16),

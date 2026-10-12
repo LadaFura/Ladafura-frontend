@@ -56,6 +56,9 @@ class PopulationConnaissanceTraditionnelleModel {
   final String? posologie;
   final String? precautions;
   final String? informateurSource;
+  final String? sourceNom;
+  final String? sourceSpecialite;
+  final String? sourceLocalite;
 
   const PopulationConnaissanceTraditionnelleModel({
     this.id,
@@ -65,6 +68,9 @@ class PopulationConnaissanceTraditionnelleModel {
     this.posologie,
     this.precautions,
     this.informateurSource,
+    this.sourceNom,
+    this.sourceSpecialite,
+    this.sourceLocalite,
   });
 
   factory PopulationConnaissanceTraditionnelleModel.fromJson(
@@ -77,6 +83,9 @@ class PopulationConnaissanceTraditionnelleModel {
       posologie: json['posologie'] as String?,
       precautions: (json['precautions'] ?? json['precaution']) as String?,
       informateurSource: (json['informateurSource'] ?? json['description']) as String?,
+      sourceNom: json['sourceNom'] as String?,
+      sourceSpecialite: json['sourceSpecialite'] as String?,
+      sourceLocalite: json['sourceLocalite'] as String?,
     );
   }
 
@@ -88,6 +97,9 @@ class PopulationConnaissanceTraditionnelleModel {
         'posologie': posologie,
         'precautions': precautions,
         'informateurSource': informateurSource,
+        if (sourceNom != null) 'sourceNom': sourceNom,
+        if (sourceSpecialite != null) 'sourceSpecialite': sourceSpecialite,
+        if (sourceLocalite != null) 'sourceLocalite': sourceLocalite,
       };
 }
 

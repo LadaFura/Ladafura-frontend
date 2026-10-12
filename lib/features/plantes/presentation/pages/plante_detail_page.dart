@@ -192,105 +192,147 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage>
         : 'Prononciation & Témoignage oral';
     final audioLanguage = vernaculaireAvecAudio?.langue ?? 'Mali';
 
-    return CustomScrollView(
-      physics: const BouncingScrollPhysics(),
-      slivers: [
-        SliverPadding(
-          padding: EdgeInsets.only(
-            left: AppDimensions.space16,
-            right: AppDimensions.space16,
-            top: MediaQuery.of(context).padding.top + AppDimensions.space12,
-            bottom: AppDimensions.space32,
-          ),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              // 1. EN-TÊTE IMMERSIF (Photo haute définition, Nom botanique, Noms locaux)
-              PlanteDetailHeroHeader(
-                plante: plante,
-                onBack: _handleBack,
-                onShare: () => _handleShare(plante),
-                onFavorite: _toggleFavorite,
-                isFavorite: _isFavorite,
+    return Stack(
+      children: [
+        CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverPadding(
+              padding: EdgeInsets.only(
+                left: AppDimensions.space16,
+                right: AppDimensions.space16,
+                top: MediaQuery.of(context).padding.top + 56.0,
+                bottom: AppDimensions.space24,
               ),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  // 1. EN-TÊTE IMMERSIF (Photo haute définition, Nom botanique, Noms locaux)
+                  PlanteDetailHeroHeader(
+                    plante: plante,
+                    onBack: _handleBack,
+                    onShare: () => _handleShare(plante),
+                    onFavorite: _toggleFavorite,
+                    isFavorite: _isFavorite,
+                  ),
 
-              const SizedBox(height: AppDimensions.space16),
+                  const SizedBox(height: AppDimensions.space12),
 
-              // 2. AUDIO PRIORITAIRE (2e/3e position : immédiatement sous l'en-tête)
-              if (audioUrl != null && audioUrl.isNotEmpty) ...[
-                PlanteAudioPlayerCard(
-                  audioUrl: audioUrl,
-                  title: audioTitle,
-                  subtitle: audioMedia?.description ??
-                      'Écouter l\'accent et l\'appellation vernaculaire authentique',
-                  languageTag: audioLanguage,
-                ),
-                const SizedBox(height: AppDimensions.space16),
-              ] else ...[
-                // Si pas d'audio enregistré sur le serveur, présenter une puce d'information sobre
-                _buildAudioEmptyPlaceholder(isDark),
-                const SizedBox(height: AppDimensions.space16),
-              ],
+                  // 2. AUDIO PRIORITAIRE (immédiatement sous l'en-tête)
+                  if (audioUrl != null && audioUrl.isNotEmpty) ...[
+                    PlanteAudioPlayerCard(
+                      audioUrl: audioUrl,
+                      title: audioTitle,
+                      subtitle: audioMedia?.description ??
+                          'Écouter l\'accent et l\'appellation vernaculaire authentique',
+                      languageTag: audioLanguage,
+                    ),
+                    const SizedBox(height: AppDimensions.space12),
+                  ] else ...[
+                    // Si pas d'audio enregistré sur le serveur, présenter une puce d'information sobre
+                    _buildAudioEmptyPlaceholder(isDark),
+                    const SizedBox(height: AppDimensions.space12),
+                  ],
 
-              // 3. AVERTISSEMENT MÉDICAL DÉONTOLOGIQUE
-              const MedicalDisclaimerBanner(compact: false),
+                  // 3. AVERTISSEMENT MÉDICAL DÉONTOLOGIQUE
+                  const MedicalDisclaimerBanner(compact: false),
 
-              const SizedBox(height: AppDimensions.space20),
+                  const SizedBox(height: AppDimensions.space12),
 
-              // 4. SÉLECTEUR D'ONGLETS STYLISÉ (Savoirs traditionnels VS Études scientifiques)
-              _buildSegmentedTabSelector(plante, isDark),
+                  // 4. SÉLECTEUR D'ONGLETS STYLISÉ (Savoirs traditionnels VS Études scientifiques)
+                  _buildSegmentedTabSelector(plante, isDark),
 
-              const SizedBox(height: AppDimensions.space16),
+                  const SizedBox(height: AppDimensions.space12),
 
-              // Contenu de l'onglet actif (animé avec AnimatedBuilder sur le TabController)
-              AnimatedBuilder(
-                animation: _tabController,
-                builder: (context, _) {
-                  if (_tabController.index == 0) {
-                    return ConnaissancesTraditionnellesCard(
-                      connaissances: plante.connaissancesTraditionnelles,
-                    );
-                  } else {
-                    return EtudesScientifiquesCard(
-                      etudes: plante.etudesScientifiques,
-                    );
-                  }
-                },
+                  // Contenu de l'onglet actif (animé avec AnimatedBuilder sur le TabController)
+                  AnimatedBuilder(
+                    animation: _tabController,
+                    builder: (context, _) {
+                      if (_tabController.index == 0) {
+                        return ConnaissancesTraditionnellesCard(
+                          connaissances: plante.connaissancesTraditionnelles,
+                        );
+                      } else {
+                        return EtudesScientifiquesCard(
+                          etudes: plante.etudesScientifiques,
+                        );
+                      }
+                    },
+                  ),
+
+                  const SizedBox(height: AppDimensions.space16),
+
+                  // 5. INDICATIONS & MALADIES ASSOCIÉES
+                  if (plante.maladiesAssociees.isNotEmpty) ...[
+                    PlanteMaladiesSection(
+                      maladies: plante.maladiesAssociees,
+                    ),
+                    const SizedBox(height: AppDimensions.space16),
+                  ],
+
+                  // 6. PRODUITS TRADITIONNELS ASSOCIÉS & DISPONIBILITÉS OFFICINES
+                  PlanteProduitsAssociesWidget(
+                    planteId: plante.id,
+                    nomPlante: plante.nomScientifique,
+                  ),
+
+                  const SizedBox(height: AppDimensions.space16),
+
+                  // 7. RÉPARTITION GÉOGRAPHIQUE AU MALI
+                  if (plante.localites.isNotEmpty) ...[
+                    PlanteLocalitesSection(
+                      localites: plante.localites,
+                    ),
+                    const SizedBox(height: AppDimensions.space16),
+                  ],
+
+                  // 8. GALERIE & PHOTOS DE TERRAIN
+                  if (plante.medias.isNotEmpty) ...[
+                    PlanteGalerieMediasSection(
+                      medias: plante.medias,
+                    ),
+                    const SizedBox(height: AppDimensions.space16),
+                  ],
+                ]),
               ),
+            ),
+          ],
+        ),
 
-              const SizedBox(height: AppDimensions.space24),
-
-              // 5. INDICATIONS & MALADIES ASSOCIÉES
-              if (plante.maladiesAssociees.isNotEmpty) ...[
-                PlanteMaladiesSection(
-                  maladies: plante.maladiesAssociees,
-                ),
-                const SizedBox(height: AppDimensions.space24),
-              ],
-
-              // 6. PRODUITS TRADITIONNELS ASSOCIÉS & DISPONIBILITÉS OFFICINES
-              PlanteProduitsAssociesWidget(
-                planteId: plante.id,
-                nomPlante: plante.nomScientifique,
+        // Barre supérieure flottante persistante (Retour, Partage, Favoris toujours accessibles au scroll)
+        Positioned(
+          top: MediaQuery.of(context).padding.top + 8,
+          left: AppDimensions.space16,
+          right: AppDimensions.space16,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildFloatingTopButton(
+                icon: Icons.arrow_back_ios_new_rounded,
+                isDark: isDark,
+                onTap: _handleBack,
+                tooltip: 'Retour',
               ),
-
-              const SizedBox(height: AppDimensions.space24),
-
-              // 7. RÉPARTITION GÉOGRAPHIQUE AU MALI
-              if (plante.localites.isNotEmpty) ...[
-                PlanteLocalitesSection(
-                  localites: plante.localites,
-                ),
-                const SizedBox(height: AppDimensions.space24),
-              ],
-
-              // 8. GALERIE & PHOTOS DE TERRAIN
-              if (plante.medias.isNotEmpty) ...[
-                PlanteGalerieMediasSection(
-                  medias: plante.medias,
-                ),
-                const SizedBox(height: AppDimensions.space24),
-              ],
-            ]),
+              Row(
+                children: [
+                  _buildFloatingTopButton(
+                    icon: Icons.share_rounded,
+                    isDark: isDark,
+                    onTap: () => _handleShare(plante),
+                    tooltip: 'Partager',
+                  ),
+                  const SizedBox(width: 8),
+                  _buildFloatingTopButton(
+                    icon: _isFavorite
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    iconColor: _isFavorite ? AppColors.danger : null,
+                    isDark: isDark,
+                    onTap: _toggleFavorite,
+                    tooltip: 'Favori',
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ],
@@ -479,6 +521,51 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFloatingTopButton({
+    required IconData icon,
+    required bool isDark,
+    required VoidCallback onTap,
+    Color? iconColor,
+    String? tooltip,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppColors.darkSurface.withAlpha(220)
+                : Colors.white.withAlpha(220),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withAlpha(40)
+                  : Colors.black.withAlpha(25),
+              width: 0.8,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(isDark ? 50 : 20),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Icon(
+            icon,
+            size: 18,
+            color: iconColor ??
+                (isDark ? Colors.white : AppColors.textPrimary),
+          ),
+        ),
       ),
     );
   }

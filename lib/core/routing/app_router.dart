@@ -1,10 +1,14 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/agent/presentation/dashboard/screens/agent_dashboard_screen.dart';
-import '../../features/collectes/presentations/screen/ListeCollectes.dart';
+import '../../features/collectes/presentations/screen/liste_collectes.dart';
+import '../../features/agent/presentation/collectes/screens/agent_collecte_detail_page.dart';
+import '../../features/agent/presentation/collectes/screens/nouvelle_collecte_wizard_screen.dart';
+import '../../features/agent/presentation/sources/screens/agent_sources_screen.dart';
 import '../../features/auth/auth.dart';
 import '../../features/home/presentation/pages/citizen_home_screen.dart';
 import '../../features/recherche/presentation/pages/citizen_search_screen.dart';
@@ -23,6 +27,7 @@ import '../../features/commandes/presentation/pages/commande_detail_page.dart';
 import '../../features/commandes/models/commande_model.dart';
 import '../../features/commandes/models/paiement_model.dart';
 import '../../features/pharmacopees/presentation/pages/pharmacopee_detail_page.dart';
+import '../../features/notifications/presentation/pages/citizen_notifications_page.dart';
 import '../../shared/enums/user_role.dart';
 import '../../shared/widgets/navigation/app_shell.dart';
 import '../../shared/widgets/navigation/navigation_provider.dart';
@@ -228,61 +233,82 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
 
       // =======================================================================
-      // PAGES SECONDAIRES CITOYEN (SANS Bottom Navigation Bar - Plein écran avec retour)
+      // PAGES SECONDAIRES CITOYEN (SANS Bottom Navigation Bar - Plein écran avec retour par geste)
       // =======================================================================
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: RouteNames.citizenPlanteDetailPath,
         name: RouteNames.citizenPlanteDetail,
-        builder: (context, state) => PlanteDetailPage(
-          planteId:
-              int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+        pageBuilder: (context, state) => CupertinoPage(
+          key: state.pageKey,
+          child: PlanteDetailPage(
+            planteId:
+                int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+          ),
         ),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: RouteNames.citizenPharmacopeeDetailPath,
         name: RouteNames.citizenPharmacopeeDetail,
-        builder: (context, state) => PharmacopeeDetailPage(
-          pharmacopeeId:
-              int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+        pageBuilder: (context, state) => CupertinoPage(
+          key: state.pageKey,
+          child: PharmacopeeDetailPage(
+            pharmacopeeId:
+                int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+          ),
         ),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: RouteNames.citizenCommandesPath,
         name: RouteNames.citizenCommandes,
-        builder: (context, state) => const CommandesScreen(),
+        pageBuilder: (context, state) => CupertinoPage(
+          key: state.pageKey,
+          child: const CommandesScreen(),
+        ),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: RouteNames.citizenCommandeValidationPath,
         name: RouteNames.citizenCommandeValidation,
-        builder: (context, state) => const CommandeValidationScreen(),
+        pageBuilder: (context, state) => CupertinoPage(
+          key: state.pageKey,
+          child: const CommandeValidationScreen(),
+        ),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: RouteNames.citizenCommandePaiementPath,
         name: RouteNames.citizenCommandePaiement,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final commande = state.extra as CommandeDetailModel?;
-          return CommandePaiementScreen(commande: commande);
+          return CupertinoPage(
+            key: state.pageKey,
+            child: CommandePaiementScreen(commande: commande),
+          );
         },
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: RouteNames.citizenCommandeConfirmationPath,
         name: RouteNames.citizenCommandeConfirmation,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
           final commande = extra?['commande'] as CommandeDetailModel?;
           final paiement = extra?['paiement'] as PaiementResponseModel?;
           if (commande == null || paiement == null) {
-            return const CommandesScreen();
+            return CupertinoPage(
+              key: state.pageKey,
+              child: const CommandesScreen(),
+            );
           }
-          return CommandeConfirmationScreen(
-            commande: commande,
-            paiement: paiement,
+          return CupertinoPage(
+            key: state.pageKey,
+            child: CommandeConfirmationScreen(
+              commande: commande,
+              paiement: paiement,
+            ),
           );
         },
       ),
@@ -290,55 +316,85 @@ GoRouter appRouter(AppRouterRef ref) {
         parentNavigatorKey: rootNavigatorKey,
         path: RouteNames.citizenCommandeDetailPath,
         name: RouteNames.citizenCommandeDetail,
-        builder: (context, state) => CommandeDetailPage(
-          commandeId: int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+        pageBuilder: (context, state) => CupertinoPage(
+          key: state.pageKey,
+          child: CommandeDetailPage(
+            commandeId: int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+          ),
         ),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: RouteNames.citizenFavorisPath,
         name: RouteNames.citizenFavoris,
-        builder: (context, state) => const _RoutePlaceholder(
-          title: 'Plantes Favorites',
-          isSecondary: true,
+        pageBuilder: (context, state) => CupertinoPage(
+          key: state.pageKey,
+          child: const _RoutePlaceholder(
+            title: 'Plantes Favorites',
+            isSecondary: true,
+          ),
         ),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: RouteNames.citizenPanierViewPath,
         name: RouteNames.citizenPanierView,
-        builder: (context, state) => const PanierScreen(),
+        pageBuilder: (context, state) => CupertinoPage(
+          key: state.pageKey,
+          child: const PanierScreen(),
+        ),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: RouteNames.citizenModifierProfilPath,
         name: RouteNames.citizenModifierProfil,
-        builder: (context, state) => const ModifierProfilScreen(),
+        pageBuilder: (context, state) => CupertinoPage(
+          key: state.pageKey,
+          child: const ModifierProfilScreen(),
+        ),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: RouteNames.citizenParametresPath,
         name: RouteNames.citizenParametres,
-        builder: (context, state) => const ParametresScreen(),
+        pageBuilder: (context, state) => CupertinoPage(
+          key: state.pageKey,
+          child: const ParametresScreen(),
+        ),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: RouteNames.citizenNotificationsPath,
+        name: RouteNames.citizenNotifications,
+        pageBuilder: (context, state) => CupertinoPage(
+          key: state.pageKey,
+          child: const CitizenNotificationsPage(),
+        ),
       ),
 
       // =======================================================================
-      // PAGES SECONDAIRES VISITEUR (SANS Bottom Navigation Bar - Plein écran avec retour)
+      // PAGES SECONDAIRES VISITEUR (SANS Bottom Navigation Bar - Plein écran avec retour par geste)
       // =======================================================================
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: RouteNames.visitorPlanteDetailPath,
         name: RouteNames.visitorPlanteDetail,
-        builder: (context, state) => PlanteDetailPage(
-          planteId: int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+        pageBuilder: (context, state) => CupertinoPage(
+          key: state.pageKey,
+          child: PlanteDetailPage(
+            planteId: int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+          ),
         ),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: RouteNames.visitorPharmacopeeDetailPath,
         name: RouteNames.visitorPharmacopeeDetail,
-        builder: (context, state) => PharmacopeeDetailPage(
-          pharmacopeeId: int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+        pageBuilder: (context, state) => CupertinoPage(
+          key: state.pageKey,
+          child: PharmacopeeDetailPage(
+            pharmacopeeId: int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+          ),
         ),
       ),
 
@@ -354,28 +410,33 @@ GoRouter appRouter(AppRouterRef ref) {
             builder: (context, state) => const ListeCollectes(),
             routes: [
               GoRoute(
+                parentNavigatorKey: rootNavigatorKey,
                 path: 'nouvelle',
                 name: RouteNames.agentNouvelleCollecte,
-                builder: (context, state) => const _RoutePlaceholder(
-                  title: 'Nouvelle Collecte Terrain',
-                  isSecondary: true,
+                pageBuilder: (context, state) => CupertinoPage(
+                  key: state.pageKey,
+                  child: const NouvelleCollecteWizardScreen(),
                 ),
               ),
               GoRoute(
+                parentNavigatorKey: rootNavigatorKey,
                 path: ':id',
                 name: RouteNames.agentCollecteDetail,
-                builder: (context, state) => _RoutePlaceholder(
-                  title: 'Détail Collecte (${state.pathParameters['id']})',
-                  isSecondary: true,
+                pageBuilder: (context, state) => CupertinoPage(
+                  key: state.pageKey,
+                  child: AgentCollecteDetailPage(
+                    collecteId:
+                        int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+                  ),
                 ),
                 routes: [
                   GoRoute(
+                    parentNavigatorKey: rootNavigatorKey,
                     path: 'modifier',
                     name: RouteNames.agentModifierCollecte,
-                    builder: (context, state) => _RoutePlaceholder(
-                      title:
-                          'Modifier Collecte (${state.pathParameters['id']})',
-                      isSecondary: true,
+                    pageBuilder: (context, state) => CupertinoPage(
+                      key: state.pageKey,
+                      child: const NouvelleCollecteWizardScreen(),
                     ),
                   ),
                 ],
@@ -385,8 +446,7 @@ GoRouter appRouter(AppRouterRef ref) {
           GoRoute(
             path: 'sources',
             name: RouteNames.agentSources,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Sources & Tradipraticiens'),
+            builder: (context, state) => const AgentSourcesScreen(),
           ),
           GoRoute(
             path: 'notifications',
@@ -397,8 +457,7 @@ GoRouter appRouter(AppRouterRef ref) {
           GoRoute(
             path: 'profil',
             name: RouteNames.agentProfil,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Profil Agent'),
+            builder: (context, state) => const ProfilScreen(),
           ),
         ],
       ),

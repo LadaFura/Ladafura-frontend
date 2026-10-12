@@ -8,7 +8,6 @@ import '../../../../core/services/services_providers.dart';
 import '../../../../core/utils/image_utils.dart';
 import '../../models/pharmacopee_detail_model.dart';
 import '../../../../core/routing/route_names.dart';
-import '../../../../core/utils/phone_call_utils.dart';
 import '../../../../shared/widgets/navigation/navigation_provider.dart';
 
 /// En-tête moderne et immersif pour la fiche d'une pharmacopée agréée.
@@ -19,24 +18,13 @@ import '../../../../shared/widgets/navigation/navigation_provider.dart';
 /// - Adresse réelle et distance GPS dynamique avec action "Voir sur la carte"
 class PharmacopeeDetailHeader extends ConsumerWidget {
   final PharmacopeeDetailModel pharmacopee;
+  final VoidCallback? onVoirAvis;
 
   const PharmacopeeDetailHeader({
     super.key,
     required this.pharmacopee,
+    this.onVoirAvis,
   });
-
-  void _callPharmacopee(BuildContext context, String phone) async {
-    final success = await PhoneCallUtils.makePhoneCall(phone);
-    if (!success && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Impossible de composer le $phone'),
-          backgroundColor: AppColors.primary,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -57,7 +45,7 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
           children: [
             // Image avec ratio élégant
             Container(
-              height: 220,
+              height: 200,
               width: double.infinity,
               decoration: BoxDecoration(
                 color:
@@ -84,7 +72,7 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
               ),
             ),
 
-            // Bouton retour rond
+            // Bouton retour rond sur l'image
             Positioned(
               top: MediaQuery.paddingOf(context).top + 8,
               left: AppDimensions.space16,
@@ -146,16 +134,14 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
 
         // 2. Fiche d'informations principales sous l'image avec coins arrondis élégants
         Container(
-          padding: const EdgeInsets.only(
-            left: AppDimensions.space16,
-            right: AppDimensions.space16,
-            top: AppDimensions.space16,
-            bottom: AppDimensions.space8,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.space16,
+            vertical: AppDimensions.space12,
           ),
           decoration: BoxDecoration(
             color: isDark ? AppColors.darkSurface : Colors.white,
             borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(24),
+              top: Radius.circular(20),
             ),
             boxShadow: [
               BoxShadow(
@@ -168,85 +154,75 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Nom & Bouton d'appel rapide
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Text(
-                      pharmacopee.nom,
-                      style: (isDark ? AppTextStyles.h2Dark : AppTextStyles.h2)
-                          .copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-                  if (pharmacopee.telephone != null &&
-                      pharmacopee.telephone!.isNotEmpty) ...[
-                    const SizedBox(width: 8),
-                    IconButton.filledTonal(
-                      onPressed: () =>
-                          _callPharmacopee(context, pharmacopee.telephone!),
-                      icon: const Icon(Icons.phone_in_talk_rounded, size: 20),
-                      style: IconButton.styleFrom(
-                        backgroundColor: AppColors.primaryLight,
-                        foregroundColor: AppColors.primary,
-                      ),
-                      tooltip: 'Appeler la pharmacopée',
-                    ),
-                  ],
-                ],
+              // Nom de la pharmacopée (sans bouton d'appel en doublon ici)
+              Text(
+                pharmacopee.nom,
+                style: (isDark ? AppTextStyles.h2Dark : AppTextStyles.h2)
+                    .copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
               ),
 
-              // Étoiles de note, nombre d'avis et remèdes disponibles VISUELLEMENT SOUS LE NOM
+              // Étoiles de note, nombre d'avis et remèdes disponibles (cliquable pour basculer vers les avis)
               const SizedBox(height: 6),
-              Row(
-                children: [
-                  const Icon(Icons.star_rounded,
-                      size: 18, color: AppColors.accent),
-                  const SizedBox(width: 4),
-                  Text(
-                    pharmacopee.noteMoyenne > 0
-                        ? pharmacopee.noteMoyenne.toStringAsFixed(1)
-                        : '5.0',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '(${pharmacopee.nombreAvis} avis)',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                  if (pharmacopee.nombreProduits > 0) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        '•',
+              InkWell(
+                onTap: onVoirAvis,
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.star_rounded,
+                          size: 18, color: AppColors.accent),
+                      const SizedBox(width: 4),
+                      Text(
+                        pharmacopee.noteMoyenne > 0
+                            ? pharmacopee.noteMoyenne.toStringAsFixed(1)
+                            : '5.0',
                         style: TextStyle(
-                          color: isDark ? Colors.white38 : Colors.grey.shade400,
-                          fontSize: 14,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
                         ),
                       ),
-                    ),
-                    Text(
-                      '${pharmacopee.nombreProduits} remèdes',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                      const SizedBox(width: 4),
+                      Text(
+                        '(${pharmacopee.nombreAvis} avis)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
+                          decoration: onVoirAvis != null
+                              ? TextDecoration.underline
+                              : null,
+                        ),
                       ),
-                    ),
-                  ],
-                ],
+                      if (pharmacopee.nombreProduits > 0) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            '•',
+                            style: TextStyle(
+                              color: isDark ? Colors.white38 : Colors.grey.shade400,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '${pharmacopee.nombreProduits} remèdes',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
 
               // Description

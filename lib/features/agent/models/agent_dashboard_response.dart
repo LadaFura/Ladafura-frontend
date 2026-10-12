@@ -1,5 +1,5 @@
 import 'package:ladafura_frontend_flutter/features/agent/models/agent_dashboard.dart';
-import 'package:ladafura_frontend_flutter/features/agent/models/derni%C3%A8resCollectes_dashboard.dart';
+import 'package:ladafura_frontend_flutter/features/agent/models/dernieres_collectes_dashboard.dart';
 import 'package:ladafura_frontend_flutter/features/agent/models/notifications_dashboard.dart';
 import 'package:ladafura_frontend_flutter/features/agent/models/statistiques_dashboard.dart';
 

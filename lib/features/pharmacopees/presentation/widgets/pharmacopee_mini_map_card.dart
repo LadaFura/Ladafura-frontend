@@ -84,7 +84,7 @@ class PharmacopeeMiniMapCard extends StatelessWidget {
         children: [
           // En-tête de la carte (Design sobre et moderne)
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             child: Row(
               children: [
                 Expanded(
@@ -94,7 +94,7 @@ class PharmacopeeMiniMapCard extends StatelessWidget {
                       Text(
                         'Emplacement & Accès',
                         style: (isDark ? AppTextStyles.h4Dark : AppTextStyles.h4).copyWith(
-                          fontSize: 15,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -112,7 +112,7 @@ class PharmacopeeMiniMapCard extends StatelessWidget {
                 ),
                 if (distanceStr != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: isDark ? const Color(0xFF1E3A8A).withAlpha(80) : const Color(0xFFEFF6FF),
                       borderRadius: BorderRadius.circular(20),
@@ -132,7 +132,7 @@ class PharmacopeeMiniMapCard extends StatelessWidget {
 
           // Contenu : Carte OSM ou fallback clair si coordonnées absentes
           SizedBox(
-            height: 150,
+            height: 120,
             child: hasValidCoords
                 ? Stack(
                     children: [
