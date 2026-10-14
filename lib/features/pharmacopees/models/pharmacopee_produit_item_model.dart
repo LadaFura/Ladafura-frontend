@@ -14,6 +14,8 @@ class PharmacopeeProduitItemModel {
   final String? categorieNom;
   final bool disponible;
   final int quantiteStock;
+  final List<String> maladies;
+  final List<String> plantes;
 
   const PharmacopeeProduitItemModel({
     required this.disponibiliteId,
@@ -27,6 +29,8 @@ class PharmacopeeProduitItemModel {
     this.categorieNom,
     required this.disponible,
     required this.quantiteStock,
+    this.maladies = const [],
+    this.plantes = const [],
   });
 
   /// Prix formaté en Francs CFA (ex: "2 500 FCFA").
@@ -62,6 +66,13 @@ class PharmacopeeProduitItemModel {
   }
 
   factory PharmacopeeProduitItemModel.fromJson(Map<String, dynamic> json) {
+    List<String> parseStringList(dynamic raw) {
+      if (raw is List) {
+        return raw.map((e) => e.toString()).where((s) => s.trim().isNotEmpty).toList();
+      }
+      return const [];
+    }
+
     return PharmacopeeProduitItemModel(
       disponibiliteId: (json['disponibiliteId'] as num?)?.toInt() ?? 0,
       produitId: (json['produitId'] as num?)?.toInt() ??
@@ -78,6 +89,8 @@ class PharmacopeeProduitItemModel {
       categorieNom: json['categorieNom']?.toString() ?? 'Phytothérapie',
       disponible: json['disponible'] as bool? ?? (json['quantiteStock'] != null && (json['quantiteStock'] as num) > 0),
       quantiteStock: (json['quantiteStock'] as num?)?.toInt() ?? 10,
+      maladies: parseStringList(json['maladies']),
+      plantes: parseStringList(json['plantes']),
     );
   }
 
@@ -93,5 +106,7 @@ class PharmacopeeProduitItemModel {
         'categorieNom': categorieNom,
         'disponible': disponible,
         'quantiteStock': quantiteStock,
+        'maladies': maladies,
+        'plantes': plantes,
       };
 }

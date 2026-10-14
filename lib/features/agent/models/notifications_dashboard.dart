@@ -13,10 +13,11 @@ class Notifications {
 
   factory Notifications.fromJson(Map<String, dynamic> json) {
     return Notifications(
-      total: json['total'],
-      nonLues: json['nonLues'],
-      dernieresNotifications: (json['dernieresNotifications'] as List)
-          .map((item) => AgentNotificationResponse.fromJson(item))
+      total: (json['total'] as num?)?.toInt() ?? 0,
+      nonLues: (json['nonLues'] as num?)?.toInt() ?? 0,
+      dernieresNotifications: (json['dernieresNotifications'] as List? ?? [])
+          .map((item) => AgentNotificationResponse.fromJson(
+              Map<String, dynamic>.from(item as Map)))
           .toList(),
     );
   }

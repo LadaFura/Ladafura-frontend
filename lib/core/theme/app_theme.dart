@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
@@ -150,6 +151,17 @@ class AppTheme {
         unselectedLabelStyle: AppTextStyles.navigation,
         type: BottomNavigationBarType.fixed,
         elevation: 8,
+      ),
+
+      // Transitions avec geste de glissement retour (Swipe back gesture iOS & Android)
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.linux: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.windows: CupertinoPageTransitionsBuilder(),
+        },
       ),
     );
   }
@@ -306,6 +318,17 @@ class AppTheme {
         unselectedLabelStyle: AppTextStyles.navigationDark,
         type: BottomNavigationBarType.fixed,
         elevation: 8,
+      ),
+
+      // Transitions avec geste de glissement retour (Swipe back gesture iOS & Android)
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.linux: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.windows: CupertinoPageTransitionsBuilder(),
+        },
       ),
     );
   }

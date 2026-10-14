@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/utils/image_utils.dart';
 import '../../models/panier_model.dart';
 
 /// Carte article panier moderne et épurée inspirée du design de référence :
-/// - Bloc image produit aux coins arrondis sur fond gris très doux
+/// - Bloc image produit aux coins arrondis sur fond vert clair très doux
 /// - Informations à droite : Titre en gras (avec ellipsis), format / taille, prix en grand
 /// - Bouton croix '✕' discret en haut à droite pour supprimer
 /// - Sélecteur de quantité pilule arrondi en bas à droite : [ —  1  + ]
@@ -27,6 +28,7 @@ class PanierItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
+    final resolvedUrl = ImageUtils.resolveImageUrl(ligne.photoUrl);
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppDimensions.space16),
@@ -34,17 +36,19 @@ class PanierItemCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // 1. Image du produit dans un conteneur aux angles arrondis (80x80) sur fond doux
+          // 1. Image du produit dans un conteneur vert clair aux angles arrondis (86x86)
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Container(
               width: 86,
               height: 86,
-              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-              child: ligne.photoUrl != null && ligne.photoUrl!.startsWith('http')
+              color: isDark ? const Color(0xFF1E3A2F) : const Color(0xFFF1F8F4),
+              child: resolvedUrl != null
                   ? Image.network(
-                      ligne.photoUrl!,
-                      fit: BoxFit.contain,
+                      resolvedUrl,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) =>
                           _buildFallbackThumbnail(isDark, primaryColor),
                     )

@@ -31,17 +31,47 @@ import '../widgets/produit_detail_modal.dart';
 /// 4. Recherche contextuelle dans la pharmacopée & Chips de catégories
 /// 5. Grille moderne de produits avec ajout instantané au panier
 /// 6. Avis clients et retours de la pharmacopée
-class PharmacopeeDetailPage extends ConsumerWidget {
+class PharmacopeeDetailPage extends ConsumerStatefulWidget {
   final int pharmacopeeId;
+  final String? initialSearchQuery;
+  final List<String> initialMatchedProduits;
 
   const PharmacopeeDetailPage({
     super.key,
     required this.pharmacopeeId,
+    this.initialSearchQuery,
+    this.initialMatchedProduits = const [],
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PharmacopeeDetailPage> createState() => _PharmacopeeDetailPageState();
+}
+
+class _PharmacopeeDetailPageState extends ConsumerState<PharmacopeeDetailPage> {
+  // Onglet sélectionné : 0 = Remèdes, 1 = Avis & Évaluations
+  int _selectedTabIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialSearchQuery != null &&
+        widget.initialSearchQuery!.trim().isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref
+            .read(pharmacopeeDetailControllerProvider(widget.pharmacopeeId).notifier)
+            .initFromSearch(
+              query: widget.initialSearchQuery,
+              matchedProduits: widget.initialMatchedProduits,
+            );
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pharmacopeeId = widget.pharmacopeeId;
 
     // Données de la pharmacopée
     final pharmaAsync = ref.watch(pharmacopeeFullDetailProvider(pharmacopeeId));
@@ -164,11 +194,18 @@ class PharmacopeeDetailPage extends ConsumerWidget {
             slivers: [
               // 1 & 2. En-tête moderne (Couverture, infos principales de la pharmacopée)
               SliverToBoxAdapter(
-                child: PharmacopeeDetailHeader(pharmacopee: pharma),
+                child: PharmacopeeDetailHeader(
+                  pharmacopee: pharma,
+                  onVoirAvis: () {
+                    setState(() {
+                      _selectedTabIndex = 1;
+                    });
+                  },
+                ),
               ),
 
               const SliverToBoxAdapter(
-                child: SizedBox(height: AppDimensions.space12),
+                child: SizedBox(height: 8),
               ),
 
               // Actions rapides : 📞 Appeler | 📍 Itinéraire | ⭐ Donner un avis
@@ -181,7 +218,7 @@ class PharmacopeeDetailPage extends ConsumerWidget {
               ),
 
               const SliverToBoxAdapter(
-                child: SizedBox(height: AppDimensions.space16),
+                child: SizedBox(height: 8),
               ),
 
               // Carte interactive & Itinéraire Google Maps
@@ -193,186 +230,318 @@ class PharmacopeeDetailPage extends ConsumerWidget {
               ),
 
               const SliverToBoxAdapter(
-                child: SizedBox(height: AppDimensions.space16),
+                child: SizedBox(height: 10),
               ),
 
-              // 3. Barre de recherche de produits fixée au défilement (Sticky pinned header)
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _StickySearchBarDelegate(
-                  selectedCategory: controllerState.selectedCategory,
-                  builder: (context, isPinned) => PharmacopeeSearchBar(
-                    pharmacopeeNom: pharma.nom,
-                    onSearchChanged: controller.setSearchQuery,
-                    categories: categories,
-                    selectedCategory: controllerState.selectedCategory,
-                    onCategorySelected: controller.selectCategory,
-                    isPinned: isPinned,
-                  ),
-                  baseHeight: categories.isNotEmpty ? 104.0 : 58.0,
-                  topSafeArea: MediaQuery.paddingOf(context).top,
-                ),
-              ),
-
-              const SliverToBoxAdapter(
-                child: SizedBox(height: AppDimensions.space12),
-              ),
-              // 4. Choix du mode de retrait (Livraison vs Retrait sur place)
-              if (pharma.modesRetrait.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: PharmacopeeModesRetraitSelector(
-                    modes: pharma.modesRetrait,
-                    selectedMode: controllerState.selectedModeRetrait,
-                    onModeChanged: controller.selectModeRetrait,
-                  ),
-                ),
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: AppDimensions.space16),
-                ),
-              ],
-
-              // Titre de section "Remèdes disponibles" (Design épuré et moderne sans icône superflue)
+              // Barre d'onglets ergonomique : [ Remèdes (N) | Avis & Évaluations (N) ]
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppDimensions.space16,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Remèdes disponibles (${filteredProduits.length})',
-                        style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                            .copyWith(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  padding: const EdgeInsets.symmetric(horizontal: AppDimensions.space16),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.darkSurface : const Color(0xFFF1F5F2),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark ? AppColors.darkBorder : const Color(0xFFE2E8F0),
                       ),
-                      if (controllerState.searchQuery.isNotEmpty ||
-                          controllerState.selectedCategory != null)
-                        TextButton(
-                          onPressed: () {
-                            controller.reset();
-                          },
-                          child: const Text('Réinitialiser'),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              if (_selectedTabIndex != 0) {
+                                setState(() => _selectedTabIndex = 0);
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(9),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: _selectedTabIndex == 0
+                                    ? AppColors.primary
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(9),
+                                boxShadow: _selectedTabIndex == 0
+                                    ? [
+                                        BoxShadow(
+                                          color: AppColors.primary.withAlpha(50),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Remèdes (${pharma.nombreProduits})',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: _selectedTabIndex == 0
+                                        ? FontWeight.bold
+                                        : FontWeight.w600,
+                                    color: _selectedTabIndex == 0
+                                        ? Colors.white
+                                        : (isDark
+                                            ? AppColors.darkTextSecondary
+                                            : AppColors.textSecondary),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                    ],
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              if (_selectedTabIndex != 1) {
+                                setState(() => _selectedTabIndex = 1);
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(9),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: _selectedTabIndex == 1
+                                    ? AppColors.primary
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(9),
+                                boxShadow: _selectedTabIndex == 1
+                                    ? [
+                                        BoxShadow(
+                                          color: AppColors.primary.withAlpha(50),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Avis (${pharma.nombreAvis})',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: _selectedTabIndex == 1
+                                        ? FontWeight.bold
+                                        : FontWeight.w600,
+                                    color: _selectedTabIndex == 1
+                                        ? Colors.white
+                                        : (isDark
+                                            ? AppColors.darkTextSecondary
+                                            : AppColors.textSecondary),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
 
               const SliverToBoxAdapter(
-                child: SizedBox(height: AppDimensions.space12),
+                child: SizedBox(height: 8),
               ),
 
-              // 5. Grille moderne de produits ou état vide contextualisé
-              if (filteredProduits.isEmpty)
+              if (_selectedTabIndex == 0) ...[
+                // 3. Barre de recherche de produits fixée au défilement (Sticky pinned header avec bouton retour)
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _StickySearchBarDelegate(
+                    selectedCategory: controllerState.selectedCategory,
+                    builder: (context, isPinned) => PharmacopeeSearchBar(
+                      pharmacopeeNom: pharma.nom,
+                      searchQuery: controllerState.searchQuery,
+                      onSearchChanged: controller.setSearchQuery,
+                      categories: categories,
+                      selectedCategory: controllerState.selectedCategory,
+                      onCategorySelected: controller.selectCategory,
+                      isPinned: isPinned,
+                      onBack: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          Navigator.of(context).maybePop();
+                        }
+                      },
+                    ),
+                    baseHeight: categories.isNotEmpty ? 118.0 : 64.0,
+                    topSafeArea: MediaQuery.paddingOf(context).top,
+                  ),
+                ),
+
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 8),
+                ),
+
+                // 4. Choix du mode de retrait (Livraison vs Retrait sur place)
+                if (pharma.modesRetrait.isNotEmpty) ...[
+                  SliverToBoxAdapter(
+                    child: PharmacopeeModesRetraitSelector(
+                      modes: pharma.modesRetrait,
+                      selectedMode: controllerState.selectedModeRetrait,
+                      onModeChanged: controller.selectModeRetrait,
+                    ),
+                  ),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 10),
+                  ),
+                ],
+
+                // Titre de section "Remèdes disponibles"
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.all(AppDimensions.space24),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.search_off_rounded,
-                            size: 54,
-                            color:
-                                isDark ? Colors.white30 : Colors.grey.shade400,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimensions.space16,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Remèdes disponibles (${filteredProduits.length})',
+                          style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
+                              .copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: AppDimensions.space12),
-                          Text(
-                            controllerState.searchQuery.isNotEmpty
-                                ? 'Aucun remède ne correspond à "${controllerState.searchQuery}" dans cette pharmacopée.'
-                                : 'Aucun remède disponible actuellement dans cette pharmacopée.',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: isDark
-                                  ? AppColors.darkTextSecondary
-                                  : AppColors.textSecondary,
+                        ),
+                        if (controllerState.searchQuery.isNotEmpty ||
+                            controllerState.selectedCategory != null)
+                          TextButton(
+                            onPressed: () {
+                              controller.reset();
+                            },
+                            child: const Text('Réinitialiser'),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 8),
+                ),
+
+                // 5. Grille moderne de produits ou état vide
+                if (filteredProduits.isEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppDimensions.space24),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.search_off_rounded,
+                              size: 48,
+                              color:
+                                  isDark ? Colors.white30 : Colors.grey.shade400,
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                            const SizedBox(height: AppDimensions.space12),
+                            Text(
+                              controllerState.searchQuery.isNotEmpty
+                                  ? 'Aucun remède ne correspond à "${controllerState.searchQuery}" dans cette pharmacopée.'
+                                  : 'Aucun remède disponible actuellement dans cette pharmacopée.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.textSecondary,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimensions.space16,
+                    ),
+                    sliver: SliverGrid(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.72,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final produit = filteredProduits[index];
+                          return PharmacopeeProduitCard(
+                            produit: produit,
+                            onTap: () {
+                              ProduitDetailModal.show(
+                                context,
+                                produit: produit,
+                                pharmacopeeId: pharma.id,
+                                nomPharmacopee: pharma.nom,
+                              );
+                            },
+                            onAddToCart: () {
+                              final authState = ref.read(authStateProvider);
+                              if (!authState.isAuthenticated) {
+                                ConnexionRequiseDialog.show(
+                                  context,
+                                  title: 'Connexion requise',
+                                  description:
+                                      'Veuillez vous connecter pour ajouter ${produit.nom} à votre panier.',
+                                );
+                                return;
+                              }
+
+                              ref
+                                  .read(panierStateProvider.notifier)
+                                  .ajouterProduit(
+                                    produit.produitId,
+                                    pharmacopeeId: pharma.id,
+                                    nomPharmacopee: pharma.nom,
+                                   );
+                              ref.read(checkoutProvider.notifier).initCheckout(
+                                    pharmacopeeId: pharma.id,
+                                    nomPharmacopee: pharma.nom,
+                                  );
+                            },
+                          );
+                        },
+                        childCount: filteredProduits.length,
                       ),
                     ),
                   ),
-                )
-              else
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppDimensions.space16,
-                  ),
-                  sliver: SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.72,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
+              ] else ...[
+                // Onglet Avis : affiché immédiatement sans avoir à faire défiler tous les produits !
+                SliverToBoxAdapter(
+                  child: avisAsync.when(
+                    loading: () => const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: CircularProgressIndicator(),
+                      ),
                     ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final produit = filteredProduits[index];
-                        return PharmacopeeProduitCard(
-                          produit: produit,
-                          onTap: () {
-                            ProduitDetailModal.show(
-                              context,
-                              produit: produit,
-                              pharmacopeeId: pharma.id,
-                              nomPharmacopee: pharma.nom,
-                            );
-                          },
-                          onAddToCart: () {
-                            final authState = ref.read(authStateProvider);
-                            if (!authState.isAuthenticated) {
-                              ConnexionRequiseDialog.show(
-                                context,
-                                title: 'Connexion requise',
-                                description:
-                                    'Veuillez vous connecter pour ajouter ${produit.nom} à votre panier.',
-                              );
-                              return;
-                            }
-
-                            ref
-                                .read(panierStateProvider.notifier)
-                                .ajouterProduit(
-                                  produit.produitId,
-                                  pharmacopeeId: pharma.id,
-                                  nomPharmacopee: pharma.nom,
-                                 );
-                            ref.read(checkoutProvider.notifier).initCheckout(
-                                  pharmacopeeId: pharma.id,
-                                  nomPharmacopee: pharma.nom,
-                                );
-                          },
-                        );
-                      },
-                      childCount: filteredProduits.length,
+                    error: (_, __) => const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Text('Erreur lors du chargement des avis.'),
+                      ),
+                    ),
+                    data: (avis) => PharmacopeeAvisSection(
+                      avis: avis,
+                      noteMoyenne: pharma.noteMoyenne,
+                      nombreAvis: pharma.nombreAvis,
+                      eligibilite: eligibiliteAsync.valueOrNull,
+                      onDonnerAvis: () => handleDonnerAvis(pharma.nom),
                     ),
                   ),
                 ),
-
-              const SliverToBoxAdapter(
-                child: SizedBox(height: AppDimensions.space24),
-              ),
-
-              // 6. Section Avis clients vérifiés
-              SliverToBoxAdapter(
-                child: avisAsync.when(
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                  data: (avis) => PharmacopeeAvisSection(
-                    avis: avis,
-                    noteMoyenne: pharma.noteMoyenne,
-                    nombreAvis: pharma.nombreAvis,
-                    eligibilite: eligibiliteAsync.valueOrNull,
-                    onDonnerAvis: () => handleDonnerAvis(pharma.nom),
-                  ),
-                ),
-              ),
+              ],
 
               const SliverToBoxAdapter(
                 child: SizedBox(height: 80),

@@ -6,16 +6,18 @@ import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/routing/route_names.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../shared/widgets/media/app_logo.dart';
-import '../widgets/home_banner_widget.dart';
+import '../widgets/home_banner_carousel.dart';
 import '../widgets/home_quick_categories.dart';
+import '../widgets/home_search_bar_button.dart';
 import '../widgets/pharmacopee_home_card.dart';
 import '../widgets/plante_home_card.dart';
 import '../../providers/home_discovery_provider.dart';
 
 /// Page d'accueil officielle de LADAFURA (Mode Visiteur & Découverte).
 ///
-/// Conforme à l'interface moderne avec bannière nature, catégories rapides (Pharmacopée,
-/// Fura, Plante, Maladie), pharmacopées proches géolocalisées et plantes populaires.
+/// Conforme à l'interface moderne avec barre de recherche, carrousel d'inspiration
+/// bannière "La richesse de notre pharmacopée traditionnelle", 5 catégories rapides
+/// (Plantes, Produits, Maladies, Pharmacopées, Collectes) et cartes de découverte.
 class AccueilScreen extends ConsumerWidget {
   const AccueilScreen({super.key});
 
@@ -77,18 +79,24 @@ class AccueilScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Bannière Hero "La nature pour une meilleure santé"
-              HomeBannerWidget(
+              // 1. Barre de recherche redirigeant vers la recherche universelle
+              HomeSearchBarButton(
                 onTap: () => context.go(RouteNames.visitorRecherchePath),
+              ),
+              const SizedBox(height: AppDimensions.space16),
+
+              // 2. Carrousel Hero "La richesse de notre pharmacopée traditionnelle"
+              HomeBannerCarousel(
+                onExplore: () => context.go(RouteNames.visitorRecherchePath),
               ),
               const SizedBox(height: AppDimensions.space20),
 
-              // 2. Accès rapides aux 4 catégories (Pharmacopée, Fura, Plante, Maladie)
+              // 3. Les 4 Catégories rapides : Plantes, Produits, Maladies, Pharmacopées
               HomeQuickCategories(
-                onPharmacopeeTap: () => context.go(RouteNames.visitorCartePath),
-                onFuraTap: () => context.go(RouteNames.visitorRecherchePath),
-                onPlanteTap: () => context.go(RouteNames.visitorRecherchePath),
-                onMaladieTap: () => context.go(RouteNames.visitorRecherchePath),
+                onPlantesTap: () => context.go(RouteNames.visitorRecherchePath),
+                onProduitsTap: () => context.go(RouteNames.visitorRecherchePath),
+                onMaladiesTap: () => context.go(RouteNames.visitorRecherchePath),
+                onPharmacopeesTap: () => context.go(RouteNames.visitorCartePath),
               ),
               const SizedBox(height: AppDimensions.space20),
 

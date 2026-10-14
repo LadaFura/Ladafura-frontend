@@ -6,17 +6,19 @@ import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/routing/route_names.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../shared/widgets/media/app_logo.dart';
-import '../widgets/home_banner_widget.dart';
+import '../widgets/home_banner_carousel.dart';
 import '../widgets/home_quick_categories.dart';
+import '../widgets/home_search_bar_button.dart';
 import '../widgets/pharmacopee_home_card.dart';
 import '../widgets/plante_home_card.dart';
 import '../../providers/home_discovery_provider.dart';
+import 'package:ladafura_frontend_flutter/features/notifications/providers/notification_provider.dart';
 
 /// Page d'accueil officielle de LADAFURA (Mode Citoyen & Découverte).
 ///
-/// Identique à la page d'accueil Visiteur (bannière, catégories rapides,
-/// pharmacopées à proximité, plantes les plus consultées),
-/// sans les boutons de connexion / déconnexion.
+/// Identique à la page d'accueil Visiteur (barre de recherche, carrousel d'inspiration,
+/// 5 catégories rapides : Plantes, Produits, Maladies, Pharmacopées, Collectes,
+/// pharmacopées à proximité, plantes les plus consultées).
 class CitizenHomeScreen extends ConsumerWidget {
   const CitizenHomeScreen({super.key});
 
@@ -49,20 +51,30 @@ class CitizenHomeScreen extends ConsumerWidget {
             },
           ),
 
-          // Icône cloche de notifications
-          IconButton(
-            tooltip: 'Notifications',
-            icon: Icon(
-              Icons.notifications_none_rounded,
-              color: isDark ? Colors.white70 : const Color(0xFF1E272E),
-              size: 26,
-            ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Aucune nouvelle notification pour le moment.'),
-                  duration: Duration(seconds: 2),
+          // Icône cloche de notifications avec badge dynamique
+          Builder(
+            builder: (context) {
+              final unreadCountAsync = ref.watch(unreadNotificationCountProvider);
+              final unreadCount = unreadCountAsync.valueOrNull ?? 0;
+
+              return IconButton(
+                tooltip: 'Notifications',
+                icon: Badge(
+                  isLabelVisible: unreadCount > 0,
+                  label: Text(
+                    unreadCount > 99 ? '99+' : unreadCount.toString(),
+                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                  backgroundColor: AppColors.danger,
+                  child: Icon(
+                    Icons.notifications_none_rounded,
+                    color: isDark ? Colors.white70 : const Color(0xFF1E272E),
+                    size: 26,
+                  ),
                 ),
+                onPressed: () {
+                  context.push(RouteNames.citizenNotificationsPath);
+                },
               );
             },
           ),
@@ -78,18 +90,24 @@ class CitizenHomeScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Bannière Hero "La nature pour une meilleure santé"
-              HomeBannerWidget(
+              // 1. Barre de recherche redirigeant vers la recherche universelle
+              HomeSearchBarButton(
                 onTap: () => context.go(RouteNames.citizenRecherchePath),
+              ),
+              const SizedBox(height: AppDimensions.space16),
+
+              // 2. Carrousel Hero "La richesse de notre pharmacopée traditionnelle"
+              HomeBannerCarousel(
+                onExplore: () => context.go(RouteNames.citizenRecherchePath),
               ),
               const SizedBox(height: AppDimensions.space20),
 
-              // 2. Accès rapides aux 4 catégories (Pharmacopée, Fura, Plante, Maladie)
+              // 3. Les 4 Catégories rapides : Plantes, Produits, Maladies, Pharmacopées
               HomeQuickCategories(
-                onPharmacopeeTap: () => context.go(RouteNames.citizenCartePath),
-                onFuraTap: () => context.go(RouteNames.citizenRecherchePath),
-                onPlanteTap: () => context.go(RouteNames.citizenRecherchePath),
-                onMaladieTap: () => context.go(RouteNames.citizenRecherchePath),
+                onPlantesTap: () => context.go(RouteNames.citizenRecherchePath),
+                onProduitsTap: () => context.go(RouteNames.citizenRecherchePath),
+                onMaladiesTap: () => context.go(RouteNames.citizenRecherchePath),
+                onPharmacopeesTap: () => context.go(RouteNames.citizenCartePath),
               ),
               const SizedBox(height: AppDimensions.space20),
 

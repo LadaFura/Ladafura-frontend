@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 
 /// Constantes officielles des URLs et routes REST du backend Spring Boot LADAFURA.
@@ -18,7 +19,7 @@ class ApiEndpoints {
 
   /// Adresse IPv4 de la machine de développement sur le réseau Wi-Fi local.
   /// Peut être remplacée au lancement avec --dart-define=API_HOST=<adresse>.
-  static const String devMachineIp = '172.25.36.133';
+  static const String devMachineIp = '192.168.11.138';
 
   /// Hôte par défaut pour simulateur iOS et Web
   static const String defaultHost = 'http://localhost:8080';
@@ -37,7 +38,12 @@ class ApiEndpoints {
     if (kIsWeb) {
       return defaultHost;
     }
-    // Sur téléphone physique ou émulateur mobile, utiliser l'IP réseau de la machine
+    // Sur simulateur iOS, localhost pointe directement vers le Mac (indépendant du Wi-Fi)
+    if (defaultTargetPlatform == TargetPlatform.iOS &&
+        Platform.environment.containsKey('SIMULATOR_DEVICE_NAME')) {
+      return defaultHost;
+    }
+    // Sur téléphone physique ou émulateur Android, utiliser l'IP réseau de la machine
     if (defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS) {
       return 'http://$devMachineIp:8080';
@@ -49,6 +55,33 @@ class ApiEndpoints {
   /// URL de base par défaut (configurable dynamiquement selon l'environnement)
   static String baseUrl =
       _envBaseUrl.isNotEmpty ? _envBaseUrl : '$resolvedHost$apiVersion';
+
+  /// Convertit un chemin relatif (ex: `/uploads/collectes/audios/rec_finkolo_01.mp3`)
+  /// ou une URL locale (`http://localhost:8080/...`) en URL HTTP absolue accessible.
+  static String resolveMediaUrl(String? rawUrl) {
+    if (rawUrl == null) return '';
+    final trimmed = rawUrl.trim();
+    if (trimmed.isEmpty) return '';
+
+    final host = baseUrl.endsWith(apiVersion)
+        ? baseUrl.substring(0, baseUrl.length - apiVersion.length)
+        : resolvedHost;
+
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      if (trimmed.startsWith('http://localhost:8080')) {
+        return '$host${trimmed.substring('http://localhost:8080'.length)}';
+      }
+      if (trimmed.startsWith('http://127.0.0.1:8080')) {
+        return '$host${trimmed.substring('http://127.0.0.1:8080'.length)}';
+      }
+      return trimmed;
+    }
+
+    if (trimmed.startsWith('/')) {
+      return '$host$trimmed';
+    }
+    return '$host/$trimmed';
+  }
 
   /// Délais d'expiration adaptés aux conditions réseau du Mali (15 secondes)
   static const Duration connectionTimeout = Duration(seconds: 15);
@@ -211,6 +244,8 @@ class ApiEndpoints {
 
   // --- Référentiel des Plantes pour Agents ---
   static const String agentPlantes = '/agent/plantes';
+  static const String agentMaladies = '/agent/maladies';
+  static const String agentSuivi = '/agent/suivi';
 
   // --- Notifications & Profil Agent ---
   static const String agentNotifications = '/agent/notifications';

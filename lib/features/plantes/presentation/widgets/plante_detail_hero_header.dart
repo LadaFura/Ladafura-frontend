@@ -18,6 +18,7 @@ class PlanteDetailHeroHeader extends StatelessWidget {
   final VoidCallback? onShare;
   final VoidCallback? onFavorite;
   final bool isFavorite;
+  final bool showTopActions;
 
   const PlanteDetailHeroHeader({
     super.key,
@@ -26,6 +27,7 @@ class PlanteDetailHeroHeader extends StatelessWidget {
     this.onShare,
     this.onFavorite,
     this.isFavorite = false,
+    this.showTopActions = false,
   });
 
   @override
@@ -87,42 +89,43 @@ class PlanteDetailHeroHeader extends StatelessWidget {
               ),
             ),
 
-            // Barre d'actions supérieure (Retour, Partage, Favoris)
-            Positioned(
-              top: AppDimensions.space12,
-              left: AppDimensions.space12,
-              right: AppDimensions.space12,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildGlassButton(
-                    icon: Icons.arrow_back_ios_new_rounded,
-                    onTap: onBack ?? () => Navigator.of(context).maybePop(),
-                  ),
-                  Row(
-                    children: [
-                      if (onShare != null) ...[
-                        _buildGlassButton(
-                          icon: Icons.share_rounded,
-                          onTap: onShare!,
-                        ),
-                        const SizedBox(width: AppDimensions.space8),
+            // Barre d'actions supérieure sur l'image (si activée)
+            if (showTopActions)
+              Positioned(
+                top: AppDimensions.space12,
+                left: AppDimensions.space12,
+                right: AppDimensions.space12,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildGlassButton(
+                      icon: Icons.arrow_back_ios_new_rounded,
+                      onTap: onBack ?? () => Navigator.of(context).maybePop(),
+                    ),
+                    Row(
+                      children: [
+                        if (onShare != null) ...[
+                          _buildGlassButton(
+                            icon: Icons.share_rounded,
+                            onTap: onShare!,
+                          ),
+                          const SizedBox(width: AppDimensions.space8),
+                        ],
+                        if (onFavorite != null)
+                          _buildGlassButton(
+                            icon: isFavorite
+                                ? Icons.favorite_rounded
+                                : Icons.favorite_border_rounded,
+                            iconColor: isFavorite
+                                ? AppColors.danger
+                                : Colors.white,
+                            onTap: onFavorite!,
+                          ),
                       ],
-                      if (onFavorite != null)
-                        _buildGlassButton(
-                          icon: isFavorite
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          iconColor: isFavorite
-                              ? AppColors.danger
-                              : Colors.white,
-                          onTap: onFavorite!,
-                        ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
 
             // Badge d'authentification botanique sur l'image
             Positioned(

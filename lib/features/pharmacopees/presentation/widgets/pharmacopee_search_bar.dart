@@ -6,20 +6,24 @@ import '../../../../core/constants/app_dimensions.dart';
 /// Permet de chercher en direct parmi les remèdes vendus par cette pharmacopée.
 class PharmacopeeSearchBar extends StatefulWidget {
   final String pharmacopeeNom;
+  final String searchQuery;
   final ValueChanged<String> onSearchChanged;
   final List<String> categories;
   final String? selectedCategory;
   final ValueChanged<String?> onCategorySelected;
   final bool isPinned;
+  final VoidCallback? onBack;
 
   const PharmacopeeSearchBar({
     super.key,
     required this.pharmacopeeNom,
+    this.searchQuery = '',
     required this.onSearchChanged,
     required this.categories,
     required this.selectedCategory,
     required this.onCategorySelected,
     this.isPinned = false,
+    this.onBack,
   });
 
   @override
@@ -27,7 +31,25 @@ class PharmacopeeSearchBar extends StatefulWidget {
 }
 
 class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.searchQuery);
+  }
+
+  @override
+  void didUpdateWidget(covariant PharmacopeeSearchBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.searchQuery != oldWidget.searchQuery &&
+        widget.searchQuery != _controller.text) {
+      _controller.value = TextEditingValue(
+        text: widget.searchQuery,
+        selection: TextSelection.collapsed(offset: widget.searchQuery.length),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -76,75 +98,96 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Champ de recherche contextualisé
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurface : Colors.white,
-              borderRadius: BorderRadius.circular(
-                widget.isPinned ? 12 : AppDimensions.radiusInput,
-              ),
-              border: Border.all(
-                color: widget.isPinned
-                    ? (isDark ? AppColors.darkPrimary.withAlpha(100) : AppColors.primary.withAlpha(100))
-                    : (isDark ? AppColors.darkBorder : AppColors.border),
-                width: widget.isPinned ? 1.2 : 1.0,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(widget.isPinned ? 12 : 6),
-                  blurRadius: widget.isPinned ? 10 : 6,
-                  offset: const Offset(0, 2),
+          Row(
+            children: [
+              if (widget.isPinned && widget.onBack != null) ...[
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                  icon: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 20,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
+                  ),
+                  onPressed: widget.onBack,
+                  tooltip: 'Retour',
                 ),
+                const SizedBox(width: 8),
               ],
-            ),
-            child: TextField(
-              controller: _controller,
-              onChanged: widget.onSearchChanged,
-              style: TextStyle(
-                fontSize: 14,
-                color: isDark ? Colors.white : AppColors.textPrimary,
+              // Champ de recherche contextualisé
+              Expanded(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkSurface : Colors.white,
+                    borderRadius: BorderRadius.circular(
+                      widget.isPinned ? 12 : AppDimensions.radiusInput,
+                    ),
+                    border: Border.all(
+                      color: widget.isPinned
+                          ? (isDark ? AppColors.darkPrimary.withAlpha(100) : AppColors.primary.withAlpha(100))
+                          : (isDark ? AppColors.darkBorder : AppColors.border),
+                      width: widget.isPinned ? 1.2 : 1.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(widget.isPinned ? 12 : 6),
+                        blurRadius: widget.isPinned ? 10 : 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: _controller,
+                    onChanged: widget.onSearchChanged,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Rechercher un remède...',
+                      hintStyle: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textMuted,
+                      ),
+                      prefixIcon: const Icon(Icons.search_rounded,
+                          color: AppColors.primary, size: 20),
+                      prefixIconConstraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                      suffixIcon: _controller.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.close_rounded,
+                                  size: 18, color: AppColors.textMuted),
+                              onPressed: () {
+                                _controller.clear();
+                                widget.onSearchChanged('');
+                                setState(() {});
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppDimensions.space12,
+                        vertical: 8,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              decoration: InputDecoration(
-                hintText: 'Rechercher un remède dans cette pharmacopée...',
-                hintStyle: const TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textMuted,
-                ),
-                prefixIcon: const Icon(Icons.search_rounded,
-                    color: AppColors.primary, size: 20),
-                prefixIconConstraints: const BoxConstraints(
-                  minWidth: 40,
-                  minHeight: 40,
-                ),
-                suffixIcon: _controller.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.close_rounded,
-                            size: 18, color: AppColors.textMuted),
-                        onPressed: () {
-                          _controller.clear();
-                          widget.onSearchChanged('');
-                          setState(() {});
-                        },
-                      )
-                    : null,
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.space12,
-                  vertical: 10,
-                ),
-              ),
-            ),
+            ],
           ),
 
           // Chips horizontales de catégories de produits si disponibles
           if (widget.categories.isNotEmpty) ...[
-            const SizedBox(height: AppDimensions.space12),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              clipBehavior: Clip.none,
-              child: Row(
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 34,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
                 children: [
                   _buildCategoryChip(
                     label: 'Tous',
@@ -184,17 +227,18 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(18),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary
               : (isDark
                   ? AppColors.darkSurface
                   : const Color(0xFFF1F5F2)),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isSelected
                 ? AppColors.primary

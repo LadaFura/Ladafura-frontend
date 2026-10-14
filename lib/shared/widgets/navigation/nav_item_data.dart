@@ -70,4 +70,36 @@ class NavItemData {
           tooltip: 'Profil',
         ),
       ];
+
+  /// Liste des onglets dédiés à l'espace Agent de Collecte Terrain
+  static List<NavItemData> agentItems() => [
+        const NavItemData(
+          index: 0,
+          label: 'Accueil',
+          activeIcon: Icons.dashboard_rounded,
+          inactiveIcon: Icons.dashboard_outlined,
+          tooltip: 'Tableau de bord',
+        ),
+        const NavItemData(
+          index: 1,
+          label: 'Collectes',
+          activeIcon: Icons.eco_rounded,
+          inactiveIcon: Icons.eco_outlined,
+          tooltip: 'Mes collectes',
+        ),
+        const NavItemData(
+          index: 2,
+          label: 'Sources',
+          activeIcon: Icons.people_alt_rounded,
+          inactiveIcon: Icons.people_alt_outlined,
+          tooltip: 'Tradipraticiens & Informateurs',
+        ),
+        const NavItemData(
+          index: 3,
+          label: 'Profil',
+          activeIcon: Icons.person_rounded,
+          inactiveIcon: Icons.person_outline_rounded,
+          tooltip: 'Mon Profil',
+        ),
+      ];
 }

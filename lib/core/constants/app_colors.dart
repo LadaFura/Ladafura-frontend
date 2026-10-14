@@ -19,6 +19,9 @@ class AppColors {
   /// Vert forêt profond pour contrastes et en-têtes (#14532D)
   static const Color primaryDark = Color(0xFF14532D);
 
+  /// Couleur secondaire
+  static const Color secondary = Color(0xFF1B5E20);
+
   /// Vert menthe doux pour conteneurs et cartes (#E8F5E9)
   static const Color primaryLight = Color(0xFFE8F5E9);
 
@@ -47,6 +50,7 @@ class AppColors {
 
   /// Bordures douces, séparateurs et contours de champs (#DDE5E0)
   static const Color border = Color(0xFFDDE5E0);
+  static const Color inputBorder = Color(0xFFDDE5E0);
 
   // --- Actions & Feedback ---
   /// Action destructive, bouton supprimer, alerte de rejet (#DC2626)

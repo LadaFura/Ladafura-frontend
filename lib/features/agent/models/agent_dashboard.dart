@@ -19,13 +19,13 @@ class AgentDashboard {
 
   factory AgentDashboard.fromJson(Map<String, dynamic> json) {
     return AgentDashboard(
-      agentId: json['agentId'],
-      nom: json['nom'],
-      prenom: json['prenom'],
-      email: json['email'],
-      telephone: json['telephone'],
-      matricule: json['matricule'],
-      zoneCouverture: json['zoneCouverture'],
+      agentId: (json['agentId'] as num?)?.toInt() ?? 0,
+      nom: json['nom'] as String? ?? '',
+      prenom: json['prenom'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      telephone: json['telephone'] as String? ?? '',
+      matricule: json['matricule'] as String?,
+      zoneCouverture: json['zoneCouverture'] as String? ?? 'Non définie',
     );
   }
 }

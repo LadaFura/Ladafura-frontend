@@ -21,14 +21,14 @@ class Statistiques {
 
   factory Statistiques.fromJson(Map<String, dynamic> json) {
     return Statistiques(
-      total: json['total'],
-      brouillons: json['brouillons'],
-      enAttente: json['enAttente'],
-      soumises: json['soumises'],
-      enExamen: json['enExamen'],
-      validees: json['validees'],
-      rejetees: json['rejetees'],
-      tauxValidation: (json['tauxValidation'] as num).toDouble(),
+      total: (json['total'] as num?)?.toInt() ?? 0,
+      brouillons: (json['brouillons'] as num?)?.toInt() ?? 0,
+      enAttente: (json['enAttente'] as num?)?.toInt() ?? 0,
+      soumises: (json['soumises'] as num?)?.toInt() ?? 0,
+      enExamen: (json['enExamen'] as num?)?.toInt() ?? 0,
+      validees: (json['validees'] as num?)?.toInt() ?? 0,
+      rejetees: (json['rejetees'] as num?)?.toInt() ?? 0,
+      tauxValidation: (json['tauxValidation'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

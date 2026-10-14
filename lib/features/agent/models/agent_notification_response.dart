@@ -25,18 +25,20 @@ class AgentNotificationResponse {
 
   factory AgentNotificationResponse.fromJson(Map<String, dynamic> json) {
     return AgentNotificationResponse(
-      id: json['id'],
-      titre: json['titre'],
-      message: json['message'],
-      type: json['type'],
-      niveau: json['niveau'],
-      lue: json['lue'],
-      dateNotification: DateTime.parse(json['dateNotification']),
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      titre: json['titre'] as String? ?? '',
+      message: json['message'] as String? ?? '',
+      type: json['type'] as String? ?? 'INFO',
+      niveau: json['niveau'] as String? ?? 'INFO',
+      lue: json['lue'] as bool? ?? false,
+      dateNotification: json['dateNotification'] != null
+          ? DateTime.tryParse(json['dateNotification'].toString()) ?? DateTime.now()
+          : DateTime.now(),
       dateLecture: json['dateLecture'] != null
-          ? DateTime.parse(json['dateLecture'])
+          ? DateTime.tryParse(json['dateLecture'].toString())
           : null,
-      referenceId: json['referenceId'],
-      lien: json['lien'],
+      referenceId: json['referenceId']?.toString(),
+      lien: json['lien'] as String?,
     );
   }
 }
