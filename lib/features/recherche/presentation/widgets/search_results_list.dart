@@ -79,10 +79,17 @@ class SearchResultsList extends StatelessWidget {
               pharma: pharma,
               userLocation: userLocation,
               onTap: () {
-                final detailPath = isCitizen
+                final basePath = isCitizen
                     ? RouteNames.citizenPharmacopeeDetailUrl(pharma.id.toString())
                     : RouteNames.visitorPharmacopeeDetailUrl(pharma.id.toString());
-                context.push(detailPath);
+                final q = results.query.trim();
+                final detailPath = q.isNotEmpty
+                    ? '$basePath?q=${Uri.encodeComponent(q)}'
+                    : basePath;
+                context.push(
+                  detailPath,
+                  extra: pharma.produitsDisponibles,
+                );
               },
               isDark: isDark,
             ),

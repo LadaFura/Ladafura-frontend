@@ -5,7 +5,9 @@ import '../models/agent_collecte_detail_model.dart';
 import '../../collectes/models/agent_collecte_summary_response.dart';
 import '../models/agent_dashboard_model.dart';
 import '../models/agent_maladie_model.dart';
+import '../models/agent_notification_response.dart';
 import '../models/agent_plante_model.dart';
+import '../models/agent_profile_model.dart';
 import '../models/agent_recapitulatif_model.dart';
 import '../models/agent_source_model.dart';
 
@@ -48,6 +50,29 @@ final agentCollecteRecapitulatifProvider =
 final agentSourcesListProvider = FutureProvider<List<AgentSourceModel>>((ref) async {
   final api = ref.watch(agentApiServiceProvider);
   return api.getSources();
+});
+
+/// Provider du profil de l'agent de collecte connecté
+final agentProfileProvider = FutureProvider<AgentProfileModel>((ref) async {
+  final api = ref.watch(agentApiServiceProvider);
+  return api.getProfile();
+});
+
+/// Filtre actuel des notifications agent (TOUTES, NON_LUES, COLLECTE_VALIDEE, COLLECTE_REJETEE, COLLECTE_CORRECTION)
+final agentNotificationsFilterProvider = StateProvider<String>((ref) => 'TOUTES');
+
+/// Provider de la liste des notifications de l'agent (filtrable)
+final agentNotificationsListProvider =
+    FutureProvider<List<AgentNotificationResponse>>((ref) async {
+  final api = ref.watch(agentApiServiceProvider);
+  final filter = ref.watch(agentNotificationsFilterProvider);
+
+  if (filter == 'NON_LUES') {
+    return api.getNotifications(lue: false);
+  } else if (filter != 'TOUTES') {
+    return api.getNotifications(type: filter);
+  }
+  return api.getNotifications();
 });
 
 // =============================================================================
@@ -98,11 +123,11 @@ class NouvelleCollecteDraftState {
     this.selectedPlante,
     this.selectedMaladies = const [],
     this.usageRapporte = '',
-    this.partieUtilisee = '',
+    this.partieUtilisee = 'Feuilles',
     this.preparation = '',
     this.precaution = '',
     this.selectedSource,
-    this.region = '',
+    this.region = 'Sikasso',
     this.cercle = '',
     this.commune = '',
     this.localite = '',
@@ -113,6 +138,60 @@ class NouvelleCollecteDraftState {
     this.recapitulatif,
   });
 
+  /// Vérifie si les champs obligatoires d'une étape donnée sont remplis
+  bool isStepValid(int step) {
+    switch (step) {
+      case 0:
+        return selectedPlante != null && selectedPlante!.id > 0;
+      case 1:
+        return selectedMaladies.isNotEmpty;
+      case 2:
+        return usageRapporte.trim().isNotEmpty &&
+            preparation.trim().isNotEmpty;
+      case 3:
+        return selectedSource != null && selectedSource!.id > 0;
+      case 4:
+        return region.trim().isNotEmpty &&
+            cercle.trim().isNotEmpty &&
+            commune.trim().isNotEmpty &&
+            localite.trim().isNotEmpty;
+      case 5:
+        return isAllStepsValid;
+      default:
+        return true;
+    }
+  }
+
+  /// Indique si les 5 étapes de saisie sont complètes
+  bool get isAllStepsValid =>
+      isStepValid(0) &&
+      isStepValid(1) &&
+      isStepValid(2) &&
+      isStepValid(3) &&
+      isStepValid(4);
+
+  /// Message explicite indiquant le champ obligatoire manquant pour l'étape courante
+  String? stepValidationMessage(int step) {
+    if (isStepValid(step)) return null;
+    switch (step) {
+      case 0:
+        return 'Veuillez sélectionner ou ajouter une plante botanique avant de continuer.';
+      case 1:
+        return 'Veuillez sélectionner ou ajouter au moins une maladie ou symptôme ciblé.';
+      case 2:
+        if (usageRapporte.trim().isEmpty) {
+          return 'Veuillez renseigner l’usage traditionnel rapporté avant de continuer.';
+        }
+        return 'Veuillez renseigner le mode de préparation et d’administration.';
+      case 3:
+        return 'Veuillez sélectionner ou ajouter l’informateur / tradipraticien source.';
+      case 4:
+        return 'Veuillez renseigner la région, le cercle, la commune et le village / localité.';
+      default:
+        return 'Veuillez compléter les champs obligatoires de cette étape.';
+    }
+  }
+
   NouvelleCollecteDraftState copyWith({
     int? currentStep,
     int? collecteId,
@@ -120,12 +199,14 @@ class NouvelleCollecteDraftState {
     bool? isLoading,
     String? errorMessage,
     AgentPlanteModel? selectedPlante,
+    bool clearSelectedPlante = false,
     List<AgentMaladieModel>? selectedMaladies,
     String? usageRapporte,
     String? partieUtilisee,
     String? preparation,
     String? precaution,
     AgentSourceModel? selectedSource,
+    bool clearSelectedSource = false,
     String? region,
     String? cercle,
     String? commune,
@@ -142,13 +223,13 @@ class NouvelleCollecteDraftState {
       isDraftSaved: isDraftSaved ?? this.isDraftSaved,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
-      selectedPlante: selectedPlante ?? this.selectedPlante,
+      selectedPlante: clearSelectedPlante ? null : (selectedPlante ?? this.selectedPlante),
       selectedMaladies: selectedMaladies ?? this.selectedMaladies,
       usageRapporte: usageRapporte ?? this.usageRapporte,
       partieUtilisee: partieUtilisee ?? this.partieUtilisee,
       preparation: preparation ?? this.preparation,
       precaution: precaution ?? this.precaution,
-      selectedSource: selectedSource ?? this.selectedSource,
+      selectedSource: clearSelectedSource ? null : (selectedSource ?? this.selectedSource),
       region: region ?? this.region,
       cercle: cercle ?? this.cercle,
       commune: commune ?? this.commune,
@@ -173,8 +254,12 @@ class NouvelleCollecteWizardNotifier extends StateNotifier<NouvelleCollecteDraft
     state = state.copyWith(currentStep: step);
   }
 
-  void selectPlante(AgentPlanteModel plante) {
-    state = state.copyWith(selectedPlante: plante);
+  void selectPlante(AgentPlanteModel? plante) {
+    if (plante == null || plante.id <= 0) {
+      state = state.copyWith(clearSelectedPlante: true);
+    } else {
+      state = state.copyWith(selectedPlante: plante);
+    }
   }
 
   void addMaladie(AgentMaladieModel maladie) {
@@ -202,8 +287,12 @@ class NouvelleCollecteWizardNotifier extends StateNotifier<NouvelleCollecteDraft
     );
   }
 
-  void selectSource(AgentSourceModel source) {
-    state = state.copyWith(selectedSource: source);
+  void selectSource(AgentSourceModel? source) {
+    if (source == null || source.id <= 0) {
+      state = state.copyWith(clearSelectedSource: true);
+    } else {
+      state = state.copyWith(selectedSource: source);
+    }
   }
 
   void setLocalisation({
@@ -236,53 +325,79 @@ class NouvelleCollecteWizardNotifier extends StateNotifier<NouvelleCollecteDraft
   Future<bool> saveDraft() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
+      final validSourceId =
+          (state.selectedSource != null && state.selectedSource!.id > 0)
+              ? state.selectedSource!.id
+              : null;
+      final validPlanteId =
+          (state.selectedPlante != null && state.selectedPlante!.id > 0)
+              ? state.selectedPlante!.id
+              : null;
+
       int id = state.collecteId ?? 0;
       if (id == 0) {
         final draft = await _api.createDraft(
           description: state.usageRapporte.isNotEmpty
               ? state.usageRapporte
               : 'Collecte de ${state.selectedPlante?.nomScientifique ?? "terrain"}',
-          sourceId: state.selectedSource?.id,
+          sourceId: validSourceId,
         );
         id = draft.id;
         state = state.copyWith(collecteId: id, isDraftSaved: true);
+      } else {
+        await _api.updateCollecte(
+          id,
+          description: state.usageRapporte.isNotEmpty
+              ? state.usageRapporte
+              : 'Collecte de ${state.selectedPlante?.nomScientifique ?? "terrain"}',
+          sourceId: validSourceId,
+        );
       }
 
       // Associer la plante si sélectionnée
-      if (state.selectedPlante != null) {
+      if (validPlanteId != null) {
         try {
           await _api.associerPlanteACollecte(
             collecteId: id,
-            planteId: state.selectedPlante!.id,
+            planteId: validPlanteId,
           );
         } catch (_) {}
       }
 
       // Enregistrer connaissance & maladies
-      if (state.selectedPlante != null && state.usageRapporte.isNotEmpty) {
+      if (validPlanteId != null && state.usageRapporte.trim().isNotEmpty) {
         try {
           await _api.enregistrerConnaissance(
             collecteId: id,
-            planteId: state.selectedPlante!.id,
-            usageRapporte: state.usageRapporte,
-            partieUtilisee: state.partieUtilisee.isNotEmpty ? state.partieUtilisee : 'Feuilles',
-            preparation: state.preparation.isNotEmpty ? state.preparation : 'Décoction',
-            precaution: state.precaution.isNotEmpty ? state.precaution : null,
-            sourceId: state.selectedSource?.id,
+            planteId: validPlanteId,
+            usageRapporte: state.usageRapporte.trim(),
+            partieUtilisee: state.partieUtilisee.trim().isNotEmpty
+                ? state.partieUtilisee.trim()
+                : 'Feuilles',
+            preparation: state.preparation.trim().isNotEmpty
+                ? state.preparation.trim()
+                : 'Décoction',
+            precaution: state.precaution.trim().isNotEmpty
+                ? state.precaution.trim()
+                : null,
+            sourceId: validSourceId,
             maladieIds: state.selectedMaladies.map((m) => m.id).toList(),
           );
         } catch (_) {}
       }
 
       // Enregistrer localisation si saisie
-      if (state.region.isNotEmpty) {
+      final reg = state.region.trim();
+      if (reg.isNotEmpty) {
         try {
           await _api.enregistrerLocalisation(
             collecteId: id,
-            region: state.region,
-            cercle: state.cercle.isNotEmpty ? state.cercle : null,
-            commune: state.commune.isNotEmpty ? state.commune : null,
-            localite: state.localite.isNotEmpty ? state.localite : null,
+            region: reg,
+            cercle: state.cercle.trim().isNotEmpty ? state.cercle.trim() : reg,
+            commune:
+                state.commune.trim().isNotEmpty ? state.commune.trim() : reg,
+            localite:
+                state.localite.trim().isNotEmpty ? state.localite.trim() : reg,
             latitude: state.latitude,
             longitude: state.longitude,
           );
@@ -313,11 +428,9 @@ class NouvelleCollecteWizardNotifier extends StateNotifier<NouvelleCollecteDraft
     }
   }
 
-  /// Charge le récapitulatif officiel avant soumission finale
+  /// Synchronise toutes les étapes avec le serveur puis charge le récapitulatif officiel
   Future<void> fetchRecapitulatif() async {
-    if (state.collecteId == null) {
-      await saveDraft();
-    }
+    await saveDraft();
     if (state.collecteId == null) return;
 
     state = state.copyWith(isLoading: true);
@@ -329,15 +442,13 @@ class NouvelleCollecteWizardNotifier extends StateNotifier<NouvelleCollecteDraft
     }
   }
 
-  /// Soumet définitivement la collecte au comité de validation
+  /// Synchronise toutes les étapes et soumet définitivement la collecte au comité de validation
   Future<bool> soumettre() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      if (state.collecteId == null) {
-        final saved = await saveDraft();
-        if (!saved || state.collecteId == null) {
-          throw Exception("Impossible de créer le dossier de collecte");
-        }
+      final saved = await saveDraft();
+      if (!saved || state.collecteId == null) {
+        throw Exception('Impossible de sauvegarder le dossier de collecte');
       }
       await _api.soumettreCollecte(state.collecteId!);
       _ref.invalidate(agentCollectesListProvider);
@@ -352,6 +463,54 @@ class NouvelleCollecteWizardNotifier extends StateNotifier<NouvelleCollecteDraft
 
   void reset() {
     state = const NouvelleCollecteDraftState();
+  }
+
+  void loadFromDetail(
+    AgentCollecteDetailModel detail,
+    AgentCollecteRecapitulatifModel? recap,
+  ) {
+    state = NouvelleCollecteDraftState(
+      currentStep: 0,
+      collecteId: detail.id,
+      isDraftSaved: true,
+      selectedPlante: (recap?.planteId != null && recap?.planteNomScientifique != null)
+          ? AgentPlanteModel(
+              id: recap!.planteId!,
+              nomScientifique: recap.planteNomScientifique!,
+              description: detail.description,
+              photoUrl: detail.photoUrl,
+              nomsVernaculaires: recap.nomsVernaculaires,
+            )
+          : null,
+      usageRapporte: recap != null && recap.usagesRapportes.isNotEmpty
+          ? recap.usagesRapportes.first
+          : (detail.description ?? ''),
+      partieUtilisee: recap != null && recap.partiesUtilisees.isNotEmpty
+          ? recap.partiesUtilisees.first
+          : 'Feuilles',
+      preparation: recap != null && recap.modesPreparation.isNotEmpty
+          ? recap.modesPreparation.first
+          : '',
+      precaution: recap != null && recap.precautions.isNotEmpty
+          ? recap.precautions.first
+          : '',
+      selectedSource: (detail.sourceId != null && detail.sourceNomComplet != null)
+          ? AgentSourceModel(
+              id: detail.sourceId!,
+              nom: detail.sourceNomComplet!,
+              nomComplet: detail.sourceNomComplet!,
+              specialite: detail.sourceSpecialite,
+              telephone: detail.sourceTelephone,
+            )
+          : null,
+      region: detail.region ?? 'Sikasso',
+      cercle: detail.cercle ?? '',
+      commune: detail.commune ?? '',
+      localite: detail.localite ?? '',
+      latitude: detail.latitude,
+      longitude: detail.longitude,
+      recapitulatif: recap,
+    );
   }
 }
 

@@ -33,22 +33,25 @@ class DerniereCollecte {
 
   factory DerniereCollecte.fromJson(Map<String, dynamic> json) {
     return DerniereCollecte(
-      id: json['id'],
-      dateCollecte: DateTime.parse(json['dateCollecte']),
-      description: json['description'],
-      statut: json['statut'],
-      photoUrl: json['photoUrl'],
-      audioUrl: json['audioUrl'],
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      dateCollecte: json['dateCollecte'] != null
+          ? DateTime.tryParse(json['dateCollecte'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+      description: json['description'] as String? ?? 'Aucune description',
+      statut: json['statut'] as String? ?? 'BROUILLON',
+      photoUrl: json['photoUrl'] as String?,
+      audioUrl: json['audioUrl'] as String?,
       dateSoumission: json['dateSoumission'] != null
-          ? DateTime.parse(json['dateSoumission'])
+          ? DateTime.tryParse(json['dateSoumission'].toString())
           : null,
-      motifRejet: json['motifRejet'],
-      nomSource: json['nomSource'],
-      localite: json['localite'],
-      cercle: json['cercle'],
-      region: json['region'],
-      nombreVertus: json['nombreVertus'],
-      nomScientifiquePlante: json['nomScientifiquePlante'],
+      motifRejet: json['motifRejet'] as String?,
+      nomSource: json['nomSource'] as String? ?? 'Source non renseignée',
+      localite: json['localite'] as String? ?? '',
+      cercle: json['cercle'] as String? ?? '',
+      region: json['region'] as String? ?? '',
+      nombreVertus: (json['nombreVertus'] as num?)?.toInt() ?? 0,
+      nomScientifiquePlante:
+          json['nomScientifiquePlante'] as String? ?? 'Plante non spécifiée',
     );
   }
 }

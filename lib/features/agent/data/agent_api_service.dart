@@ -6,7 +6,9 @@ import '../models/agent_collecte_detail_model.dart';
 import '../../collectes/models/agent_collecte_summary_response.dart';
 import '../models/agent_dashboard_model.dart';
 import '../models/agent_maladie_model.dart';
+import '../models/agent_notification_response.dart';
 import '../models/agent_plante_model.dart';
+import '../models/agent_profile_model.dart';
 import '../models/agent_recapitulatif_model.dart';
 import '../models/agent_source_model.dart';
 
@@ -112,12 +114,25 @@ class AgentApiService {
   Future<AgentPlanteModel> createPlante({
     required String nomScientifique,
     String? description,
+    String? nomVernaculaire,
+    String? langueVernaculaire,
   }) async {
     final response = await _dio.post(
       ApiEndpoints.agentPlantes,
       data: {
         'nomScientifique': nomScientifique,
-        if (description != null) 'description': description,
+        if (description != null && description.trim().isNotEmpty)
+          'description': description.trim(),
+        if (nomVernaculaire != null && nomVernaculaire.trim().isNotEmpty)
+          'nomsVernaculaires': [
+            {
+              'nom': nomVernaculaire.trim(),
+              'langue': (langueVernaculaire != null && langueVernaculaire.trim().isNotEmpty)
+                  ? langueVernaculaire.trim()
+                  : 'Bambara',
+              'pays': 'Mali',
+            },
+          ],
       },
     );
     return AgentPlanteModel.fromJson(response.data as Map<String, dynamic>);
@@ -294,6 +309,81 @@ class AgentApiService {
 
   Future<void> soumettreCollecte(int collecteId) async {
     await _dio.post(ApiEndpoints.agentCollecteSoumettre(collecteId.toString()));
+  }
+
+  // ===========================================================================
+  // PROFIL AGENT
+  // ===========================================================================
+  Future<AgentProfileModel> getProfile() async {
+    final response = await _dio.get(ApiEndpoints.agentProfile);
+    return AgentProfileModel.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<AgentProfileModel> updateProfile({
+    required String nom,
+    required String prenom,
+    String? telephone,
+    String? zoneCouverture,
+  }) async {
+    final response = await _dio.put(
+      ApiEndpoints.agentProfile,
+      data: {
+        'nom': nom.trim(),
+        'prenom': prenom.trim(),
+        if (telephone != null && telephone.trim().isNotEmpty)
+          'telephone': telephone.trim(),
+        if (zoneCouverture != null && zoneCouverture.trim().isNotEmpty)
+          'zoneCouverture': zoneCouverture.trim(),
+      },
+    );
+    return AgentProfileModel.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  // ===========================================================================
+  // NOTIFICATIONS AGENT
+  // ===========================================================================
+  Future<List<AgentNotificationResponse>> getNotifications({
+    bool? lue,
+    String? type,
+  }) async {
+    final queryParams = <String, dynamic>{
+      'size': 50,
+      if (lue != null) 'lue': lue,
+      if (type != null && type.isNotEmpty) 'type': type,
+    };
+    final response = await _dio.get(
+      ApiEndpoints.agentNotifications,
+      queryParameters: queryParams,
+    );
+    final data = response.data;
+    if (data is List) {
+      return data
+          .map((e) =>
+              AgentNotificationResponse.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } else if (data is Map && data['content'] is List) {
+      return (data['content'] as List)
+          .map((e) =>
+              AgentNotificationResponse.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  Future<AgentNotificationResponse> markNotificationAsRead(int id) async {
+    final response =
+        await _dio.patch('${ApiEndpoints.agentNotifications}/$id/read');
+    return AgentNotificationResponse.fromJson(
+      response.data as Map<String, dynamic>,
+    );
+  }
+
+  Future<void> markAllNotificationsAsRead() async {
+    await _dio.post('${ApiEndpoints.agentNotifications}/read-all');
+  }
+
+  Future<void> deleteNotification(int id) async {
+    await _dio.delete('${ApiEndpoints.agentNotifications}/$id');
   }
 }
 

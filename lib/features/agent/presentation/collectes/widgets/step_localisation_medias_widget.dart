@@ -257,7 +257,7 @@ class _StepLocalisationMediasWidgetState
                 child: TextField(
                   controller: _cercleController,
                   decoration: const InputDecoration(
-                    labelText: 'Cercle (ex: Koutiala)',
+                    labelText: 'Cercle * (ex: Koutiala)',
                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                 ),
@@ -267,7 +267,7 @@ class _StepLocalisationMediasWidgetState
                 child: TextField(
                   controller: _communeController,
                   decoration: const InputDecoration(
-                    labelText: 'Commune (ex: Finkolo)',
+                    labelText: 'Commune * (ex: Finkolo)',
                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                 ),
@@ -280,7 +280,7 @@ class _StepLocalisationMediasWidgetState
           TextField(
             controller: _localiteController,
             decoration: const InputDecoration(
-              labelText: 'Village ou localité spécifique',
+              labelText: 'Village ou localité spécifique *',
               hintText: 'Ex: Hameau de Finkolo-Sud',
               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),

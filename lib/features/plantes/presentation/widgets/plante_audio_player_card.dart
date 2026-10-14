@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
@@ -70,7 +72,7 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
         if (mounted) {
           setState(() {
             _isLoading = false;
-            _errorMessage = "Module audio indisponible sans redémarrage complet.";
+            _errorMessage = 'Impossible de lire cet enregistrement audio.';
           });
         }
       });
@@ -92,11 +94,12 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
           setState(() {
             _playerState = PlayerState.completed;
             _position = Duration.zero;
+            _isLoading = false;
           });
         }
       }, onError: (_) {});
     } catch (_) {
-      _errorMessage = "Module audio indisponible (redémarrage de l'app requis).";
+      _errorMessage = 'Module audio indisponible.';
     }
   }
 
@@ -113,6 +116,22 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
     super.dispose();
   }
 
+  Source _buildAudioSource(String rawUrl) {
+    final trimmed = rawUrl.trim();
+    if (trimmed.startsWith('file://')) {
+      return DeviceFileSource(Uri.parse(trimmed).toFilePath());
+    }
+    if (!trimmed.startsWith('http://') &&
+        !trimmed.startsWith('https://') &&
+        !trimmed.startsWith('/uploads/') &&
+        !trimmed.startsWith('uploads/') &&
+        File(trimmed).existsSync()) {
+      return DeviceFileSource(trimmed);
+    }
+    final resolved = ApiEndpoints.resolveMediaUrl(trimmed);
+    return UrlSource(resolved);
+  }
+
   Future<void> _togglePlayPause() async {
     setState(() => _errorMessage = null);
 
@@ -123,7 +142,7 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
     final player = _audioPlayer;
     if (player == null) {
       setState(() {
-        _errorMessage = "Veuillez redémarrer l'application complètement pour activer le lecteur.";
+        _errorMessage = 'Lecteur audio non disponible.';
       });
       return;
     }
@@ -135,16 +154,20 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
         setState(() => _isLoading = true);
         if (_playerState == PlayerState.completed ||
             _playerState == PlayerState.stopped) {
-          await player.play(UrlSource(widget.audioUrl));
+          final source = _buildAudioSource(widget.audioUrl);
+          await player.play(source);
         } else {
           await player.resume();
+        }
+        if (mounted) {
+          setState(() => _isLoading = false);
         }
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = "Lecteur audio non prêt (redémarrage requis).";
+          _errorMessage = 'Impossible de charger le fichier audio.';
         });
       }
     }
@@ -212,7 +235,7 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(AppDimensions.space8),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: (isDark ? AppColors.darkPrimary : AppColors.primary)
                       .withAlpha(25),
@@ -221,7 +244,7 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
                 child: Icon(
                   Icons.volume_up_rounded,
                   color: isDark ? AppColors.darkPrimary : AppColors.primary,
-                  size: 20,
+                  size: 16,
                 ),
               ),
               const SizedBox(width: AppDimensions.space12),
@@ -311,8 +334,8 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
                     );
                   },
                   child: Container(
-                    width: 48,
-                    height: 48,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
@@ -331,18 +354,18 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
                                   ? AppColors.darkPrimary
                                   : AppColors.primary)
                               .withAlpha(isPlaying ? 80 : 40),
-                          blurRadius: isPlaying ? 10 : 6,
-                          offset: const Offset(0, 3),
+                          blurRadius: isPlaying ? 8 : 5,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
                     child: _isLoading
                         ? const Center(
                             child: SizedBox(
-                              width: 22,
-                              height: 22,
+                              width: 18,
+                              height: 18,
                               child: CircularProgressIndicator(
-                                strokeWidth: 2.4,
+                                strokeWidth: 2.0,
                                 valueColor:
                                     AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
@@ -353,7 +376,7 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
                                 ? Icons.pause_rounded
                                 : Icons.play_arrow_rounded,
                             color: Colors.white,
-                            size: 28,
+                            size: 20,
                           ),
                   ),
                 ),

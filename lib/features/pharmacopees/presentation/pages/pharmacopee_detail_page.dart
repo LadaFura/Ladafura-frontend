@@ -33,10 +33,14 @@ import '../widgets/produit_detail_modal.dart';
 /// 6. Avis clients et retours de la pharmacopée
 class PharmacopeeDetailPage extends ConsumerStatefulWidget {
   final int pharmacopeeId;
+  final String? initialSearchQuery;
+  final List<String> initialMatchedProduits;
 
   const PharmacopeeDetailPage({
     super.key,
     required this.pharmacopeeId,
+    this.initialSearchQuery,
+    this.initialMatchedProduits = const [],
   });
 
   @override
@@ -46,6 +50,23 @@ class PharmacopeeDetailPage extends ConsumerStatefulWidget {
 class _PharmacopeeDetailPageState extends ConsumerState<PharmacopeeDetailPage> {
   // Onglet sélectionné : 0 = Remèdes, 1 = Avis & Évaluations
   int _selectedTabIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialSearchQuery != null &&
+        widget.initialSearchQuery!.trim().isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref
+            .read(pharmacopeeDetailControllerProvider(widget.pharmacopeeId).notifier)
+            .initFromSearch(
+              query: widget.initialSearchQuery,
+              matchedProduits: widget.initialMatchedProduits,
+            );
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -335,6 +356,7 @@ class _PharmacopeeDetailPageState extends ConsumerState<PharmacopeeDetailPage> {
                     selectedCategory: controllerState.selectedCategory,
                     builder: (context, isPinned) => PharmacopeeSearchBar(
                       pharmacopeeNom: pharma.nom,
+                      searchQuery: controllerState.searchQuery,
                       onSearchChanged: controller.setSearchQuery,
                       categories: categories,
                       selectedCategory: controllerState.selectedCategory,

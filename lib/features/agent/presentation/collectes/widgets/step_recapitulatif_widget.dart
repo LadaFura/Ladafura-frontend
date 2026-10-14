@@ -95,67 +95,73 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
           const SizedBox(height: AppDimensions.space16),
 
           // 1. Statut de conformité
-          if (recap != null) ...[
-            Container(
-              padding: const EdgeInsets.all(AppDimensions.space16),
-              decoration: BoxDecoration(
-                color: recap.conformePourSoumission
-                    ? (isDark ? AppColors.darkSurfaceVariant : Colors.green.shade50)
-                    : (isDark ? AppColors.darkSurfaceVariant : Colors.amber.shade50),
-                borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-                border: Border.all(
-                  color: recap.conformePourSoumission
-                      ? Colors.green
-                      : Colors.amber.shade700,
-                  width: 1.5,
+          Builder(
+            builder: (context) {
+              final isConforme =
+                  draft.isAllStepsValid || (recap?.conformePourSoumission ?? false);
+              return Container(
+                padding: const EdgeInsets.all(AppDimensions.space16),
+                decoration: BoxDecoration(
+                  color: isConforme
+                      ? (isDark
+                          ? AppColors.darkSurfaceVariant
+                          : Colors.green.shade50)
+                      : (isDark
+                          ? AppColors.darkSurfaceVariant
+                          : Colors.amber.shade50),
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+                  border: Border.all(
+                    color: isConforme ? Colors.green : Colors.amber.shade700,
+                    width: 1.5,
+                  ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    recap.conformePourSoumission
-                        ? Icons.check_circle_rounded
-                        : Icons.warning_amber_rounded,
-                    color: recap.conformePourSoumission
-                        ? Colors.green
-                        : Colors.amber.shade800,
-                    size: 32,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          recap.conformePourSoumission
-                              ? 'Dossier Conforme pour Soumission'
-                              : 'Dossier Incomplet',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: recap.conformePourSoumission
-                                ? Colors.green.shade800
-                                : Colors.amber.shade900,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          recap.conformePourSoumission
-                            ? 'Tous les critères indispensables sont validés.'
-                            : 'Certains éléments obligatoires manquent à la fiche.',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isDark ? AppColors.darkTextSecondary : Colors.black87,
-                          ),
-                        ),
-                      ],
+                child: Row(
+                  children: [
+                    Icon(
+                      isConforme
+                          ? Icons.check_circle_rounded
+                          : Icons.warning_amber_rounded,
+                      color: isConforme ? Colors.green : Colors.amber.shade800,
+                      size: 32,
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppDimensions.space16),
-          ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isConforme
+                                ? 'Dossier Conforme pour Soumission'
+                                : 'Vérification des étapes requise',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: isConforme
+                                  ? Colors.green.shade800
+                                  : Colors.amber.shade900,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            isConforme
+                                ? 'Tous les critères indispensables sont validés. Vous pouvez soumettre la fiche.'
+                                : 'Appuyez sur une section ci-dessous pour compléter ou modifier ses informations.',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: AppDimensions.space16),
 
           // 2. Synthèse Plante
           _buildSummaryCard(
@@ -163,7 +169,8 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
             isDark: isDark,
             title: 'Spécimen Botanique',
             icon: Icons.eco_rounded,
-            isValid: draft.selectedPlante != null,
+            isValid: draft.isStepValid(0),
+            onEdit: () => ref.read(nouvelleCollecteWizardProvider.notifier).setStep(0),
             content: draft.selectedPlante != null
                 ? draft.selectedPlante!.nomScientifique
                 : 'Aucune plante sélectionnée',
@@ -181,7 +188,8 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
             isDark: isDark,
             title: 'Pathologies & Symptômes associés',
             icon: Icons.medical_services_rounded,
-            isValid: draft.selectedMaladies.isNotEmpty,
+            isValid: draft.isStepValid(1),
+            onEdit: () => ref.read(nouvelleCollecteWizardProvider.notifier).setStep(1),
             content: draft.selectedMaladies.isNotEmpty
                 ? draft.selectedMaladies.map((m) => m.nom).join(', ')
                 : 'Aucune affection spécifiée',
@@ -195,7 +203,8 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
             isDark: isDark,
             title: 'Savoir traditionnel & Recette',
             icon: Icons.auto_stories_rounded,
-            isValid: draft.usageRapporte.isNotEmpty,
+            isValid: draft.isStepValid(2),
+            onEdit: () => ref.read(nouvelleCollecteWizardProvider.notifier).setStep(2),
             content: draft.usageRapporte.isNotEmpty
                 ? draft.usageRapporte
                 : 'Usage non renseigné',
@@ -210,7 +219,8 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
             isDark: isDark,
             title: 'Praticien / Informateur',
             icon: Icons.person_pin_circle_rounded,
-            isValid: draft.selectedSource != null,
+            isValid: draft.isStepValid(3),
+            onEdit: () => ref.read(nouvelleCollecteWizardProvider.notifier).setStep(3),
             content: draft.selectedSource != null
                 ? draft.selectedSource!.nomComplet
                 : 'Aucun praticien associé',
@@ -225,8 +235,9 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
             isDark: isDark,
             title: 'Territoire & Médias',
             icon: Icons.pin_drop_rounded,
-            isValid: draft.region.isNotEmpty,
-            content: '${draft.region}${draft.cercle.isNotEmpty ? " / ${draft.cercle}" : ""}',
+            isValid: draft.isStepValid(4),
+            onEdit: () => ref.read(nouvelleCollecteWizardProvider.notifier).setStep(4),
+            content: '${draft.region}${draft.cercle.isNotEmpty ? " / ${draft.cercle}" : ""}${draft.commune.isNotEmpty ? " • ${draft.commune}" : ""}${draft.localite.isNotEmpty ? " (${draft.localite})" : ""}',
             subtitle: 'GPS : ${draft.latitude != null ? "Enregistré" : "Non capturé"} • Photo : ${draft.photoFile != null ? "Présente" : "Absente"} • Audio : ${draft.audioFile != null ? "Présent" : "Absent"}',
           ),
 
@@ -243,11 +254,15 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
     required IconData icon,
     required bool isValid,
     required String content,
+    required VoidCallback onEdit,
     String? subtitle,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(AppDimensions.space12),
-      decoration: BoxDecoration(
+    return InkWell(
+      onTap: onEdit,
+      borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+      child: Container(
+        padding: const EdgeInsets.all(AppDimensions.space12),
+        decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
         border: Border.all(
@@ -318,6 +333,7 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
             ),
           ),
         ],
+      ),
       ),
     );
   }

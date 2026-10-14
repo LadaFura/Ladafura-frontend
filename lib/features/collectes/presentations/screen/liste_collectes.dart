@@ -46,16 +46,6 @@ class ListeCollectes extends ConsumerWidget {
           const SizedBox(width: 8),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_location_alt_rounded),
-        label: const Text('Nouvelle collecte'),
-        onPressed: () {
-          ref.read(nouvelleCollecteWizardProvider.notifier).reset();
-          context.push(RouteNames.agentNouvelleCollectePath);
-        },
-      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -191,6 +181,120 @@ class ListeCollectes extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkSurface : Colors.white,
+          border: Border(
+            top: BorderSide(
+              color: isDark ? AppColors.darkBorder : AppColors.border,
+            ),
+          ),
+        ),
+        child: SafeArea(
+          child: SizedBox(
+            height: 58,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _CollecteNavItem(
+                    icon: Icons.home_outlined,
+                    label: 'Accueil',
+                    isDark: isDark,
+                    onTap: () => context.go(RouteNames.agentDashboardPath),
+                  ),
+                ),
+                Expanded(
+                  child: _CollecteNavItem(
+                    icon: Icons.folder_rounded,
+                    label: 'Collectes',
+                    isDark: isDark,
+                    selected: true,
+                    onTap: () {},
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: SizedBox(
+                      width: 42,
+                      height: 42,
+                      child: FloatingActionButton(
+                        heroTag: 'agent_collectes_nav_fab',
+                        tooltip: 'Nouvelle collecte',
+                        onPressed: () {
+                          ref.read(nouvelleCollecteWizardProvider.notifier).reset();
+                          context.push(RouteNames.agentNouvelleCollectePath);
+                        },
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: const CircleBorder(),
+                        child: const Icon(Icons.add, size: 25),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: _CollecteNavItem(
+                    icon: Icons.notifications_none_outlined,
+                    label: 'Notif.',
+                    isDark: isDark,
+                    onTap: () => context.go(RouteNames.agentNotificationsPath),
+                  ),
+                ),
+                Expanded(
+                  child: _CollecteNavItem(
+                    icon: Icons.person_outline,
+                    label: 'Profil',
+                    isDark: isDark,
+                    onTap: () => context.go(RouteNames.agentProfilPath),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CollecteNavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isDark;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _CollecteNavItem({
+    required this.icon,
+    required this.label,
+    required this.isDark,
+    required this.onTap,
+    this.selected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected
+        ? AppColors.primary
+        : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary);
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 19, color: color),
+          const SizedBox(height: 3),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 9,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+            ),
+          ),
+        ],
       ),
     );
   }

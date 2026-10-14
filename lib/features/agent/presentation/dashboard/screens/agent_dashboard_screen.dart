@@ -45,7 +45,7 @@ class AgentDashboardScreen extends ConsumerWidget {
 
     final dashboardAsync = ref.watch(dashboardAgentProvider);
 
-    final dashboard = dashboardAsync.value;
+    final dashboard = dashboardAsync.valueOrNull;
 
     final agent = dashboard?.agent;
     final statistiques = dashboard?.statistiques;

@@ -6,6 +6,7 @@ import '../../../../core/constants/app_dimensions.dart';
 /// Permet de chercher en direct parmi les remèdes vendus par cette pharmacopée.
 class PharmacopeeSearchBar extends StatefulWidget {
   final String pharmacopeeNom;
+  final String searchQuery;
   final ValueChanged<String> onSearchChanged;
   final List<String> categories;
   final String? selectedCategory;
@@ -16,6 +17,7 @@ class PharmacopeeSearchBar extends StatefulWidget {
   const PharmacopeeSearchBar({
     super.key,
     required this.pharmacopeeNom,
+    this.searchQuery = '',
     required this.onSearchChanged,
     required this.categories,
     required this.selectedCategory,
@@ -29,7 +31,25 @@ class PharmacopeeSearchBar extends StatefulWidget {
 }
 
 class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.searchQuery);
+  }
+
+  @override
+  void didUpdateWidget(covariant PharmacopeeSearchBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.searchQuery != oldWidget.searchQuery &&
+        widget.searchQuery != _controller.text) {
+      _controller.value = TextEditingValue(
+        text: widget.searchQuery,
+        selection: TextSelection.collapsed(offset: widget.searchQuery.length),
+      );
+    }
+  }
 
   @override
   void dispose() {

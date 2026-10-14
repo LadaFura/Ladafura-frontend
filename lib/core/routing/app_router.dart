@@ -8,6 +8,8 @@ import '../../features/agent/presentation/dashboard/screens/agent_dashboard_scre
 import '../../features/collectes/presentations/screen/liste_collectes.dart';
 import '../../features/agent/presentation/collectes/screens/agent_collecte_detail_page.dart';
 import '../../features/agent/presentation/collectes/screens/nouvelle_collecte_wizard_screen.dart';
+import '../../features/agent/presentation/notifications/screens/agent_notifications_screen.dart';
+import '../../features/agent/presentation/profil/screens/agent_profil_screen.dart';
 import '../../features/agent/presentation/sources/screens/agent_sources_screen.dart';
 import '../../features/auth/auth.dart';
 import '../../features/home/presentation/pages/citizen_home_screen.dart';
@@ -31,6 +33,7 @@ import '../../features/notifications/presentation/pages/citizen_notifications_pa
 import '../../shared/enums/user_role.dart';
 import '../../shared/widgets/navigation/app_shell.dart';
 import '../../shared/widgets/navigation/navigation_provider.dart';
+import '../network/network_providers.dart';
 import '../services/services_providers.dart';
 import 'route_guard.dart';
 import 'route_names.dart';
@@ -98,21 +101,47 @@ AuthRoutingState authRoutingState(AuthRoutingStateRef ref) {
   bool isAuthenticated = false;
   UserRole? role;
 
+  final routingState = AuthRoutingState(
+    isAuthenticated: false,
+    role: null,
+    isInitializing: false,
+  );
+
   try {
     final storage = ref.watch(storageServiceProvider);
+    final apiClient = ref.watch(apiClientProvider);
     final token = storage.getToken();
     final roleStr = storage.getRole();
     role = UserRole.fromString(roleStr);
     isAuthenticated = token != null && token.isNotEmpty && role != null;
+
+    // Toujours fournir le token stocké à l'intercepteur dès le démarrage
+    apiClient.authInterceptor.setTokenProvider(() async => storage.getToken());
+    if (token != null && token.isNotEmpty) {
+      apiClient.setAuthToken(token);
+    }
+
+    // Déconnexion et redirection automatique dès qu'une requête renvoie 401 (jeton expiré)
+    apiClient.setOnTokenExpired(() async {
+      await storage.clearSession();
+      apiClient.clearAuthToken();
+      routingState.update(
+        isAuthenticated: false,
+        role: null,
+        isInitializing: false,
+      );
+    });
   } catch (_) {
     // Si storageServiceProvider n'est pas configuré dans un conteneur de test isolé
   }
 
-  return AuthRoutingState(
+  routingState.update(
     isAuthenticated: isAuthenticated,
     role: role,
     isInitializing: false,
   );
+
+  return routingState;
 }
 
 /// Fournisseur Riverpod central du [GoRouter] adapté aux 2 acteurs mobiles (Population & Agent).
@@ -256,6 +285,10 @@ GoRouter appRouter(AppRouterRef ref) {
           child: PharmacopeeDetailPage(
             pharmacopeeId:
                 int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+            initialSearchQuery: state.uri.queryParameters['q'],
+            initialMatchedProduits: state.extra is List<String>
+                ? state.extra as List<String>
+                : const [],
           ),
         ),
       ),
@@ -394,6 +427,10 @@ GoRouter appRouter(AppRouterRef ref) {
           key: state.pageKey,
           child: PharmacopeeDetailPage(
             pharmacopeeId: int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+            initialSearchQuery: state.uri.queryParameters['q'],
+            initialMatchedProduits: state.extra is List<String>
+                ? state.extra as List<String>
+                : const [],
           ),
         ),
       ),
@@ -451,13 +488,12 @@ GoRouter appRouter(AppRouterRef ref) {
           GoRoute(
             path: 'notifications',
             name: RouteNames.agentNotifications,
-            builder: (context, state) =>
-                const _RoutePlaceholder(title: 'Notifications'),
+            builder: (context, state) => const AgentNotificationsScreen(),
           ),
           GoRoute(
             path: 'profil',
             name: RouteNames.agentProfil,
-            builder: (context, state) => const ProfilScreen(),
+            builder: (context, state) => const AgentProfilScreen(),
           ),
         ],
       ),

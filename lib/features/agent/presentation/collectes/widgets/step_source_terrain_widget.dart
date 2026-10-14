@@ -188,7 +188,7 @@ class _StepSourceTerrainWidgetState extends ConsumerState<StepSourceTerrainWidge
           const SizedBox(height: AppDimensions.space16),
 
           // Source actuellement sélectionnée
-          if (selectedSource != null) ...[
+          if (selectedSource != null && selectedSource.id > 0) ...[
             Container(
               padding: const EdgeInsets.all(AppDimensions.space16),
               decoration: BoxDecoration(
@@ -246,11 +246,7 @@ class _StepSourceTerrainWidgetState extends ConsumerState<StepSourceTerrainWidge
                     onPressed: () {
                       ref
                           .read(nouvelleCollecteWizardProvider.notifier)
-                          .selectSource(const AgentSourceModel(
-                            id: 0,
-                            nom: '',
-                            nomComplet: '',
-                          ));
+                          .selectSource(null);
                     },
                   ),
                 ],

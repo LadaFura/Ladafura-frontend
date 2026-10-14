@@ -18,11 +18,15 @@ class AgentDashboardResponse {
 
   factory AgentDashboardResponse.fromJson(Map<String, dynamic> json) {
     return AgentDashboardResponse(
-      agent: AgentDashboard.fromJson(json['agent']),
-      statistiques: Statistiques.fromJson(json['statistiques']),
-      notifications: Notifications.fromJson(json['notifications']),
-      dernieresCollectes: (json['dernieresCollectes'] as List)
-          .map((e) => DerniereCollecte.fromJson(e))
+      agent: AgentDashboard.fromJson(
+          Map<String, dynamic>.from(json['agent'] as Map? ?? {})),
+      statistiques: Statistiques.fromJson(
+          Map<String, dynamic>.from(json['statistiques'] as Map? ?? {})),
+      notifications: Notifications.fromJson(
+          Map<String, dynamic>.from(json['notifications'] as Map? ?? {})),
+      dernieresCollectes: (json['dernieresCollectes'] as List? ?? [])
+          .map((e) =>
+              DerniereCollecte.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
     );
   }

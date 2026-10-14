@@ -1,3 +1,4 @@
+import 'package:ladafura_frontend_flutter/core/constants/api_endpoints.dart';
 import 'package:ladafura_frontend_flutter/shared/models/plante_sommaire_model.dart';
 
 /// Modèle pour les noms vernaculaires dans les langues maliennes (Bambara, Peul, etc.).
@@ -24,12 +25,15 @@ class PopulationNomVernaculaireModel {
       );
     }
     if (json is Map<String, dynamic>) {
+      final rawAudio = json['audioUrl'] as String?;
       return PopulationNomVernaculaireModel(
         id: json['id'] as int?,
         nom: json['nom'] as String? ?? '',
         langue: json['langue'] as String? ?? 'Bambara',
         pays: json['pays'] as String? ?? 'Mali',
-        audioUrl: json['audioUrl'] as String?,
+        audioUrl: (rawAudio != null && rawAudio.trim().isNotEmpty)
+            ? ApiEndpoints.resolveMediaUrl(rawAudio)
+            : null,
       );
     }
     return PopulationNomVernaculaireModel(
@@ -200,7 +204,7 @@ class PopulationPlanteMediaModel {
   factory PopulationPlanteMediaModel.fromJson(Map<String, dynamic> json) {
     return PopulationPlanteMediaModel(
       id: json['id'] as int?,
-      url: json['url'] as String? ?? '',
+      url: ApiEndpoints.resolveMediaUrl(json['url'] as String?),
       typeMedia: json['typeMedia'] as String? ?? 'IMAGE',
       description: json['description'] as String?,
     );
@@ -297,12 +301,15 @@ class PopulationPlanteDetailModel {
   factory PopulationPlanteDetailModel.fromJson(Map<String, dynamic> json) {
     // Dans le cas d'une réponse sommaire, le champ peut s'appeler 'maladies'
     final rawMaladies = json['maladiesAssociees'] ?? json['maladies'];
+    final rawPhoto = json['photoUrl'] as String?;
 
     return PopulationPlanteDetailModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
       nomScientifique: json['nomScientifique'] as String? ?? '',
       description: json['description'] as String? ?? '',
-      photoUrl: json['photoUrl'] as String?,
+      photoUrl: (rawPhoto != null && rawPhoto.trim().isNotEmpty)
+          ? ApiEndpoints.resolveMediaUrl(rawPhoto)
+          : null,
       avertissementMedical: json['avertissementMedical'] as String?,
       nomsVernaculaires: (json['nomsVernaculaires'] as List<dynamic>?)
               ?.map(PopulationNomVernaculaireModel.fromJson)

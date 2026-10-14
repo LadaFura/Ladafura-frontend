@@ -28,9 +28,6 @@ class AuthRepository {
     // Configurer l'intercepteur Dio pour qu'il injecte toujours le Bearer token
     _apiClient.authInterceptor
         .setTokenProvider(() async => _storageService.getToken());
-    _apiClient.setOnTokenExpired(() async {
-      await logout();
-    });
     final existingToken = _storageService.getToken();
     if (existingToken != null && existingToken.isNotEmpty) {
       _apiClient.setAuthToken(existingToken);
@@ -50,6 +47,18 @@ class AuthRepository {
       ApiEndpoints.authMe,
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
+    if (response.statusCode == 401) {
+      await _storageService.clearSession();
+      _apiClient.clearAuthToken();
+      throw DioException(
+        requestOptions: RequestOptions(path: ApiEndpoints.authMe),
+        response: Response(
+          requestOptions: RequestOptions(path: ApiEndpoints.authMe),
+          statusCode: 401,
+        ),
+        type: DioExceptionType.badResponse,
+      );
+    }
     if (response.isSuccess && response.data != null) {
       final authMe = AuthMeModel.fromJson(response.data!);
       return authMe.toUtilisateurModel();

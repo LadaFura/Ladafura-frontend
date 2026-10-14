@@ -101,10 +101,33 @@ class _NouvelleCollecteWizardScreenState
               child: Row(
                 children: List.generate(_stepTitles.length, (index) {
                   final isCurrent = index == draft.currentStep;
-                  final isDone = index < draft.currentStep;
+                  final isDone = index < draft.currentStep && draft.isStepValid(index);
                   return Expanded(
                     child: GestureDetector(
-                      onTap: () => notifier.setStep(index),
+                      onTap: () {
+                        if (index <= draft.currentStep) {
+                          notifier.setStep(index);
+                          return;
+                        }
+                        // Empêcher de sauter une étape non remplie
+                        for (int s = 0; s < index; s++) {
+                          if (!draft.isStepValid(s)) {
+                            final msg = draft.stepValidationMessage(s) ??
+                                'Veuillez compléter cette étape avant de continuer.';
+                            ScaffoldMessenger.of(context)
+                              ..hideCurrentSnackBar()
+                              ..showSnackBar(
+                                SnackBar(
+                                  content: Text(msg),
+                                  backgroundColor: Colors.orange.shade800,
+                                ),
+                              );
+                            notifier.setStep(s);
+                            return;
+                          }
+                        }
+                        notifier.setStep(index);
+                      },
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -196,6 +219,41 @@ class _NouvelleCollecteWizardScreenState
               ),
             ),
 
+            // Bandeau d'indication si l'étape courante n'est pas encore complète
+            if (!draft.isStepValid(draft.currentStep))
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.space16,
+                  vertical: 8,
+                ),
+                color: isDark
+                    ? Colors.amber.shade900.withValues(alpha: 0.25)
+                    : Colors.amber.shade50,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 16,
+                      color: Colors.amber.shade800,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        draft.stepValidationMessage(draft.currentStep) ?? '',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? Colors.amber.shade200
+                              : Colors.amber.shade900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
             // Barre de navigation inférieure (Précédent / Suivant / Soumettre)
             Container(
               padding: const EdgeInsets.symmetric(
@@ -229,14 +287,13 @@ class _NouvelleCollecteWizardScreenState
                   ],
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: draft.isLoading
+                      onPressed: (draft.isLoading ||
+                              !draft.isStepValid(draft.currentStep))
                           ? null
                           : () async {
                               if (draft.currentStep < _stepTitles.length - 1) {
-                                // Passage à l'étape suivante avec auto-save
                                 notifier.setStep(draft.currentStep + 1);
                               } else {
-                                // Étape finale : Soumission
                                 final success = await notifier.soumettre();
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -249,6 +306,17 @@ class _NouvelleCollecteWizardScreenState
                                   );
                                   notifier.reset();
                                   context.pop();
+                                } else if (!success && context.mounted) {
+                                  final err = ref
+                                          .read(nouvelleCollecteWizardProvider)
+                                          .errorMessage ??
+                                      'Impossible de soumettre la collecte.';
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(err),
+                                      backgroundColor: AppColors.danger,
+                                    ),
+                                  );
                                 }
                               }
                             },
@@ -257,6 +325,12 @@ class _NouvelleCollecteWizardScreenState
                             ? Colors.green
                             : AppColors.primary,
                         foregroundColor: Colors.white,
+                        disabledBackgroundColor: isDark
+                            ? AppColors.darkSurfaceVariant
+                            : Colors.grey.shade300,
+                        disabledForegroundColor: isDark
+                            ? AppColors.darkTextMuted
+                            : Colors.grey.shade600,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppDimensions.radiusButton),
                         ),
