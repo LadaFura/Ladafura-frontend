@@ -70,6 +70,12 @@ class _CitizenSearchScreenState extends ConsumerState<CitizenSearchScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    ref.listen<RechercheState>(rechercheProvider, (prev, next) {
+      if (next.query != _controller.text) {
+        _controller.text = next.query;
+      }
+    });
+
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
       body: SafeArea(

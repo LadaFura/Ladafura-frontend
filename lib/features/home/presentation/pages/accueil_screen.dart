@@ -11,6 +11,7 @@ import '../widgets/home_search_bar_button.dart';
 import '../widgets/pharmacopee_home_card.dart';
 import '../widgets/plante_home_card.dart';
 import '../../providers/home_discovery_provider.dart';
+import 'package:ladafura_frontend_flutter/features/recherche/providers/recherche_provider.dart';
 
 /// Page d'accueil officielle de LADAFURA (Mode Visiteur & Découverte).
 ///
@@ -58,7 +59,12 @@ class AccueilScreen extends ConsumerWidget {
 
               // 3. Les 4 Catégories rapides : Plantes, Produits, Maladies, Pharmacopées
               HomeQuickCategories(
-                onPlantesTap: () => context.go(RouteNames.visitorRecherchePath),
+                onPlantesTap: () {
+                  ref
+                      .read(rechercheProvider.notifier)
+                      .exploreCategory(SearchCategory.plantes, userLocation: userLocation);
+                  context.go(RouteNames.visitorRecherchePath);
+                },
                 onProduitsTap: () => context.go(RouteNames.visitorRecherchePath),
                 onMaladiesTap: () => context.go(RouteNames.visitorRecherchePath),
                 onPharmacopeesTap: () => context.go(RouteNames.visitorCartePath),
@@ -114,7 +120,12 @@ class AccueilScreen extends ConsumerWidget {
               _buildSectionHeader(
                 context: context,
                 title: 'Plantes les plus consultées',
-                onSeeAll: () => context.go(RouteNames.visitorRecherchePath),
+                onSeeAll: () {
+                  ref
+                      .read(rechercheProvider.notifier)
+                      .exploreCategory(SearchCategory.plantes, userLocation: userLocation);
+                  context.go(RouteNames.visitorRecherchePath);
+                },
                 isDark: isDark,
               ),
               const SizedBox(height: AppDimensions.space12),
