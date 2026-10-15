@@ -87,15 +87,6 @@ class CommandeDetailPage extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
-        actions: [
-          IconButton(
-            tooltip: 'Actualiser',
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: () {
-              ref.invalidate(commandeDetailProvider(commandeId));
-            },
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {

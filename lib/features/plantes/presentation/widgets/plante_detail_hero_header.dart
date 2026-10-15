@@ -20,6 +20,7 @@ class PlanteDetailHeroHeader extends StatelessWidget {
   final VoidCallback? onFavorite;
   final bool isFavorite;
   final bool showTopActions;
+  final bool showDescription;
 
   const PlanteDetailHeroHeader({
     super.key,
@@ -29,6 +30,7 @@ class PlanteDetailHeroHeader extends StatelessWidget {
     this.onFavorite,
     this.isFavorite = false,
     this.showTopActions = false,
+    this.showDescription = false,
   });
 
   @override
@@ -219,8 +221,8 @@ class PlanteDetailHeroHeader extends StatelessWidget {
           ),
         ],
 
-        // Description botanique avec toggle Voir plus / Voir moins
-        if (plante.description.isNotEmpty) ...[
+        // Description botanique avec toggle Voir plus / Voir moins (si activé)
+        if (showDescription && plante.description.isNotEmpty) ...[
           const SizedBox(height: AppDimensions.space12),
           _ExpandableBotanicalDescription(
             text: plante.description,

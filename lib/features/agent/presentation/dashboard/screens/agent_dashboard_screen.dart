@@ -7,8 +7,8 @@ import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_dimensions.dart';
 import '../../../../../core/constants/app_text_styles.dart';
 import '../../../../../core/routing/route_names.dart';
-import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../shared/widgets/formatted_html_text.dart';
+import '../../../../../shared/widgets/media/app_logo.dart';
 
 /// Retourne la couleur correspondant au statut d'une collecte.
 Color getStatusColor(String status) {
@@ -50,7 +50,6 @@ class AgentDashboardScreen extends ConsumerWidget {
 
     final agent = dashboard?.agent;
     final statistiques = dashboard?.statistiques;
-    final notifications = dashboard?.notifications;
     final dernieresCollectes = dashboard?.dernieresCollectes;
 
     return Scaffold(
@@ -65,89 +64,8 @@ class AgentDashboardScreen extends ConsumerWidget {
         backgroundColor:
             isDark ? AppColors.darkSurface : Colors.white,
         elevation: 0.5,
-
-        title: Text(
-          'Espace Agent',
-          style: (isDark
-                  ? AppTextStyles.h3Dark
-                  : AppTextStyles.h3)
-              .copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-
+        title: const AppLogo.horizontal(height: 32),
         centerTitle: false,
-
-        actions: [
-          // Nombre de notifications non lues
-          Stack(
-            children: [
-              IconButton(
-                tooltip: 'Notifications',
-                icon: Icon(
-                  Icons.notifications_none_outlined,
-                  color: isDark
-                      ? Colors.white
-                      : AppColors.primary,
-                ),
-                onPressed: () {
-                  context.go(
-                    RouteNames.agentNotificationsPath,
-                  );
-                },
-              ),
-              if ((notifications?.nonLues ?? 0) > 0)
-                Positioned(
-                  right: 8,
-                  top: 7,
-                  child: Container(
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
-                    decoration: const BoxDecoration(
-                      color: AppColors.danger,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      '${notifications?.nonLues ?? 0}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-
-          // Bascule thème clair / sombre
-          IconButton(
-            tooltip:
-                isDark ? 'Mode clair' : 'Mode sombre',
-            icon: Icon(
-              isDark
-                  ? Icons.light_mode_rounded
-                  : Icons.dark_mode_outlined,
-              color: isDark
-                  ? Colors.white
-                  : AppColors.primary,
-            ),
-            onPressed: () {
-              ref
-                  .read(themeModeProvider.notifier)
-                  .toggleTheme(
-                    currentIsDark: isDark,
-                  );
-            },
-          ),
-        ],
       ),
 
       // ============================================================
@@ -155,82 +73,91 @@ class AgentDashboardScreen extends ConsumerWidget {
       // ============================================================
 
       body: SafeArea(
-        child: dashboardAsync.when(
-          // --------------------------------------------------------
-          // CHARGEMENT
-          // --------------------------------------------------------
-
-          loading: () {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+        child: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: () async {
+            ref.invalidate(dashboardAgentProvider);
           },
+          child: dashboardAsync.when(
+            // --------------------------------------------------------
+            // CHARGEMENT
+            // --------------------------------------------------------
 
-          // --------------------------------------------------------
-          // ERREUR
-          // --------------------------------------------------------
+            loading: () {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            },
 
-          error: (error, stackTrace) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 50,
-                      color: AppColors.danger,
-                    ),
+            // --------------------------------------------------------
+            // ERREUR
+            // --------------------------------------------------------
 
-                    const SizedBox(height: 16),
-
-                    const Text(
-                      'Impossible de charger le tableau de bord.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+            error: (error, stackTrace) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment:
+                        MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 50,
+                        color: AppColors.danger,
                       ),
-                    ),
 
-                    const SizedBox(height: 8),
+                      const SizedBox(height: 16),
 
-                    Text(
-                      error.toString(),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
+                      const Text(
+                        'Impossible de charger le tableau de bord.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
 
-                    const SizedBox(height: 20),
+                      const SizedBox(height: 8),
 
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        ref.invalidate(
-                          dashboardAgentProvider,
-                        );
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Réessayer'),
-                    ),
-                  ],
+                      Text(
+                        error.toString(),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          ref.invalidate(
+                            dashboardAgentProvider,
+                          );
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Réessayer'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
 
-          // --------------------------------------------------------
-          // DONNÉES CHARGÉES
-          // --------------------------------------------------------
+            // --------------------------------------------------------
+            // DONNÉES CHARGÉES
+            // --------------------------------------------------------
 
-          data: (dashboard) {
-            return SingleChildScrollView(
-              padding:
-                  AppDimensions.paddingScreenMobile,
+            data: (dashboard) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding:
+                    AppDimensions.paddingScreenMobile,
 
               child: Column(
                 crossAxisAlignment:
@@ -694,6 +621,7 @@ class AgentDashboardScreen extends ConsumerWidget {
           },
         ),
       ),
+    ),
 
       // ============================================================
       // BOTTOM NAVIGATION

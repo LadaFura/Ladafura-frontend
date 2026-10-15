@@ -242,16 +242,6 @@ class AgentProfilScreen extends ConsumerWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          IconButton(
-            tooltip: 'Actualiser',
-            icon: Icon(
-              Icons.refresh_rounded,
-              color: isDark ? Colors.white : AppColors.primary,
-            ),
-            onPressed: () => ref.invalidate(agentProfileProvider),
-          ),
-        ],
       ),
       body: SafeArea(
         child: RefreshIndicator(

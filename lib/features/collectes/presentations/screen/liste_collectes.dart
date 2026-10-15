@@ -37,14 +37,6 @@ class ListeCollectes extends ConsumerWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Actualiser',
-            onPressed: () => ref.invalidate(agentCollectesListProvider),
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: SafeArea(
         child: Column(
@@ -94,74 +86,82 @@ class ListeCollectes extends ConsumerWidget {
 
             // Liste de résultats
             Expanded(
-              child: collectesAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppDimensions.space20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.error_outline, size: 48, color: Colors.orange),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Impossible de charger les collectes.',
-                          style: isDark ? AppTextStyles.bodyDark : AppTextStyles.body,
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: () => ref.invalidate(agentCollectesListProvider),
-                          child: const Text('Réessayer'),
-                        ),
-                      ],
+              child: RefreshIndicator(
+                color: AppColors.primary,
+                onRefresh: () async {
+                  ref.invalidate(agentCollectesListProvider);
+                },
+                child: collectesAsync.when(
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (err, stack) => SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Container(
+                      height: MediaQuery.of(context).size.height * 0.6,
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.all(AppDimensions.space20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline, size: 48, color: Colors.orange),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Impossible de charger les collectes.',
+                            style: isDark ? AppTextStyles.bodyDark : AppTextStyles.body,
+                          ),
+                          const SizedBox(height: 8),
+                          ElevatedButton(
+                            onPressed: () => ref.invalidate(agentCollectesListProvider),
+                            child: const Text('Réessayer'),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                data: (collectes) {
-                  if (collectes.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(AppDimensions.space24),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.spa_outlined,
-                              size: 56,
-                              color: isDark ? AppColors.darkTextMuted : Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Aucune collecte trouvée pour ce filtre.',
-                              style: (isDark
-                                      ? AppTextStyles.h3Dark
-                                      : AppTextStyles.h3)
-                                  .copyWith(fontSize: 16),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Appuyez sur "Nouvelle collecte" pour débuter un enregistrement de terrain.',
-                              textAlign: TextAlign.center,
-                              style: (isDark
-                                      ? AppTextStyles.captionDark
-                                      : AppTextStyles.caption)
-                                  .copyWith(
-                                color: isDark
-                                    ? AppColors.darkTextMuted
-                                    : AppColors.textMuted,
+                  data: (collectes) {
+                    if (collectes.isEmpty) {
+                      return SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Container(
+                          height: MediaQuery.of(context).size.height * 0.6,
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.all(AppDimensions.space24),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.spa_outlined,
+                                size: 56,
+                                color: isDark ? AppColors.darkTextMuted : Colors.grey.shade400,
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 16),
+                              Text(
+                                'Aucune collecte trouvée pour ce filtre.',
+                                style: (isDark
+                                        ? AppTextStyles.h3Dark
+                                        : AppTextStyles.h3)
+                                    .copyWith(fontSize: 16),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Appuyez sur "Nouvelle collecte" pour débuter un enregistrement de terrain.',
+                                textAlign: TextAlign.center,
+                                style: (isDark
+                                        ? AppTextStyles.captionDark
+                                        : AppTextStyles.caption)
+                                    .copyWith(
+                                  color: isDark
+                                      ? AppColors.darkTextMuted
+                                      : AppColors.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  }
+                      );
+                    }
 
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      ref.invalidate(agentCollectesListProvider);
-                    },
-                    child: ListView.separated(
+                    return ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.all(AppDimensions.space16),
                       itemCount: collectes.length,
                       separatorBuilder: (ctx, i) => const SizedBox(height: 12),
@@ -174,9 +174,9 @@ class ListeCollectes extends ConsumerWidget {
                           },
                         );
                       },
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           ],

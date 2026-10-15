@@ -172,9 +172,16 @@ class AgentCollecteDetailPage extends ConsumerWidget {
           final hasPhoto = detail.photoUrl != null && detail.photoUrl!.isNotEmpty;
           final hasAudio = detail.audioUrl != null && detail.audioUrl!.isNotEmpty;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-            child: Column(
+          return RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: () async {
+              ref.invalidate(agentCollecteDetailProvider(collecteId));
+              ref.invalidate(agentCollecteRecapitulatifProvider(collecteId));
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // 1. Carte En-tête Hero (Photo + Plante + Statut + Date)
@@ -356,7 +363,8 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                 const SizedBox(height: 20),
               ],
             ),
-          );
+          ),
+        );
         },
       ),
     );

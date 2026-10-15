@@ -190,8 +190,16 @@ class _PharmacopeeDetailPageState extends ConsumerState<PharmacopeeDetailPage> {
             );
           }
 
-          return CustomScrollView(
-            slivers: [
+          return RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: () async {
+              ref.invalidate(pharmacopeeFullDetailProvider(pharmacopeeId));
+              ref.invalidate(pharmacopeeAvisProvider(pharmacopeeId));
+              ref.invalidate(pharmacopeeEligibiliteAvisProvider(pharmacopeeId));
+            },
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
               // 1 & 2. En-tête moderne (Couverture, infos principales de la pharmacopée)
               SliverToBoxAdapter(
                 child: PharmacopeeDetailHeader(
@@ -547,7 +555,8 @@ class _PharmacopeeDetailPageState extends ConsumerState<PharmacopeeDetailPage> {
                 child: SizedBox(height: 80),
               ),
             ],
-          );
+          ),
+        );
         },
       ),
 

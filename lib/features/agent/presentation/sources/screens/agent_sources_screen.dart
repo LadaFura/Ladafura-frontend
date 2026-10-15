@@ -184,89 +184,108 @@ class _AgentSourcesScreenState extends ConsumerState<AgentSourcesScreen> {
               ),
             ),
             Expanded(
-              child: sourcesAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, size: 48, color: Colors.orange),
-                      const SizedBox(height: 12),
-                      Text('Erreur de chargement: $err'),
-                      ElevatedButton(
-                        onPressed: () => ref.invalidate(agentSourcesListProvider),
-                        child: const Text('Réessayer'),
-                      ),
-                    ],
-                  ),
-                ),
-                data: (sources) {
-                  final filtered = _filterQuery.isEmpty
-                      ? sources
-                      : sources.where((s) {
-                          final nomMatch = s.nomComplet.toLowerCase().contains(_filterQuery);
-                          final adrMatch = s.adresse?.toLowerCase().contains(_filterQuery) ?? false;
-                          final specMatch = s.specialite?.toLowerCase().contains(_filterQuery) ?? false;
-                          return nomMatch || adrMatch || specMatch;
-                        }).toList();
-
-                  if (filtered.isEmpty) {
-                    return Center(
+              child: RefreshIndicator(
+                color: AppColors.primary,
+                onRefresh: () async {
+                  ref.invalidate(agentSourcesListProvider);
+                },
+                child: sourcesAsync.when(
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (err, stack) => SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Container(
+                      height: MediaQuery.of(context).size.height * 0.6,
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.all(AppDimensions.space20),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.people_outline_rounded,
-                            size: 56,
-                            color: isDark ? AppColors.darkTextMuted : Colors.grey.shade400,
+                          const Icon(Icons.error_outline, size: 48, color: Colors.orange),
+                          const SizedBox(height: 12),
+                          Text('Erreur de chargement: $err'),
+                          const SizedBox(height: 8),
+                          ElevatedButton(
+                            onPressed: () => ref.invalidate(agentSourcesListProvider),
+                            child: const Text('Réessayer'),
                           ),
-                          const SizedBox(height: 16),
-                          const Text('Aucun praticien répertorié.'),
                         ],
                       ),
-                    );
-                  }
+                    ),
+                  ),
+                  data: (sources) {
+                    final filtered = _filterQuery.isEmpty
+                        ? sources
+                        : sources.where((s) {
+                            final nomMatch = s.nomComplet.toLowerCase().contains(_filterQuery);
+                            final adrMatch = s.adresse?.toLowerCase().contains(_filterQuery) ?? false;
+                            final specMatch = s.specialite?.toLowerCase().contains(_filterQuery) ?? false;
+                            return nomMatch || adrMatch || specMatch;
+                          }).toList();
 
-                  return ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: AppDimensions.space16),
-                    itemCount: filtered.length,
-                    separatorBuilder: (ctx, i) => const SizedBox(height: 8),
-                    itemBuilder: (ctx, index) {
-                      final s = filtered[index];
-                      return ListTile(
-                        tileColor: isDark ? AppColors.darkSurface : Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-                          side: BorderSide(
-                            color: isDark ? AppColors.darkBorder : AppColors.inputBorder,
+                    if (filtered.isEmpty) {
+                      return SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Container(
+                          height: MediaQuery.of(context).size.height * 0.6,
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.people_outline_rounded,
+                                size: 56,
+                                color: isDark ? AppColors.darkTextMuted : Colors.grey.shade400,
+                              ),
+                              const SizedBox(height: 16),
+                              const Text('Aucun praticien répertorié.'),
+                            ],
                           ),
                         ),
-                        leading: CircleAvatar(
-                          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                          child: const Icon(Icons.person, color: AppColors.primary),
-                        ),
-                        title: Text(
-                          s.nomComplet,
-                          style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
-                              .copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(
-                          '${s.specialite ?? "Praticien"} • ${s.adresse ?? "Mali"}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                          ),
-                        ),
-                        trailing: s.telephone != null
-                            ? Text(
-                                s.telephone!,
-                                style: const TextStyle(fontSize: 11, color: AppColors.primary),
-                              )
-                            : null,
                       );
-                    },
-                  );
-                },
+                    }
+
+                    return ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.space16),
+                      itemCount: filtered.length,
+                      separatorBuilder: (ctx, i) => const SizedBox(height: 8),
+                      itemBuilder: (ctx, index) {
+                        final s = filtered[index];
+                        return ListTile(
+                          tileColor: isDark ? AppColors.darkSurface : Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+                            side: BorderSide(
+                              color: isDark ? AppColors.darkBorder : AppColors.inputBorder,
+                            ),
+                          ),
+                          leading: CircleAvatar(
+                            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                            child: const Icon(Icons.person, color: AppColors.primary),
+                          ),
+                          title: Text(
+                            s.nomComplet,
+                            style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
+                                .copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            '${s.specialite ?? "Praticien"} • ${s.adresse ?? "Mali"}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                            ),
+                          ),
+                          trailing: s.telephone != null
+                              ? Text(
+                                  s.telephone!,
+                                  style: const TextStyle(fontSize: 11, color: AppColors.primary),
+                                )
+                              : null,
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
           ],

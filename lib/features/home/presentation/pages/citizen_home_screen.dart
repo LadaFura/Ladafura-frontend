@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/routing/route_names.dart';
-import '../../../../core/theme/theme_provider.dart';
 import '../../../../shared/widgets/media/app_logo.dart';
 import '../widgets/home_banner_carousel.dart';
 import '../widgets/home_quick_categories.dart';
@@ -36,64 +35,28 @@ class CitizenHomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const AppLogo.horizontal(height: 32),
         centerTitle: false,
-        actions: [
-          // Bascule de thème Clair / Sombre
-          IconButton(
-            tooltip: isDark ? 'Mode clair' : 'Mode sombre',
-            icon: Icon(
-              isDark ? Icons.light_mode_rounded : Icons.dark_mode_outlined,
-              color: isDark ? Colors.white : AppColors.primary,
-            ),
-            onPressed: () {
-              ref
-                  .read(themeModeProvider.notifier)
-                  .toggleTheme(currentIsDark: isDark);
-            },
-          ),
-
-          // Icône cloche de notifications avec badge dynamique
-          Builder(
-            builder: (context) {
-              final unreadCountAsync = ref.watch(unreadNotificationCountProvider);
-              final unreadCount = unreadCountAsync.valueOrNull ?? 0;
-
-              return IconButton(
-                tooltip: 'Notifications',
-                icon: Badge(
-                  isLabelVisible: unreadCount > 0,
-                  label: Text(
-                    unreadCount > 99 ? '99+' : unreadCount.toString(),
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                  ),
-                  backgroundColor: AppColors.danger,
-                  child: Icon(
-                    Icons.notifications_none_rounded,
-                    color: isDark ? Colors.white70 : const Color(0xFF1E272E),
-                    size: 26,
-                  ),
-                ),
-                onPressed: () {
-                  context.push(RouteNames.citizenNotificationsPath);
-                },
-              );
-            },
-          ),
-          const SizedBox(width: AppDimensions.space8),
-        ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.space16,
-            vertical: AppDimensions.space12,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Barre de recherche redirigeant vers la recherche universelle
-              HomeSearchBarButton(
-                onTap: () => context.go(RouteNames.citizenRecherchePath),
-              ),
+        child: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: () async {
+            ref.invalidate(nearbyPharmacopeesProvider);
+            ref.invalidate(popularPlantesProvider);
+            ref.invalidate(unreadNotificationCountProvider);
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.space16,
+              vertical: AppDimensions.space12,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. Barre de recherche redirigeant vers la recherche universelle
+                HomeSearchBarButton(
+                  onTap: () => context.go(RouteNames.citizenRecherchePath),
+                ),
               const SizedBox(height: AppDimensions.space16),
 
               // 2. Carrousel Hero "La richesse de notre pharmacopée traditionnelle"
@@ -199,7 +162,8 @@ class CitizenHomeScreen extends ConsumerWidget {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   /// En-tête générique de section avec bouton "Voir tout >"

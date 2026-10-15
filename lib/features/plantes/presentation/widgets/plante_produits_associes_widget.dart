@@ -34,37 +34,51 @@ class PlanteProduitsAssociesWidget extends ConsumerWidget {
           return const SizedBox.shrink();
         }
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: AppDimensions.space16),
+        return Container(
+          padding: const EdgeInsets.all(AppDimensions.space16),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkSurface : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              if (!isDark)
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.035),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+            ],
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // En-tête de section (Design moderne et épuré)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  Text(
-                    'Produits & Formulations Associés',
-                    style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                        .copyWith(fontSize: 16, fontWeight: FontWeight.bold),
+                  Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(7),
+                    ),
+                    child: const Icon(Icons.inventory_2_outlined,
+                        size: 14, color: AppColors.primary),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Remèdes traditionnels préparés contenant cette plante',
-                    style: (isDark
-                            ? AppTextStyles.captionDark
-                            : AppTextStyles.caption)
-                        .copyWith(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Produits & Formulations Associés',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
+                      ),
                     ),
                   ),
                 ],
               ),
-
-              const SizedBox(height: AppDimensions.space12),
-
+              const SizedBox(height: 14),
               ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),

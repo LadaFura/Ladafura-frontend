@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/routing/route_names.dart';
-import '../../../../core/theme/theme_provider.dart';
 import '../../../../shared/widgets/media/app_logo.dart';
 import '../widgets/home_banner_carousel.dart';
 import '../widgets/home_quick_categories.dart';
@@ -35,40 +34,6 @@ class AccueilScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const AppLogo.horizontal(height: 32),
         centerTitle: false,
-        actions: [
-          // Bascule de thème Clair / Sombre
-          IconButton(
-            tooltip: isDark ? 'Mode clair' : 'Mode sombre',
-            icon: Icon(
-              isDark ? Icons.light_mode_rounded : Icons.dark_mode_outlined,
-              color: isDark ? Colors.white : AppColors.primary,
-            ),
-            onPressed: () {
-              ref
-                  .read(themeModeProvider.notifier)
-                  .toggleTheme(currentIsDark: isDark);
-            },
-          ),
-
-          // Icône cloche de notifications
-          IconButton(
-            tooltip: 'Notifications',
-            icon: Icon(
-              Icons.notifications_none_rounded,
-              color: isDark ? Colors.white70 : const Color(0xFF1E272E),
-              size: 26,
-            ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Aucune nouvelle notification pour le moment.'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: AppDimensions.space8),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(

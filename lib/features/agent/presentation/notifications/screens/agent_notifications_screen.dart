@@ -125,17 +125,6 @@ class AgentNotificationsScreen extends ConsumerWidget {
               }
             },
           ),
-          IconButton(
-            tooltip: 'Actualiser',
-            icon: Icon(
-              Icons.refresh_rounded,
-              color: isDark ? Colors.white : AppColors.primary,
-            ),
-            onPressed: () {
-              ref.invalidate(agentNotificationsListProvider);
-              ref.invalidate(dashboardAgentProvider);
-            },
-          ),
         ],
       ),
       body: SafeArea(
