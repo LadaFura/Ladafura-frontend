@@ -6,6 +6,7 @@ import 'package:ladafura_frontend_flutter/core/constants/app_dimensions.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_text_styles.dart';
 import 'package:ladafura_frontend_flutter/features/agent/models/agent_plante_model.dart';
 import 'package:ladafura_frontend_flutter/features/agent/providers/agent_providers.dart';
+import 'formatting_toolbar_widget.dart';
 
 /// Étape 1 du Wizard : Sélection ou création d'une plante médicinale de référence.
 class StepPlanteSelectionWidget extends ConsumerStatefulWidget {
@@ -156,104 +157,16 @@ class _StepPlanteSelectionWidgetState
     }
   }
 
-  Future<void> _handleQuickCreatePlante() async {
-    final nom = _searchController.text.trim();
-    if (nom.isEmpty) return;
-
-    setState(() => _isCreating = true);
-    try {
-      final api = ref.read(agentApiServiceProvider);
-      final newPlante = await api.createPlante(nomScientifique: nom);
-      ref.read(nouvelleCollecteWizardProvider.notifier).selectPlante(newPlante);
-      _searchController.clear();
-      setState(() => _isCreating = false);
-      _loadInitialPlantes();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Plante "$nom" créée en statut brouillon et sélectionnée.',
-            ),
-            backgroundColor: AppColors.primary,
-          ),
-        );
-      }
-    } catch (e) {
-      setState(() => _isCreating = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur création plante : $e'),
-            backgroundColor: AppColors.danger,
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final draftState = ref.watch(nouvelleCollecteWizardProvider);
     final selectedPlante = draftState.selectedPlante;
     final query = _searchController.text.trim();
-    final hasExactMatch = query.isNotEmpty &&
-        _plantes.any(
-          (p) =>
-              p.nomScientifique.toLowerCase() == query.toLowerCase() ||
-              p.nomsVernaculaires.any(
-                (v) => v.toLowerCase() == query.toLowerCase(),
-              ),
-        );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // En-tête
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.eco_rounded,
-                color: AppColors.primary,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: AppDimensions.space12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Identification Botanique',
-                    style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                        .copyWith(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Recherchez le spécimen ou ajoutez une nouvelle plante.',
-                    style: (isDark
-                            ? AppTextStyles.captionDark
-                            : AppTextStyles.caption)
-                        .copyWith(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: AppDimensions.space12),
-
         // Carte de la plante actuellement sélectionnée
         if (selectedPlante != null && selectedPlante.id > 0) ...[
           Container(
@@ -330,35 +243,13 @@ class _StepPlanteSelectionWidgetState
           const SizedBox(height: AppDimensions.space12),
         ],
 
-        // Barre de bascule : Sélectionner vs Ajouter nouvelle plante
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                _showAddForm
-                    ? 'Nouvelle plante médicinale'
-                    : 'Sélectionner parmi les plantes répertoriées',
-                style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
-                    .copyWith(fontWeight: FontWeight.bold, fontSize: 13),
-              ),
-            ),
-            TextButton.icon(
-              icon: Icon(
-                _showAddForm ? Icons.list_rounded : Icons.add_circle_outline,
-                size: 18,
-              ),
-              label: Text(
-                _showAddForm ? 'Liste existante' : 'Ajouter une plante',
-              ),
-              onPressed: () {
-                if (!_showAddForm) {
-                  _openAddFormWithQuery();
-                } else {
-                  setState(() => _showAddForm = false);
-                }
-              },
-            ),
-          ],
+        // Section Title
+        Text(
+          _showAddForm
+              ? 'Nouvelle plante médicinale'
+              : 'Sélectionner parmi les plantes répertoriées',
+          style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
+              .copyWith(fontWeight: FontWeight.bold, fontSize: 13),
         ),
 
         const SizedBox(height: 6),
@@ -434,12 +325,15 @@ class _StepPlanteSelectionWidgetState
                       }).toList(),
                     ),
                     const SizedBox(height: 12),
+                    FormattingToolbarWidget(
+                      controller: _descriptionController,
+                      label: 'Description botanique (optionnel)',
+                    ),
                     TextField(
                       controller: _descriptionController,
                       maxLines: 3,
                       style: isDark ? AppTextStyles.bodyDark : AppTextStyles.body,
                       decoration: const InputDecoration(
-                        labelText: 'Description botanique (optionnel)',
                         hintText:
                             'Ex: Arbuste buissonnant à feuilles opposées, fleurs blanches...',
                         alignLabelWithHint: true,
@@ -449,26 +343,53 @@ class _StepPlanteSelectionWidgetState
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed:
-                          _isCreating ? null : _handleCreatePlanteFromForm,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton.icon(
+                        onPressed:
+                            _isCreating ? null : _handleCreatePlanteFromForm,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: _isCreating
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.check_circle_outline_rounded, size: 20),
+                        label: const Text(
+                          'Enregistrer et Sélectionner la plante',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
                       ),
-                      icon: _isCreating
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.check_rounded, size: 18),
-                      label: const Text('Enregistrer et Sélectionner'),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 42,
+                      child: OutlinedButton(
+                        onPressed: () => setState(() => _showAddForm = false),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                          side: BorderSide(
+                            color: isDark ? AppColors.darkBorder : Colors.grey.shade300,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Retour à la liste des plantes existantes'),
+                      ),
                     ),
                   ],
                 ),
@@ -531,117 +452,44 @@ class _StepPlanteSelectionWidgetState
             ),
           ),
 
-          if (query.isNotEmpty && !hasExactMatch && !_isLoading) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.add_circle_outline_rounded,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '« $query » n\'existe pas encore ?',
-                      style: (isDark
-                              ? AppTextStyles.captionDark
-                              : AppTextStyles.caption)
-                          .copyWith(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: _isCreating
-                        ? null
-                        : () => _openAddFormWithQuery(query),
-                    child: const Text('Compléter fiche'),
-                  ),
-                  ElevatedButton(
-                    onPressed: _isCreating ? null : _handleQuickCreatePlante,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                    ),
-                    child: _isCreating
-                        ? const SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text(
-                            'Créer direct',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-
           const SizedBox(height: AppDimensions.space12),
 
-          // Liste des résultats
+          // Liste des résultats ou état vide
           if (_plantes.isEmpty && !_isLoading) ...[
-            Container(
-              padding: const EdgeInsets.all(AppDimensions.space20),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurface : Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-                border: Border.all(
-                  color: isDark ? AppColors.darkBorder : Colors.grey.shade200,
+            Expanded(
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(AppDimensions.space20),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkSurface : Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+                    border: Border.all(
+                      color: isDark ? AppColors.darkBorder : Colors.grey.shade200,
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.search_off_rounded,
+                        size: 36,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        query.isNotEmpty
+                            ? 'Aucune plante trouvée pour "$query".'
+                            : 'Aucune plante disponible.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color:
+                              isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              child: Column(
-                children: [
-                  const Icon(
-                    Icons.search_off_rounded,
-                    size: 36,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    query.isNotEmpty
-                        ? 'Aucune plante trouvée pour "$query".'
-                        : 'Aucune plante disponible.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color:
-                          isDark ? AppColors.darkTextMuted : AppColors.textMuted,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  ElevatedButton.icon(
-                    onPressed: _isCreating
-                        ? null
-                        : () => _openAddFormWithQuery(query),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                    ),
-                    icon: const Icon(Icons.add_rounded, size: 18),
-                    label: Text(
-                      query.isNotEmpty
-                          ? 'Ajouter la plante "$query"'
-                          : 'Ajouter une nouvelle plante',
-                    ),
-                  ),
-                ],
               ),
             ),
           ] else ...[
@@ -738,6 +586,33 @@ class _StepPlanteSelectionWidgetState
               ),
             ),
           ],
+
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: () => _openAddFormWithQuery(query),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isDark
+                    ? AppColors.darkSurfaceVariant
+                    : const Color(0xFFE8F5E9),
+                foregroundColor: AppColors.primary,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: AppColors.primary, width: 1.2),
+                ),
+              ),
+              icon: const Icon(Icons.add_circle_outline_rounded, size: 20),
+              label: Text(
+                query.isNotEmpty
+                    ? 'Ajouter la plante "$query"'
+                    : 'Ajouter une nouvelle plante',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+            ),
+          ),
         ],
       ],
     );

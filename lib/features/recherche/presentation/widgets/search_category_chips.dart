@@ -35,6 +35,7 @@ class SearchCategoryChips extends StatelessWidget {
             selected: isSelected,
             onSelected: (_) => onSelected(cat),
             selectedColor: AppColors.primary,
+            checkmarkColor: Colors.white,
             backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
             labelStyle: TextStyle(
               color: isSelected

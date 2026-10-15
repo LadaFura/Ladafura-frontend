@@ -4,6 +4,7 @@ import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/utils/image_utils.dart';
 import '../../../../shared/widgets/feedback/medical_disclaimer_banner.dart';
+import '../../../../shared/widgets/formatted_html_text.dart';
 import '../../models/plante_model.dart';
 
 class PlanteHeaderCard extends StatelessWidget {
@@ -71,12 +72,12 @@ class PlanteHeaderCard extends StatelessWidget {
           ),
         ],
 
-        // Description
+        // Description avec toggle Voir plus / Voir moins
         if (plante.description.isNotEmpty) ...[
           const SizedBox(height: AppDimensions.space12),
-          Text(
-            plante.description,
-            style: isDark ? AppTextStyles.bodyDark : AppTextStyles.body,
+          _CardExpandableDescription(
+            text: plante.description,
+            isDark: isDark,
           ),
         ],
 
@@ -117,6 +118,95 @@ class PlanteHeaderCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CardExpandableDescription extends StatefulWidget {
+  final String text;
+  final bool isDark;
+
+  const _CardExpandableDescription({
+    required this.text,
+    required this.isDark,
+  });
+
+  @override
+  State<_CardExpandableDescription> createState() =>
+      _CardExpandableDescriptionState();
+}
+
+class _CardExpandableDescriptionState
+    extends State<_CardExpandableDescription> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final style =
+        (widget.isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
+      fontSize: 14.5,
+      height: 1.55,
+    );
+
+    final bool canExpand =
+        FormattedHtmlText.stripHtml(widget.text).trim().length > 120;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AnimatedSize(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          alignment: Alignment.topLeft,
+          child: FormattedHtmlText(
+            widget.text,
+            style: style,
+            maxLines: (_isExpanded || !canExpand) ? null : 3,
+            overflow: (_isExpanded || !canExpand)
+                ? TextOverflow.visible
+                : TextOverflow.ellipsis,
+          ),
+        ),
+        if (canExpand) ...[
+          const SizedBox(height: 6),
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            borderRadius: BorderRadius.circular(6),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _isExpanded ? 'Voir moins' : 'Lire la suite',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                      color: widget.isDark
+                          ? AppColors.accent
+                          : AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    _isExpanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    size: 18,
+                    color: widget.isDark
+                        ? AppColors.accent
+                        : AppColors.primary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

@@ -129,7 +129,7 @@ class SearchIdleSuggestions extends StatelessWidget {
                               Icons.close,
                               size: 14,
                               color: isDark
-                                  ? AppColors.darkTextMuted
+                                  ? Colors.white70
                                   : const Color(0xFF4A6B56),
                             ),
                           ),
@@ -289,10 +289,10 @@ class SearchIdleSuggestions extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            const Icon(
+            Icon(
               Icons.chevron_right,
               size: 18,
-              color: Color(0xFF6B7B70),
+              color: isDark ? Colors.white : const Color(0xFF6B7B70),
             ),
           ],
         ),

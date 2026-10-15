@@ -275,8 +275,6 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage>
                     nomPlante: plante.nomScientifique,
                   ),
 
-                  const SizedBox(height: AppDimensions.space16),
-
                   // 7. RÉPARTITION GÉOGRAPHIQUE AU MALI
                   if (plante.localites.isNotEmpty) ...[
                     PlanteLocalitesSection(
@@ -362,7 +360,6 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage>
               index: 0,
               icon: Icons.history_edu_rounded,
               label: 'Savoirs Traditionnels',
-              badgeCount: plante.connaissancesTraditionnelles.length,
               isDark: isDark,
             ),
           ),
@@ -371,7 +368,6 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage>
               index: 1,
               icon: Icons.biotech_rounded,
               label: 'Études Scientifiques',
-              badgeCount: plante.etudesScientifiques.length,
               isDark: isDark,
             ),
           ),
@@ -384,7 +380,6 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage>
     required int index,
     required IconData icon,
     required String label,
-    required int badgeCount,
     required bool isDark,
   }) {
     final isSelected = _tabController.index == index;
@@ -448,37 +443,6 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage>
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            if (badgeCount > 0) ...[
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 2,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? (isDark ? Colors.black26 : Colors.white.withAlpha(60))
-                      : (isDark
-                              ? AppColors.darkSurfaceVariant
-                              : AppColors.surface)
-                          .withAlpha(200),
-                  borderRadius:
-                      BorderRadius.circular(AppDimensions.radiusBadge),
-                ),
-                child: Text(
-                  badgeCount.toString(),
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: isSelected
-                        ? (isDark ? AppColors.darkBackground : Colors.white)
-                        : (isDark
-                            ? AppColors.darkPrimary
-                            : AppColors.primary),
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),

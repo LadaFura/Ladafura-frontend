@@ -425,18 +425,6 @@ class AgentProfilScreen extends ConsumerWidget {
                                   ],
                                 ),
                               ),
-                              IconButton(
-                                tooltip: 'Modifier mes coordonnées',
-                                onPressed: () => _showEditProfileSheet(
-                                  context,
-                                  ref,
-                                  profile,
-                                ),
-                                icon: const Icon(
-                                  Icons.edit_outlined,
-                                  color: Colors.white,
-                                ),
-                              ),
                             ],
                           ),
                           const SizedBox(height: 16),
@@ -486,12 +474,6 @@ class AgentProfilScreen extends ConsumerWidget {
                       ),
                       children: [
                         _InfoRow(
-                          icon: Icons.badge_outlined,
-                          label: 'Matricule agent',
-                          value: profile.matricule,
-                          isDark: isDark,
-                        ),
-                        _InfoRow(
                           icon: Icons.map_outlined,
                           label: 'Zone de couverture',
                           value: profile.zoneCouverture.isNotEmpty
@@ -509,12 +491,6 @@ class AgentProfilScreen extends ConsumerWidget {
                           isDark: isDark,
                         ),
                         _InfoRow(
-                          icon: Icons.email_outlined,
-                          label: 'E-mail professionnel',
-                          value: profile.email,
-                          isDark: isDark,
-                        ),
-                        _InfoRow(
                           icon: Icons.calendar_today_outlined,
                           label: 'Membre depuis',
                           value: _formatDate(profile.dateCreation),
@@ -526,35 +502,18 @@ class AgentProfilScreen extends ConsumerWidget {
 
                     const SizedBox(height: AppDimensions.space20),
 
-                    // 3. Accès rapide Terrain
+                    // 3. Répertoire Terrain
                     _SectionContainer(
                       title: 'Activités de terrain',
                       isDark: isDark,
                       children: [
                         _ActionTile(
-                          icon: Icons.folder_open_rounded,
-                          title: 'Mes fiches de collecte',
-                          subtitle:
-                              '${profile.nombreTotalCollectes} collecte(s) enregistrée(s)',
-                          isDark: isDark,
-                          onTap: () =>
-                              context.go(RouteNames.agentCollectesPath),
-                        ),
-                        _ActionTile(
                           icon: Icons.people_outline_rounded,
                           title: 'Informateurs & Tradipraticiens',
                           subtitle: 'Répertoire des sources de terrain',
                           isDark: isDark,
-                          onTap: () => context.push(RouteNames.agentSourcesPath),
-                        ),
-                        _ActionTile(
-                          icon: Icons.notifications_none_rounded,
-                          title: 'Centre de notifications',
-                          subtitle: 'Alertes de validation et retours comité',
-                          isDark: isDark,
                           showDivider: false,
-                          onTap: () =>
-                              context.go(RouteNames.agentNotificationsPath),
+                          onTap: () => context.push(RouteNames.agentSourcesPath),
                         ),
                       ],
                     ),

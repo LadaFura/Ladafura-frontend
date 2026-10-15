@@ -136,7 +136,9 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
                   item.partieUtilisee!.isNotEmpty)
                 _buildTagChip(
                   icon: Icons.eco_outlined,
-                  label: 'Partie : ${item.partieUtilisee}',
+                  label: item.partieUtilisee!.contains(',')
+                      ? 'Parties : ${item.partieUtilisee}'
+                      : 'Partie : ${item.partieUtilisee}',
                   isDark: isDark,
                 ),
               if (item.modePreparation != null &&

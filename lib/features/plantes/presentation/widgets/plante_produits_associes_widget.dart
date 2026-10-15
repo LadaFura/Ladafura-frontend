@@ -26,110 +26,60 @@ class PlanteProduitsAssociesWidget extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final produitsAsync = ref.watch(produitsByPlanteProvider(planteId));
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // En-tête de section (Design moderne et épuré)
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Produits & Formulations Associés',
-              style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                  .copyWith(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              'Remèdes traditionnels préparés contenant cette plante',
-              style: (isDark
-                      ? AppTextStyles.captionDark
-                      : AppTextStyles.caption)
-                  .copyWith(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
+    return produitsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (produits) {
+        if (produits.isEmpty) {
+          return const SizedBox.shrink();
+        }
 
-        const SizedBox(height: AppDimensions.space12),
-
-        produitsAsync.when(
-          loading: () => Container(
-            height: 120,
-            alignment: Alignment.center,
-            child: const CircularProgressIndicator(strokeWidth: 2.5),
-          ),
-          error: (err, _) => Container(
-            padding: const EdgeInsets.all(AppDimensions.space16),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurface : Colors.white,
-              borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-              border: Border.all(
-                color: isDark ? AppColors.darkBorder : AppColors.border,
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.info_outline_rounded,
-                    color: AppColors.textMuted, size: 20),
-                const SizedBox(width: AppDimensions.space8),
-                Expanded(
-                  child: Text(
-                    'Informations sur les produits momentanément indisponibles.',
-                    style: isDark
-                        ? AppTextStyles.captionDark
-                        : AppTextStyles.caption,
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppDimensions.space16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // En-tête de section (Design moderne et épuré)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Produits & Formulations Associés',
+                    style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
+                        .copyWith(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                ),
-              ],
-            ),
-          ),
-          data: (produits) {
-            if (produits.isEmpty) {
-              return Container(
-                padding: const EdgeInsets.all(AppDimensions.space16),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurface : Colors.white,
-                  borderRadius:
-                      BorderRadius.circular(AppDimensions.radiusCard),
-                  border: Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.border,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.inventory_2_outlined,
-                        color: AppColors.textMuted, size: 20),
-                    const SizedBox(width: AppDimensions.space8),
-                    Expanded(
-                      child: Text(
-                        'Aucun produit commercialisé actuellement répertorié pour cette plante.',
-                        style: isDark
+                  const SizedBox(height: 2),
+                  Text(
+                    'Remèdes traditionnels préparés contenant cette plante',
+                    style: (isDark
                             ? AppTextStyles.captionDark
-                            : AppTextStyles.caption,
-                      ),
+                            : AppTextStyles.caption)
+                        .copyWith(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
                     ),
-                  ],
-                ),
-              );
-            }
+                  ),
+                ],
+              ),
 
-            return ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: produits.length,
-              separatorBuilder: (_, __) =>
-                  const SizedBox(height: AppDimensions.space12),
-              itemBuilder: (context, index) {
-                final prod = produits[index];
-                return _buildProduitCard(context, prod, isDark);
-              },
-            );
-          },
-        ),
-      ],
+              const SizedBox(height: AppDimensions.space12),
+
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: produits.length,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: AppDimensions.space12),
+                itemBuilder: (context, index) {
+                  final prod = produits[index];
+                  return _buildProduitCard(context, prod, isDark);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

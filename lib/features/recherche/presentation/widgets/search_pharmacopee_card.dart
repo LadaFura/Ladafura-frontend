@@ -176,7 +176,7 @@ class SearchPharmacopeeCard extends StatelessWidget {
                               Icons.storefront_outlined,
                               size: 18,
                               color: isDark
-                                  ? AppColors.darkTextMuted
+                                  ? Colors.white70
                                   : const Color(0xFF616161),
                             ),
                             const SizedBox(width: 6),
@@ -185,7 +185,7 @@ class SearchPharmacopeeCard extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 13,
                                 color: isDark
-                                    ? AppColors.darkTextMuted
+                                    ? Colors.white70
                                     : const Color(0xFF616161),
                               ),
                             ),
@@ -216,7 +216,7 @@ class SearchPharmacopeeCard extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 13,
                                 color: isDark
-                                    ? AppColors.darkTextMuted
+                                    ? Colors.white70
                                     : const Color(0xFF757575),
                               ),
                             ),

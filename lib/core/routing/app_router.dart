@@ -749,7 +749,7 @@ class RoutePlaceholderScreen extends ConsumerWidget {
         automaticallyImplyLeading: isSecondary,
         leading: isSecondary
             ? IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
                 tooltip: 'Retour',
                 onPressed: goBack,
               )

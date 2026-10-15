@@ -173,51 +173,6 @@ class _StepLocalisationMediasWidgetState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // En-tête
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.pin_drop_rounded,
-                  color: AppColors.primary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: AppDimensions.space12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Localisation & Médias de Terrain',
-                      style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                          .copyWith(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Précisez le lieu de recueil, le point GPS et les preuves visuelles.',
-                      style: (isDark
-                              ? AppTextStyles.captionDark
-                              : AppTextStyles.caption)
-                        .copyWith(
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: AppDimensions.space20),
-
           // 1. Découpage territorial
           Text(
             'Région administrative *',
@@ -354,6 +309,39 @@ class _StepLocalisationMediasWidgetState
 
           const SizedBox(height: AppDimensions.space24),
 
+          // Information Médias facultatifs
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.info_outline_rounded,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Photo et enregistrement vocal sont facultatifs sur le terrain. Si vous ne pouvez pas les capturer maintenant, vous pourrez les enregistrer plus tard.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.white70 : AppColors.textPrimary,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppDimensions.space16),
+
           // 3. Médias : Photo de l'échantillon
           Text(
             'Photo du spécimen ou de la préparation',
@@ -390,6 +378,73 @@ class _StepLocalisationMediasWidgetState
               ],
             ),
             const SizedBox(height: 8),
+          ] else if (draft.existingPhotoUrl != null && draft.existingPhotoUrl!.isNotEmpty) ...[
+            Stack(
+              alignment: Alignment.topRight,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+                  child: Image.network(
+                    draft.existingPhotoUrl!,
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 120,
+                      color: Colors.grey.shade200,
+                      child: const Center(child: Icon(Icons.broken_image_rounded)),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.65),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      'Photo existante',
+                      style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.black.withValues(alpha: 0.6),
+                    child: IconButton(
+                      icon: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
+                      onPressed: () => ref
+                          .read(nouvelleCollecteWizardProvider.notifier)
+                          .clearExistingPhoto(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _pickImage(ImageSource.camera),
+                    icon: const Icon(Icons.camera_alt_outlined),
+                    label: const Text('Remplacer photo'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _pickImage(ImageSource.gallery),
+                    icon: const Icon(Icons.photo_library_outlined),
+                    label: const Text('Galerie'),
+                  ),
+                ),
+              ],
+            ),
           ] else ...[
             Row(
               children: [
@@ -435,7 +490,9 @@ class _StepLocalisationMediasWidgetState
               children: [
                 Icon(
                   Icons.mic_rounded,
-                  color: draft.audioFile != null ? Colors.green : AppColors.primary,
+                  color: (draft.audioFile != null || (draft.existingAudioUrl != null && draft.existingAudioUrl!.isNotEmpty))
+                      ? Colors.green
+                      : AppColors.primary,
                   size: 26,
                 ),
                 const SizedBox(width: 12),
@@ -443,10 +500,12 @@ class _StepLocalisationMediasWidgetState
                   child: Text(
                     draft.audioFile != null
                         ? 'Audio joint : ${draft.audioFile!.path.split("/").last}'
-                        : 'Aucun enregistrement audio joint.',
+                        : (draft.existingAudioUrl != null && draft.existingAudioUrl!.isNotEmpty)
+                            ? 'Audio existant enregistré sur le serveur'
+                            : 'Aucun enregistrement audio joint.',
                     style: TextStyle(
                       fontSize: 12,
-                      color: draft.audioFile != null
+                      color: (draft.audioFile != null || (draft.existingAudioUrl != null && draft.existingAudioUrl!.isNotEmpty))
                           ? (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary)
                           : (isDark ? AppColors.darkTextMuted : AppColors.textMuted),
                     ),
@@ -460,6 +519,22 @@ class _StepLocalisationMediasWidgetState
                     onPressed: () => ref
                         .read(nouvelleCollecteWizardProvider.notifier)
                         .setAudio(null),
+                  )
+                else if (draft.existingAudioUrl != null && draft.existingAudioUrl!.isNotEmpty)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, color: AppColors.danger),
+                        onPressed: () => ref
+                            .read(nouvelleCollecteWizardProvider.notifier)
+                            .clearExistingAudio(),
+                      ),
+                      TextButton(
+                        onPressed: _pickAudio,
+                        child: const Text('Remplacer'),
+                      ),
+                    ],
                   )
                 else
                   TextButton.icon(

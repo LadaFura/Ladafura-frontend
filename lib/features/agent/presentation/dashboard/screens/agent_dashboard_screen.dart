@@ -8,6 +8,7 @@ import '../../../../../core/constants/app_dimensions.dart';
 import '../../../../../core/constants/app_text_styles.dart';
 import '../../../../../core/routing/route_names.dart';
 import '../../../../../core/theme/theme_provider.dart';
+import '../../../../../shared/widgets/formatted_html_text.dart';
 
 /// Retourne la couleur correspondant au statut d'une collecte.
 Color getStatusColor(String status) {
@@ -1053,9 +1054,10 @@ class _RecentCollectionCard extends StatelessWidget {
 
                 const SizedBox(height: 2),
 
-                Text(
+                FormattedHtmlText(
                   '$id · $details',
-
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: (isDark
                           ? AppTextStyles.captionDark
                           : AppTextStyles.caption)
@@ -1064,9 +1066,6 @@ class _RecentCollectionCard extends StatelessWidget {
                         ? AppColors.darkTextSecondary
                         : AppColors.textSecondary,
                   ),
-
-                  overflow:
-                      TextOverflow.ellipsis,
                 ),
               ],
             ),

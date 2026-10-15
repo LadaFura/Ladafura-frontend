@@ -115,8 +115,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+            Icons.arrow_back_ios_new_rounded,
+            color: isDark ? Colors.white : AppColors.textPrimary,
+            size: 20,
           ),
           onPressed: () {
             ref.read(navigationIndexProvider.notifier).setIndex(0);

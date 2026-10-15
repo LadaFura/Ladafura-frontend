@@ -142,51 +142,6 @@ class _StepSourceTerrainWidgetState extends ConsumerState<StepSourceTerrainWidge
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // En-tête
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.person_pin_rounded,
-                  color: AppColors.primary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: AppDimensions.space12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Source & Praticien de Terrain',
-                      style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                          .copyWith(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Identifiez le tradipraticien ou herboriste dépositaire du savoir.',
-                      style: (isDark
-                              ? AppTextStyles.captionDark
-                              : AppTextStyles.caption)
-                          .copyWith(
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: AppDimensions.space16),
-
           // Source actuellement sélectionnée
           if (selectedSource != null && selectedSource.id > 0) ...[
             Container(
@@ -255,27 +210,13 @@ class _StepSourceTerrainWidgetState extends ConsumerState<StepSourceTerrainWidge
             const SizedBox(height: AppDimensions.space16),
           ],
 
-          // Bouton bascule Formulaire d'ajout
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _showAddForm
-                      ? 'Nouveau praticien / informateur'
-                      : 'Sélectionner parmi les praticiens connus',
-                  style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
-                      .copyWith(fontWeight: FontWeight.bold, fontSize: 13),
-                ),
-              ),
-              TextButton.icon(
-                icon: Icon(
-                  _showAddForm ? Icons.list_rounded : Icons.person_add_rounded,
-                  size: 18,
-                ),
-                label: Text(_showAddForm ? 'Liste existante' : 'Ajouter nouveau'),
-                onPressed: () => setState(() => _showAddForm = !_showAddForm),
-              ),
-            ],
+          // Titre de section
+          Text(
+            _showAddForm
+                ? 'Nouveau praticien / informateur'
+                : 'Sélectionner parmi les praticiens connus',
+            style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
+                .copyWith(fontWeight: FontWeight.bold, fontSize: 13),
           ),
 
           const SizedBox(height: 8),
@@ -360,21 +301,49 @@ class _StepSourceTerrainWidgetState extends ConsumerState<StepSourceTerrainWidge
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: _isSavingSource ? null : _handleCreateSource,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                  const SizedBox(height: 18),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton.icon(
+                      onPressed: _isSavingSource ? null : _handleCreateSource,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: _isSavingSource
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Icon(Icons.check_circle_outline_rounded, size: 20),
+                      label: const Text(
+                        'Enregistrer et Sélectionner la source',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
                     ),
-                    icon: _isSavingSource
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Icon(Icons.check, size: 18),
-                    label: const Text('Enregistrer et Sélectionner'),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 42,
+                    child: OutlinedButton(
+                      onPressed: () => setState(() => _showAddForm = false),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                        side: BorderSide(
+                          color: isDark ? AppColors.darkBorder : Colors.grey.shade300,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Retour à la liste des praticiens existants'),
+                    ),
                   ),
                 ],
               ),
@@ -398,7 +367,7 @@ class _StepSourceTerrainWidgetState extends ConsumerState<StepSourceTerrainWidge
               Padding(
                 padding: const EdgeInsets.all(AppDimensions.space20),
                 child: Text(
-                  'Aucune source trouvée. Utilisez "Ajouter nouveau" pour en créer une.',
+                  'Aucune source trouvée. Utilisez le bouton ci-dessous pour en ajouter une.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
@@ -458,6 +427,30 @@ class _StepSourceTerrainWidgetState extends ConsumerState<StepSourceTerrainWidge
                   );
                 },
               ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () => setState(() => _showAddForm = true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isDark
+                      ? AppColors.darkSurfaceVariant
+                      : const Color(0xFFE8F5E9),
+                  foregroundColor: AppColors.primary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: AppColors.primary, width: 1.2),
+                  ),
+                ),
+                icon: const Icon(Icons.person_add_alt_1_rounded, size: 20),
+                label: const Text(
+                  'Ajouter un nouveau praticien / informateur',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+              ),
+            ),
           ],
           const SizedBox(height: 24),
         ],

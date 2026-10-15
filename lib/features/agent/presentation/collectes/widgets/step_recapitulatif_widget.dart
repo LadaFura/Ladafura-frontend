@@ -49,51 +49,6 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // En-tête
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.assignment_turned_in_rounded,
-                  color: AppColors.primary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: AppDimensions.space12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Récapitulatif & Validation',
-                      style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                          .copyWith(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Vérifiez la conformité du dossier avant soumission.',
-                      style: (isDark
-                              ? AppTextStyles.captionDark
-                              : AppTextStyles.caption)
-                          .copyWith(
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: AppDimensions.space16),
-
           // 1. Statut de conformité
           Builder(
             builder: (context) {
@@ -161,6 +116,66 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
               );
             },
           ),
+
+          // Points bloquants de validation du serveur
+          if (recap != null && recap.erreursBloquantes.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(AppDimensions.space12),
+              decoration: BoxDecoration(
+                color: AppColors.danger.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
+                border: Border.all(
+                  color: AppColors.danger.withValues(alpha: 0.25),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.error_outline_rounded,
+                          color: AppColors.danger, size: 18),
+                      SizedBox(width: 8),
+                      Text(
+                        'Points bloquants pour la soumission',
+                        style: TextStyle(
+                          color: AppColors.danger,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ...recap.erreursBloquantes.map((err) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('• ',
+                                style: TextStyle(
+                                    color: AppColors.danger,
+                                    fontWeight: FontWeight.bold)),
+                            Expanded(
+                              child: Text(
+                                err,
+                                style: TextStyle(
+                                  color: isDark
+                                      ? Colors.red.shade200
+                                      : const Color(0xFF7F1D1D),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+                ],
+              ),
+            ),
+          ],
+
           const SizedBox(height: AppDimensions.space16),
 
           // 2. Synthèse Plante
@@ -208,7 +223,7 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
             content: draft.usageRapporte.isNotEmpty
                 ? draft.usageRapporte
                 : 'Usage non renseigné',
-            subtitle: 'Partie : ${draft.partieUtilisee} • Préparation : ${draft.preparation.isNotEmpty ? draft.preparation : "Non précisée"}',
+            subtitle: 'Partie(s) : ${draft.partieUtilisee.isNotEmpty ? draft.partieUtilisee : "Non précisée"} • Préparation : ${draft.preparation.isNotEmpty ? draft.preparation : "Non précisée"}',
           ),
 
           const SizedBox(height: 12),

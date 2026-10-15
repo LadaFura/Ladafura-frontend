@@ -73,7 +73,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
     final hintColor = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
     final iconColor =
-        isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+        isDark ? Colors.white70 : AppColors.textSecondary;
 
     Widget? suffix;
     if (widget.isPassword) {

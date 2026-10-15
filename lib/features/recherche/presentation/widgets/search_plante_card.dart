@@ -131,7 +131,7 @@ class SearchPlanteCard extends StatelessWidget {
                   padding: const EdgeInsets.only(top: AppDimensions.space8),
                   child: Icon(
                     Icons.chevron_right_rounded,
-                    color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                    color: isDark ? Colors.white : AppColors.textMuted,
                     size: 22,
                   ),
                 ),
