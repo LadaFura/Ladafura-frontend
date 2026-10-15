@@ -294,13 +294,7 @@ class _CommandeLivraisonFormState extends ConsumerState<CommandeLivraisonForm> {
           ],
           const SizedBox(height: 16),
 
-          // 4. Numéro de téléphone de contact (sans le tag rouge Obligatoire)
-          Text(
-            'Numéro de téléphone de contact *',
-            style: (isDark ? AppTextStyles.captionDark : AppTextStyles.caption)
-                .copyWith(fontWeight: FontWeight.bold, fontSize: 13),
-          ),
-          const SizedBox(height: 6),
+          // 4. Numéro de téléphone du destinataire
           TextField(
             controller: widget.telephoneController,
             keyboardType: TextInputType.phone,
