@@ -55,7 +55,7 @@ class SearchBarInput extends StatelessWidget {
             color: isDark ? AppColors.darkTextMuted : const Color(0xFF6B7B70),
             fontSize: 14,
           ),
-          prefixIcon: (showBackButton && onBack != null)
+          prefixIcon: showBackButton
               ? IconButton(
                   focusNode:
                       FocusNode(skipTraversal: true, canRequestFocus: false),
@@ -64,7 +64,16 @@ class SearchBarInput extends StatelessWidget {
                     color: isDark ? Colors.white : AppColors.textPrimary,
                     size: 20,
                   ),
-                  onPressed: onBack,
+                  onPressed: () {
+                    if (onBack != null) {
+                      onBack!();
+                    } else if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop();
+                    } else {
+                      controller.clear();
+                      onClear();
+                    }
+                  },
                 )
               : Icon(
                   Icons.search_rounded,
