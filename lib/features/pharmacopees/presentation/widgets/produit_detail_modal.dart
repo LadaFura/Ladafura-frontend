@@ -262,7 +262,7 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
                               _buildSectionHeader(
                                 icon: Icons.storefront_rounded,
                                 title: 'Sélectionnez la pharmacopée',
-                                countBadge: '${detail.offresPharmacopees.length} officines',
+                                countBadge: '${detail.offresPharmacopees.length} pharmacopées',
                                 isDark: isDark,
                               ),
                               const SizedBox(height: 10),
@@ -963,7 +963,7 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${offre.commune ?? offre.region ?? "Officine agréée"} • ${_formatNumber(offre.prix)} FCFA',
+                    '${offre.commune ?? offre.region ?? "Pharmacopée agréée"} • ${_formatNumber(offre.prix)} FCFA',
                     style: TextStyle(
                       fontSize: 11.5,
                       color: isDark ? Colors.white70 : AppColors.textSecondary,

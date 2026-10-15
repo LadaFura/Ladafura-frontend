@@ -74,24 +74,19 @@ class CommandeModeRetraitSelector extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        opt.libelle,
+                        opt.libelle
+                            .replaceAll(RegExp(r'\s*\([Pp]ickup\)'), '')
+                            .replaceAll('officine', 'pharmacopée')
+                            .replaceAll('Officine', 'Pharmacopée')
+                            .trim(),
                         style: (isDark
                                 ? AppTextStyles.bodyDark
                                 : AppTextStyles.body)
                             .copyWith(
                           fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
+                              isSelected ? FontWeight.bold : FontWeight.w600,
                         ),
                       ),
-                      if (opt.description != null &&
-                          opt.description!.isNotEmpty)
-                        Text(
-                          opt.description!,
-                          style: (isDark
-                                  ? AppTextStyles.captionDark
-                                  : AppTextStyles.caption)
-                              .copyWith(fontSize: 11),
-                        ),
                     ],
                   ),
                 ),
