@@ -9,7 +9,6 @@ import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routing/route_names.dart';
 import '../../../../core/services/location_service.dart';
-import '../../../../shared/widgets/feedback/app_loading_indicator.dart';
 import '../../../home/providers/home_discovery_provider.dart';
 import '../../../pharmacopees/models/pharmacopee_model.dart';
 import '../../models/carte_filter_model.dart';
@@ -39,6 +38,10 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
   // Coordonnées par défaut : Bamako, Mali (Place de l'Indépendance / Fleuve Niger)
   static const LatLng _bamakoCenter = LatLng(12.6392, -8.0029);
 
+  bool _isMapReady = false;
+  LatLng? _pendingCenter;
+  double? _pendingZoom;
+
   @override
   void initState() {
     super.initState();
@@ -53,12 +56,21 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
     super.dispose();
   }
 
+  void _safeAnimateTo(LatLng destCenter, {double? zoom}) {
+    if (!_isMapReady) {
+      _pendingCenter = destCenter;
+      _pendingZoom = zoom;
+      return;
+    }
+    _mapController.animateTo(destCenter, zoom: zoom);
+  }
+
   Future<void> _requestUserLocation({bool showFeedbackOnDenied = false}) async {
     final notifier = ref.read(userLocationProvider.notifier);
     final coords = await notifier.requestLocationWithPermission();
     if (mounted) {
       if (coords != null) {
-        _mapController.animateTo(
+        _safeAnimateTo(
           LatLng(coords.latitude, coords.longitude),
           zoom: 14.5,
         );
@@ -78,7 +90,7 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
 
   void _onMarkerTap(PharmacopeeModel pharmacopee) {
     ref.read(selectedCartePharmacopeeProvider.notifier).state = pharmacopee;
-    _mapController.animateTo(
+    _safeAnimateTo(
       LatLng(pharmacopee.latitude, pharmacopee.longitude),
       zoom: 14.5,
     );
@@ -86,7 +98,7 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
 
   void _recenterMap(GeoCoordinates? userCoords) {
     if (userCoords != null) {
-      _mapController.animateTo(
+      _safeAnimateTo(
         LatLng(userCoords.latitude, userCoords.longitude),
         zoom: 14.5,
       );
@@ -111,25 +123,47 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
       body: Stack(
         children: [
-          // 1. FOND DE CARTE OPENSTREETMAP (Gratuit, interactif, tuiles OSM officielles)
-          pharmacopeesAsync.when(
-            loading: () => const Center(child: AppLoadingIndicator()),
-            error: (err, stack) => _buildMapFallback(
+          // 1. FOND DE CARTE OPENSTREETMAP (Toujours rendu pour MapController et fluidité)
+          if (pharmacopeesAsync.hasError &&
+              (pharmacopeesAsync.valueOrNull == null ||
+                  pharmacopeesAsync.valueOrNull!.isEmpty))
+            _buildMapFallback(
               context: context,
               isDark: isDark,
               pharmacopees: const [],
               userLocation: userLocation,
+            )
+          else
+            _buildOpenStreetMap(
+              context: context,
+              isDark: isDark,
+              pharmacopees: pharmacopeesAsync.valueOrNull ?? const [],
+              selectedPharmacopee: selectedPharmacopee,
+              userLocation: userLocation,
             ),
-            data: (pharmacopees) {
-              return _buildOpenStreetMap(
-                context: context,
-                isDark: isDark,
-                pharmacopees: pharmacopees,
-                selectedPharmacopee: selectedPharmacopee,
-                userLocation: userLocation,
-              );
-            },
-          ),
+
+          if (pharmacopeesAsync.isLoading &&
+              (pharmacopeesAsync.valueOrNull == null ||
+                  pharmacopeesAsync.valueOrNull!.isEmpty))
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 70,
+              left: 0,
+              right: 0,
+              child: const Center(
+                child: Card(
+                  elevation: 4,
+                  shape: CircleBorder(),
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    ),
+                  ),
+                ),
+              ),
+            ),
 
           // 2. BARRE SUPÉRIEURE : RECHERCHE & FILTRES RAPIDES
           SafeArea(
@@ -226,6 +260,19 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
         initialZoom: 13.2,
         minZoom: 5.0,
         maxZoom: 18.0,
+        onMapReady: () {
+          if (!mounted) return;
+          setState(() {
+            _isMapReady = true;
+          });
+          if (_pendingCenter != null) {
+            final target = _pendingCenter!;
+            final z = _pendingZoom ?? 14.5;
+            _pendingCenter = null;
+            _pendingZoom = null;
+            _mapController.animateTo(target, zoom: z);
+          }
+        },
         onTap: (_, __) {
           // Désélectionne la carte si l'utilisateur clique sur la carte vide
           if (ref.read(selectedCartePharmacopeeProvider) != null) {
@@ -861,6 +908,11 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
 /// Extension d'animation de recentrage souple pour MapController
 extension MapControllerAnimated on MapController {
   void animateTo(LatLng destCenter, {double? zoom}) {
-    move(destCenter, zoom ?? camera.zoom);
+    try {
+      final targetZoom = zoom ?? camera.zoom;
+      move(destCenter, targetZoom);
+    } catch (_) {
+      // Protège contre l'exception si le widget FlutterMap n'est pas encore rendu / prêt
+    }
   }
 }

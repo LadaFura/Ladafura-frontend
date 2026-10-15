@@ -107,18 +107,6 @@ class ProfilScreen extends ConsumerWidget {
         automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          IconButton(
-            tooltip: 'Actualiser',
-            icon: const Icon(
-              Icons.refresh_rounded,
-              size: AppDimensions.iconSizeLarge,
-            ),
-            onPressed: () {
-              ref.read(profilProvider.notifier).chargerProfil();
-            },
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: () => ref.read(profilProvider.notifier).chargerProfil(),

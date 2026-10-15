@@ -1,3 +1,5 @@
+import 'package:ladafura_frontend_flutter/core/utils/image_utils.dart';
+
 /// Résumé synthétique d'une plante médicinale validée dans le catalogue LADAFURA.
 ///
 /// Conforme au DTO backend `PopulationPlanteSummaryResponse.java` (US-01 & US-02).
@@ -89,7 +91,7 @@ class PlanteSommaireModel {
       id: (json['id'] as num?)?.toInt() ?? 0,
       nomScientifique: json['nomScientifique']?.toString() ?? '',
       description: json['description']?.toString(),
-      photoUrl: json['photoUrl']?.toString(),
+      photoUrl: ImageUtils.resolveImageUrl(json['photoUrl']?.toString()),
       nomsVernaculaires: parseStringList(json['nomsVernaculaires']),
       maladies: parseStringList(json['maladies'] ?? json['maladiesAssociees']),
       nombreConnaissances: (json['nombreConnaissances'] as num?)?.toInt() ?? 0,

@@ -127,10 +127,13 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
   }
 
   Widget _buildSlideCard(HomeBannerSlideData slide, bool isDark) {
+    final cardBgColor =
+        isDark ? const Color(0xFF0F261B) : const Color(0xFFE2EFE3);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 2),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F261B) : const Color(0xFFE2EFE3),
+        color: cardBgColor,
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
@@ -144,159 +147,188 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
         borderRadius: BorderRadius.circular(22),
         child: Stack(
           children: [
-            // Arrière-plan visuel : mortier & herbes sur la droite
-            Positioned(
-              right: 0,
-              top: 0,
-              bottom: 0,
-              width: 250,
-              child: Image.asset(
-                slide.imagePath,
-                fit: BoxFit.cover,
-                alignment: Alignment.centerRight,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            // 1. Arrière-plan visuel avec ShaderMask progressif :
+            // La photo est rendue 100% transparente sous le texte (à gauche)
+            // et apparaît naturellement sur la droite (mortier, feuilles, fleur).
+            Positioned.fill(
+              child: ShaderMask(
+                shaderCallback: (Rect bounds) {
+                  return const LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.transparent,
+                      Colors.transparent,
+                      Colors.white70,
+                      Colors.white,
+                    ],
+                    stops: [0.0, 0.40, 0.65, 0.85],
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.dstIn,
+                child: Image.asset(
+                  slide.imagePath,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.centerRight,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                ),
               ),
             ),
 
-            // Dégradé pour fondre l'image dans le fond vert doux à gauche
+            // 2. Dégradé de fond continu : couleur unie 100% opaque sous le texte
+            // pour garantir une lisibilité optimale sans aucun artefact ni coupure
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: isDark
-                        ? [
-                            const Color(0xFF0D2418),
-                            const Color(0xFF0D2418).withValues(alpha: 0.95),
-                            const Color(0xFF0D2418).withValues(alpha: 0.40),
-                            Colors.transparent,
-                          ]
-                        : [
-                            const Color(0xFFDEEDE0),
-                            const Color(0xFFDEEDE0).withValues(alpha: 0.95),
-                            const Color(0xFFDEEDE0).withValues(alpha: 0.40),
-                            Colors.transparent,
-                          ],
-                    stops: const [0.0, 0.52, 0.75, 1.0],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
+                    colors: isDark
+                        ? [
+                            cardBgColor,
+                            cardBgColor,
+                            cardBgColor.withValues(alpha: 0.65),
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.22),
+                          ]
+                        : [
+                            cardBgColor,
+                            cardBgColor,
+                            cardBgColor.withValues(alpha: 0.50),
+                            Colors.transparent,
+                          ],
+                    stops: isDark
+                        ? const [0.0, 0.45, 0.68, 0.88, 1.0]
+                        : const [0.0, 0.45, 0.68, 0.90],
                   ),
                 ),
               ),
             ),
 
-            // Contenu texte & boutons au premier plan
+            // 3. Contenu textuel et bouton (limité en largeur pour ne pas empiéter sur l'illustration)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final textWidth = constraints.maxWidth * 0.60;
+                  return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Badge "Découvrez" avec icône feuille
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0C5231),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      SizedBox(
+                        width: textWidth,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(
-                              Icons.eco,
-                              color: Colors.white,
-                              size: 13,
+                            // Badge "Découvrez" avec icône feuille
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0C5231),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.eco,
+                                    color: Colors.white,
+                                    size: 13,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    slide.tag,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            const SizedBox(width: 5),
+                            const SizedBox(height: 8),
+
+                            // Titre principal
                             Text(
-                              slide.tag,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.2,
+                              slide.title,
+                              maxLines: 2,
+                              style: TextStyle(
+                                fontSize: 16.5,
+                                fontWeight: FontWeight.w800,
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF0C3822),
+                                height: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+
+                            // Sous-titre
+                            Text(
+                              slide.subtitle,
+                              maxLines: 2,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: isDark
+                                    ? const Color(0xFFBDD3C5)
+                                    : const Color(0xFF526D5B),
+                                height: 1.25,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 8),
 
-                      // Titre principal
-                      Text(
-                        slide.title,
-                        maxLines: 2,
-                        style: TextStyle(
-                          fontSize: 16.5,
-                          fontWeight: FontWeight.w800,
-                          color: isDark ? Colors.white : const Color(0xFF0C3822),
-                          height: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-
-                      // Sous-titre
-                      Text(
-                        slide.subtitle,
-                        maxLines: 2,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: isDark
-                              ? const Color(0xFFBDD3C5)
-                              : const Color(0xFF526D5B),
-                          height: 1.25,
+                      // Bouton pilule "Explorer →"
+                      InkWell(
+                        onTap: slide.onAction ?? widget.onExplore,
+                        borderRadius: BorderRadius.circular(24),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0C5231),
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF0C5231)
+                                    .withValues(alpha: 0.25),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                slide.buttonText,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Icon(
+                                Icons.arrow_forward_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
-                  ),
-
-                  // Bouton pilule "Explorer →"
-                  InkWell(
-                    onTap: slide.onAction ?? widget.onExplore,
-                    borderRadius: BorderRadius.circular(24),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0C5231),
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF0C5231).withValues(alpha: 0.25),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            slide.buttonText,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          const Icon(
-                            Icons.arrow_forward_rounded,
-                            color: Colors.white,
-                            size: 14,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ],

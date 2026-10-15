@@ -3,6 +3,7 @@ import 'package:ladafura_frontend_flutter/core/constants/app_colors.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_dimensions.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_text_styles.dart';
 import 'package:ladafura_frontend_flutter/features/collectes/models/agent_collecte_summary_response.dart';
+import 'package:ladafura_frontend_flutter/shared/widgets/formatted_html_text.dart';
 
 /// Carte représentant une collecte dans la liste de l'agent.
 class CollecteCardWidget extends StatelessWidget {
@@ -101,7 +102,7 @@ class CollecteCardWidget extends StatelessWidget {
 
             if (collecte.description != null && collecte.description!.isNotEmpty) ...[
               const SizedBox(height: 2),
-              Text(
+              FormattedHtmlText(
                 collecte.description!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

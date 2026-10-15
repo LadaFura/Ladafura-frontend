@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/network/error_handler.dart';
 import '../data/agent_api_service.dart';
 import '../models/agent_collecte_detail_model.dart';
 import '../../collectes/models/agent_collecte_summary_response.dart';
@@ -110,6 +111,8 @@ class NouvelleCollecteDraftState {
   final double? longitude;
   final File? photoFile;
   final File? audioFile;
+  final String? existingPhotoUrl;
+  final String? existingAudioUrl;
 
   // Step 6 : Récapitulatif
   final AgentCollecteRecapitulatifModel? recapitulatif;
@@ -135,6 +138,8 @@ class NouvelleCollecteDraftState {
     this.longitude,
     this.photoFile,
     this.audioFile,
+    this.existingPhotoUrl,
+    this.existingAudioUrl,
     this.recapitulatif,
   });
 
@@ -147,6 +152,7 @@ class NouvelleCollecteDraftState {
         return selectedMaladies.isNotEmpty;
       case 2:
         return usageRapporte.trim().isNotEmpty &&
+            partieUtilisee.trim().isNotEmpty &&
             preparation.trim().isNotEmpty;
       case 3:
         return selectedSource != null && selectedSource!.id > 0;
@@ -179,6 +185,9 @@ class NouvelleCollecteDraftState {
       case 1:
         return 'Veuillez sélectionner ou ajouter au moins une maladie ou symptôme ciblé.';
       case 2:
+        if (partieUtilisee.trim().isEmpty) {
+          return 'Veuillez saisir ou sélectionner la ou les partie(s) de plante utilisée(s).';
+        }
         if (usageRapporte.trim().isEmpty) {
           return 'Veuillez renseigner l’usage traditionnel rapporté avant de continuer.';
         }
@@ -215,6 +224,10 @@ class NouvelleCollecteDraftState {
     double? longitude,
     File? photoFile,
     File? audioFile,
+    String? existingPhotoUrl,
+    bool clearExistingPhotoUrl = false,
+    String? existingAudioUrl,
+    bool clearExistingAudioUrl = false,
     AgentCollecteRecapitulatifModel? recapitulatif,
   }) {
     return NouvelleCollecteDraftState(
@@ -238,6 +251,8 @@ class NouvelleCollecteDraftState {
       longitude: longitude ?? this.longitude,
       photoFile: photoFile ?? this.photoFile,
       audioFile: audioFile ?? this.audioFile,
+      existingPhotoUrl: clearExistingPhotoUrl ? null : (existingPhotoUrl ?? this.existingPhotoUrl),
+      existingAudioUrl: clearExistingAudioUrl ? null : (existingAudioUrl ?? this.existingAudioUrl),
       recapitulatif: recapitulatif ?? this.recapitulatif,
     );
   }
@@ -423,7 +438,8 @@ class NouvelleCollecteWizardNotifier extends StateNotifier<NouvelleCollecteDraft
       state = state.copyWith(isLoading: false, isDraftSaved: true);
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      final error = ErrorHandler.handle(e);
+      state = state.copyWith(isLoading: false, errorMessage: error.message);
       return false;
     }
   }
@@ -438,7 +454,8 @@ class NouvelleCollecteWizardNotifier extends StateNotifier<NouvelleCollecteDraft
       final recap = await _api.getRecapitulatif(state.collecteId!);
       state = state.copyWith(isLoading: false, recapitulatif: recap);
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      final error = ErrorHandler.handle(e);
+      state = state.copyWith(isLoading: false, errorMessage: error.message);
     }
   }
 
@@ -456,13 +473,22 @@ class NouvelleCollecteWizardNotifier extends StateNotifier<NouvelleCollecteDraft
       state = state.copyWith(isLoading: false);
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      final error = ErrorHandler.handle(e);
+      state = state.copyWith(isLoading: false, errorMessage: error.message);
       return false;
     }
   }
 
   void reset() {
     state = const NouvelleCollecteDraftState();
+  }
+
+  void clearExistingPhoto() {
+    state = state.copyWith(clearExistingPhotoUrl: true);
+  }
+
+  void clearExistingAudio() {
+    state = state.copyWith(clearExistingAudioUrl: true);
   }
 
   void loadFromDetail(
@@ -482,11 +508,18 @@ class NouvelleCollecteWizardNotifier extends StateNotifier<NouvelleCollecteDraft
               nomsVernaculaires: recap.nomsVernaculaires,
             )
           : null,
+      selectedMaladies: (recap != null && recap.maladiesAssociees.isNotEmpty)
+          ? recap.maladiesAssociees
+              .asMap()
+              .entries
+              .map((e) => AgentMaladieModel(id: e.key + 1, nom: e.value))
+              .toList()
+          : const [],
       usageRapporte: recap != null && recap.usagesRapportes.isNotEmpty
           ? recap.usagesRapportes.first
           : (detail.description ?? ''),
       partieUtilisee: recap != null && recap.partiesUtilisees.isNotEmpty
-          ? recap.partiesUtilisees.first
+          ? recap.partiesUtilisees.join(', ')
           : 'Feuilles',
       preparation: recap != null && recap.modesPreparation.isNotEmpty
           ? recap.modesPreparation.first
@@ -509,6 +542,8 @@ class NouvelleCollecteWizardNotifier extends StateNotifier<NouvelleCollecteDraft
       localite: detail.localite ?? '',
       latitude: detail.latitude,
       longitude: detail.longitude,
+      existingPhotoUrl: detail.photoUrl,
+      existingAudioUrl: detail.audioUrl,
       recapitulatif: recap,
     );
   }

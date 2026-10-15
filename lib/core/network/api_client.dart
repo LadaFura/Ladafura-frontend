@@ -52,27 +52,40 @@ class ApiClient {
               error.requestOptions.extra['_hostFallbackRetried'] == true;
 
           if (isConnectionFailure && !alreadyRetried && !kIsWeb) {
-            final fallbackHost = defaultTargetPlatform == TargetPlatform.android
-                ? ApiEndpoints.androidEmulatorHost
-                : ApiEndpoints.defaultHost;
-            final fallbackBaseUrl = '$fallbackHost${ApiEndpoints.apiVersion}';
+            String? fallbackHost;
+            if (defaultTargetPlatform == TargetPlatform.android) {
+              fallbackHost = _dio.options.baseUrl.contains('10.0.2.2')
+                  ? 'http://${ApiEndpoints.devMachineIp}:8080'
+                  : ApiEndpoints.androidEmulatorHost;
+            } else if (defaultTargetPlatform == TargetPlatform.iOS ||
+                defaultTargetPlatform == TargetPlatform.macOS) {
+              fallbackHost = _dio.options.baseUrl.contains(ApiEndpoints.devMachineIp)
+                  ? ApiEndpoints.defaultHost
+                  : 'http://${ApiEndpoints.devMachineIp}:8080';
+            }
 
-            if (_dio.options.baseUrl != fallbackBaseUrl) {
-              debugPrint(
-                '[DIO] Connexion échouée sur ${_dio.options.baseUrl}, bascule automatique vers $fallbackBaseUrl',
-              );
-              _dio.options.baseUrl = fallbackBaseUrl;
-              ApiEndpoints.baseUrl = fallbackBaseUrl;
+            if (fallbackHost != null) {
+              final fallbackBaseUrl = '$fallbackHost${ApiEndpoints.apiVersion}';
 
-              final opts = error.requestOptions;
-              opts.baseUrl = fallbackBaseUrl;
-              opts.extra['_hostFallbackRetried'] = true;
+              if (_dio.options.baseUrl != fallbackBaseUrl) {
+                final previousBaseUrl = _dio.options.baseUrl;
+                final opts = error.requestOptions;
+                opts.baseUrl = fallbackBaseUrl;
+                opts.extra['_hostFallbackRetried'] = true;
 
-              try {
-                final response = await _dio.fetch<dynamic>(opts);
-                return handler.resolve(response);
-              } on DioException catch (retryError) {
-                return handler.next(retryError);
+                try {
+                  final response = await _dio.fetch<dynamic>(opts);
+                  // La bascule a réussi, on adopte la nouvelle baseUrl
+                  _dio.options.baseUrl = fallbackBaseUrl;
+                  ApiEndpoints.baseUrl = fallbackBaseUrl;
+                  debugPrint('[DIO] Bascule d\'URL réussie vers $fallbackBaseUrl');
+                  return handler.resolve(response);
+                } on DioException catch (retryError) {
+                  // Le fallback a échoué : on restaure impérativement l'URL initiale
+                  _dio.options.baseUrl = previousBaseUrl;
+                  ApiEndpoints.baseUrl = previousBaseUrl;
+                  return handler.next(retryError);
+                }
               }
             }
           }

@@ -1,3 +1,5 @@
+import '../../../core/utils/image_utils.dart';
+
 /// Modèle synthétique d'un médicament traditionnel ou produit de pharmacopée (Fura).
 ///
 /// Conforme au DTO backend `PopulationProduitSummaryResponse.java`.
@@ -53,7 +55,7 @@ class ProduitModel {
       prixIndicatif: (json['prixIndicatif'] as num?)?.toDouble() ??
           (json['prix'] as num?)?.toDouble() ??
           2500.0,
-      photoUrl: json['photoUrl']?.toString(),
+      photoUrl: ImageUtils.resolveImageUrl(json['photoUrl']?.toString()),
       categorieId: (json['categorieId'] as num?)?.toInt(),
       categorieNom: json['categorieNom']?.toString() ?? 'Phytothérapie',
       plantesPrincipales: (json['plantesPrincipales'] as List<dynamic>?)

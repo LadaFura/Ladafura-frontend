@@ -1,15 +1,21 @@
+import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:ladafura_frontend_flutter/core/constants/api_endpoints.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_colors.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_dimensions.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_text_styles.dart';
+import 'package:ladafura_frontend_flutter/core/network/error_handler.dart';
 import 'package:ladafura_frontend_flutter/core/routing/route_names.dart';
 import 'package:ladafura_frontend_flutter/features/agent/models/agent_collecte_detail_model.dart';
 import 'package:ladafura_frontend_flutter/features/agent/models/agent_recapitulatif_model.dart';
 import 'package:ladafura_frontend_flutter/features/agent/providers/agent_providers.dart';
 import 'package:ladafura_frontend_flutter/features/plantes/presentation/widgets/plante_audio_player_card.dart';
+import 'package:ladafura_frontend_flutter/shared/widgets/formatted_html_text.dart';
 
 /// Écran de consultation détaillée d'une fiche de collecte de terrain.
 class AgentCollecteDetailPage extends ConsumerWidget {
@@ -71,6 +77,12 @@ class AgentCollecteDetailPage extends ConsumerWidget {
     final recapAsync = ref.watch(agentCollecteRecapitulatifProvider(collecteId));
     final recap = recapAsync.valueOrNull;
 
+    final detail = detailAsync.valueOrNull;
+    final canSubmit = detail != null &&
+        detail.soumissible &&
+        (recap == null || recap.conformePourSoumission);
+    final hasBottomActions = detail != null && (detail.modifiable || canSubmit);
+
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : const Color(0xFFF6F8F6),
       appBar: AppBar(
@@ -93,7 +105,41 @@ class AgentCollecteDetailPage extends ConsumerWidget {
             fontSize: 18,
           ),
         ),
+        actions: [
+          if (detail != null && detail.modifiable)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilledButton.tonal(
+                onPressed: () {
+                  ref
+                      .read(nouvelleCollecteWizardProvider.notifier)
+                      .loadFromDetail(detail, recap);
+                  context.push(RouteNames.agentNouvelleCollectePath);
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                  foregroundColor: AppColors.primary,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                ),
+                child: const Text(
+                  'Modifier',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+              ),
+            ),
+        ],
       ),
+      bottomNavigationBar: hasBottomActions
+          ? _buildBottomActionBar(
+              context: context,
+              ref: ref,
+              detail: detail,
+              recap: recap,
+              isDark: isDark,
+              canSubmit: canSubmit,
+            )
+          : null,
       body: detailAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(
@@ -127,19 +173,52 @@ class AgentCollecteDetailPage extends ConsumerWidget {
           final hasPhoto = detail.photoUrl != null && detail.photoUrl!.isNotEmpty;
           final hasAudio = detail.audioUrl != null && detail.audioUrl!.isNotEmpty;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-            child: Column(
+          return RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: () async {
+              ref.invalidate(agentCollecteDetailProvider(collecteId));
+              ref.invalidate(agentCollecteRecapitulatifProvider(collecteId));
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // 1. Carte En-tête Hero (Photo + Plante + Statut + Date)
                 _buildHeroHeaderCard(
+                  context: context,
+                  ref: ref,
                   isDark: isDark,
                   detail: detail,
                   recap: recap,
                   statusStyle: statusStyle,
                   hasPhoto: hasPhoto,
                 ),
+
+                // Bannière informative si validée ou soumise
+                if (detail.statut.toUpperCase() == 'VALIDEE') ...[
+                  const SizedBox(height: 14),
+                  _buildStatusNoticeCard(
+                    isDark: isDark,
+                    icon: Icons.verified_rounded,
+                    color: Colors.green,
+                    title: 'Fiche de collecte validée & intégrée',
+                    message:
+                        'Cette collecte a été approuvée par le comité scientifique et intégrée au patrimoine botanique officiel. Elle n\'est plus modifiable.',
+                  ),
+                ] else if (detail.statut.toUpperCase() == 'SOUMISE' ||
+                    detail.statut.toUpperCase() == 'EN_EXAMEN') ...[
+                  const SizedBox(height: 14),
+                  _buildStatusNoticeCard(
+                    isDark: isDark,
+                    icon: Icons.hourglass_top_rounded,
+                    color: Colors.amber.shade800,
+                    title: 'Examen en cours par le comité',
+                    message:
+                        'Cette fiche de collecte a été transmise pour modération. Toute modification est suspendue pendant son examen.',
+                  ),
+                ],
 
                 // Alerte motif de rejet si présent
                 if (detail.motifRejet != null && detail.motifRejet!.trim().isNotEmpty) ...[
@@ -191,17 +270,61 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                   ),
                 ],
 
-                // 2. Lecteur Audio (mis en avant s'il existe)
+                // 2. Lecteur Audio (ou incitation à enregistrer si absent)
                 if (hasAudio) ...[
                   const SizedBox(height: 14),
                   _buildModernCard(
                     isDark: isDark,
                     icon: Icons.graphic_eq_rounded,
                     title: 'Témoignage vocal enregistré',
-                    child: PlanteAudioPlayerCard(
-                      audioUrl: detail.audioUrl!,
-                      title: 'Enregistrement de terrain',
-                      subtitle: detail.sourceNomComplet ?? ' Informateur local',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        PlanteAudioPlayerCard(
+                          audioUrl: detail.audioUrl!,
+                          title: 'Enregistrement de terrain',
+                          subtitle: detail.sourceNomComplet ?? ' Informateur local',
+                        ),
+                        if (detail.statut.toUpperCase() != 'VALIDEE') ...[
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () => _handlePickAndUploadAudio(context, ref, detail.id),
+                              child: const Text('Remplacer l\'audio'),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ] else if (detail.statut.toUpperCase() != 'VALIDEE') ...[
+                  const SizedBox(height: 14),
+                  _buildModernCard(
+                    isDark: isDark,
+                    icon: Icons.mic_none_rounded,
+                    title: 'Témoignage vocal (Audio)',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Aucun enregistrement vocal n\'a encore été joint à cette fiche de collecte. Vous pouvez en importer ou enregistrer un maintenant.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          onPressed: () => _handlePickAndUploadAudio(context, ref, detail.id),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
+                          ),
+                          child: const Text('Ajouter un enregistrement audio'),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -213,12 +336,9 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                     isDark: isDark,
                     icon: Icons.description_outlined,
                     title: 'Description de la mission',
-                    child: Text(
-                      detail.description!,
-                      style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
-                        height: 1.5,
-                        fontSize: 14,
-                      ),
+                    child: _ExpandableDescriptionText(
+                      text: detail.description!,
+                      isDark: isDark,
                     ),
                   ),
                 ],
@@ -241,20 +361,69 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                 const SizedBox(height: 14),
                 _buildLocationCard(isDark: isDark, detail: detail),
 
-                // 7. Actions (Modifier / Soumettre)
-                if (detail.modifiable || detail.soumissible) ...[
-                  const SizedBox(height: 24),
-                  _buildActionButtons(context, ref, detail, recap),
-                ],
+                const SizedBox(height: 20),
               ],
             ),
-          );
+          ),
+        );
         },
       ),
     );
   }
 
+  Widget _buildStatusNoticeCard({
+    required bool isDark,
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String message,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: color.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  message,
+                  style: TextStyle(
+                    color: isDark ? Colors.white70 : const Color(0xFF1F2937),
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeroHeaderCard({
+    required BuildContext context,
+    required WidgetRef ref,
     required bool isDark,
     required AgentCollecteDetailModel detail,
     required AgentCollecteRecapitulatifModel? recap,
@@ -263,6 +432,7 @@ class AgentCollecteDetailPage extends ConsumerWidget {
   }) {
     final planteTitle = recap?.planteNomScientifique ?? 'Échantillon ethnobotanique';
     final dateFormatted = _formatDate(detail.dateCollecte);
+    final canModifyMedia = detail.statut.toUpperCase() != 'VALIDEE';
 
     return Container(
       decoration: BoxDecoration(
@@ -287,10 +457,20 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                 SizedBox(
                   height: 210,
                   width: double.infinity,
-                  child: Image.network(
-                    ApiEndpoints.resolveMediaUrl(detail.photoUrl),
+                  child: CachedNetworkImage(
+                    imageUrl: ApiEndpoints.resolveMediaUrl(detail.photoUrl),
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    placeholder: (_, __) => Container(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      child: const Center(
+                        child: SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                        ),
+                      ),
+                    ),
+                    errorWidget: (_, __, ___) => Container(
                       color: AppColors.primary.withValues(alpha: 0.08),
                       child: const Center(
                         child: Icon(
@@ -317,6 +497,37 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                     ),
                   ),
                 ),
+                if (canModifyMedia)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Material(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(20),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () => _handlePickAndUploadPhoto(context, ref, detail.id),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.camera_alt_outlined, size: 14, color: Colors.white),
+                              SizedBox(width: 5),
+                              Text(
+                                'Changer photo',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 Positioned(
                   top: 12,
                   right: 12,
@@ -364,7 +575,7 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                 ),
               ],
             )
-          else
+          else ...[
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -415,6 +626,23 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                 ],
               ),
             ),
+            if (canModifyMedia)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: OutlinedButton(
+                  onPressed: () => _handlePickAndUploadPhoto(context, ref, detail.id),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  ),
+                  child: const Text(
+                    'Ajouter la photo du spécimen',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+          ],
           if (recap != null && recap.nomsVernaculaires.isNotEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
@@ -628,23 +856,13 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                 if (detail.sourceTelephone != null &&
                     detail.sourceTelephone!.trim().isNotEmpty) ...[
                   const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.phone_outlined,
-                        size: 14,
-                        color: AppColors.primary.withValues(alpha: 0.9),
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        detail.sourceTelephone!,
-                        style: const TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    'Tél : ${detail.sourceTelephone!}',
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ],
               ],
@@ -694,24 +912,12 @@ class AgentCollecteDetailPage extends ConsumerWidget {
           ),
           if (detail.localite != null && detail.localite!.trim().isNotEmpty) ...[
             const SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(
-                  Icons.holiday_village_outlined,
-                  size: 16,
-                  color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Localité / Village : ${detail.localite!}',
-                    style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
+            Text(
+              'Localité / Village : ${detail.localite!}',
+              style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
           if (hasGps) ...[
@@ -722,24 +928,13 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                 color: AppColors.primary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.gps_fixed_rounded,
-                    size: 15,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'GPS : ${detail.latitude!.toStringAsFixed(4)}, ${detail.longitude!.toStringAsFixed(4)}',
-                    style: const TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
+              child: Text(
+                'GPS : ${detail.latitude!.toStringAsFixed(4)}, ${detail.longitude!.toStringAsFixed(4)}',
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
               ),
             ),
           ],
@@ -789,82 +984,222 @@ class AgentCollecteDetailPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildActionButtons(
-    BuildContext context,
-    WidgetRef ref,
-    AgentCollecteDetailModel detail,
-    AgentCollecteRecapitulatifModel? recap,
-  ) {
-    final canSubmit = recap == null ? detail.soumissible : recap.conformePourSoumission;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (detail.modifiable)
-          OutlinedButton.icon(
-            onPressed: () {
-              ref.read(nouvelleCollecteWizardProvider.notifier).loadFromDetail(detail, recap);
-              context.push(RouteNames.agentNouvelleCollectePath);
-            },
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: const BorderSide(color: AppColors.primary, width: 1.4),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            icon: const Icon(Icons.edit_outlined, size: 19),
-            label: const Text(
-              'Compléter ou modifier la fiche',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
+  Widget _buildBottomActionBar({
+    required BuildContext context,
+    required WidgetRef ref,
+    required AgentCollecteDetailModel detail,
+    required AgentCollecteRecapitulatifModel? recap,
+    required bool isDark,
+    required bool canSubmit,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.space16,
+        vertical: AppDimensions.space12,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: isDark ? AppColors.darkBorder : AppColors.inputBorder,
           ),
-        if (detail.modifiable && canSubmit) const SizedBox(height: 10),
-        if (canSubmit)
-          ElevatedButton.icon(
-            onPressed: () async {
-              try {
-                final api = ref.read(agentApiServiceProvider);
-                await api.soumettreCollecte(detail.id);
-                ref.invalidate(agentCollecteDetailProvider(collecteId));
-                ref.invalidate(agentCollecteRecapitulatifProvider(collecteId));
-                ref.invalidate(agentCollectesListProvider);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Collecte soumise pour validation avec succès.'),
-                      backgroundColor: AppColors.primary,
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Erreur : $e'),
-                      backgroundColor: AppColors.danger,
-                    ),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            icon: const Icon(Icons.send_rounded, size: 18),
-            label: const Text(
-              'Soumettre au comité de validation',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
           ),
-      ],
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: (detail.modifiable && canSubmit)
+            ? Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 48,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          ref
+                              .read(nouvelleCollecteWizardProvider.notifier)
+                              .loadFromDetail(detail, recap);
+                          context.push(RouteNames.agentNouvelleCollectePath);
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.textPrimary,
+                          side: BorderSide(
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.inputBorder,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'Modifier',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SizedBox(
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          try {
+                            final api = ref.read(agentApiServiceProvider);
+                            await api.soumettreCollecte(detail.id);
+                            ref.invalidate(
+                                agentCollecteDetailProvider(collecteId));
+                            ref.invalidate(
+                                agentCollecteRecapitulatifProvider(collecteId));
+                            ref.invalidate(agentCollectesListProvider);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Collecte soumise pour validation avec succès.',
+                                  ),
+                                  backgroundColor: AppColors.primary,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              final appError = ErrorHandler.handle(e);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(appError.message),
+                                  backgroundColor: AppColors.danger,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'Soumettre',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (detail.modifiable)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          ref
+                              .read(nouvelleCollecteWizardProvider.notifier)
+                              .loadFromDetail(detail, recap);
+                          context.push(RouteNames.agentNouvelleCollectePath);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Modifier la fiche de collecte',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (canSubmit)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          try {
+                            final api = ref.read(agentApiServiceProvider);
+                            await api.soumettreCollecte(detail.id);
+                            ref.invalidate(
+                                agentCollecteDetailProvider(collecteId));
+                            ref.invalidate(
+                                agentCollecteRecapitulatifProvider(collecteId));
+                            ref.invalidate(agentCollectesListProvider);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Collecte soumise pour validation avec succès.',
+                                  ),
+                                  backgroundColor: AppColors.primary,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              final appError = ErrorHandler.handle(e);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(appError.message),
+                                  backgroundColor: AppColors.danger,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Soumettre au comité de validation',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+      ),
     );
   }
 
@@ -935,47 +1270,192 @@ class AgentCollecteDetailPage extends ConsumerWidget {
 
   Widget _buildInfoRow({
     required bool isDark,
-    required IconData icon,
+    IconData? icon,
     required String label,
     required String value,
   }) {
-    return Row(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Icon(
-            icon,
-            size: 16,
-            color: AppColors.primary.withValues(alpha: 0.8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w600,
+            color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
           ),
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
-                  fontSize: 13.5,
-                  height: 1.4,
-                ),
-              ),
-            ],
+        const SizedBox(height: 2),
+        FormattedHtmlText(
+          value,
+          style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
+            fontSize: 13.5,
+            height: 1.4,
           ),
         ),
       ],
     );
+  }
+
+  Future<void> _handlePickAndUploadPhoto(
+    BuildContext context,
+    WidgetRef ref,
+    int collecteId,
+  ) async {
+    final picker = ImagePicker();
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Photo du spécimen',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+                title: const Text('Prendre une photo'),
+                onTap: () => Navigator.pop(ctx, ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined, color: AppColors.primary),
+                title: const Text('Choisir depuis la galerie'),
+                onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    try {
+      final picked = await picker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 1920,
+      );
+      if (picked == null) return;
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              ),
+              SizedBox(width: 12),
+              Text('Envoi de la photo en cours...'),
+            ],
+          ),
+          duration: Duration(seconds: 15),
+        ),
+      );
+
+      final api = ref.read(agentApiServiceProvider);
+      await api.uploadPhoto(collecteId: collecteId, file: File(picked.path));
+
+      ref.invalidate(agentCollecteDetailProvider(collecteId));
+      ref.invalidate(agentCollecteRecapitulatifProvider(collecteId));
+      ref.invalidate(agentCollectesListProvider);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Photo du spécimen enregistrée avec succès.'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        final appError = ErrorHandler.handle(e);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur envoi photo : ${appError.message}'),
+            backgroundColor: AppColors.danger,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handlePickAndUploadAudio(
+    BuildContext context,
+    WidgetRef ref,
+    int collecteId,
+  ) async {
+    try {
+      final result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['mp3', 'm4a', 'wav', 'aac', 'ogg'],
+      );
+      if (result.isEmpty || result.first.path == null) {
+        return;
+      }
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              ),
+              SizedBox(width: 12),
+              Text('Envoi de l\'enregistrement audio...'),
+            ],
+          ),
+          duration: Duration(seconds: 15),
+        ),
+      );
+
+      final api = ref.read(agentApiServiceProvider);
+      await api.uploadAudio(
+        collecteId: collecteId,
+        file: File(result.first.path!),
+      );
+
+      ref.invalidate(agentCollecteDetailProvider(collecteId));
+      ref.invalidate(agentCollecteRecapitulatifProvider(collecteId));
+      ref.invalidate(agentCollectesListProvider);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Témoignage audio enregistré avec succès.'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        final appError = ErrorHandler.handle(e);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur envoi audio : ${appError.message}'),
+            backgroundColor: AppColors.danger,
+          ),
+        );
+      }
+    }
   }
 }
 
@@ -992,3 +1472,71 @@ class _StatusStyle {
     required this.icon,
   });
 }
+
+class _ExpandableDescriptionText extends StatefulWidget {
+  final String text;
+  final bool isDark;
+
+  const _ExpandableDescriptionText({
+    required this.text,
+    required this.isDark,
+  });
+
+  @override
+  State<_ExpandableDescriptionText> createState() => _ExpandableDescriptionTextState();
+}
+
+class _ExpandableDescriptionTextState extends State<_ExpandableDescriptionText> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final plainText = FormattedHtmlText.stripHtml(widget.text);
+    final isLong = plainText.length > 200 || plainText.split('\n').length > 4;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FormattedHtmlText(
+          widget.text,
+          maxLines: _isExpanded ? null : 4,
+          overflow: _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+          style: (widget.isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
+            height: 1.5,
+            fontSize: 14,
+          ),
+        ),
+        if (isLong) ...[
+          const SizedBox(height: 6),
+          InkWell(
+            onTap: () => setState(() => _isExpanded = !_isExpanded),
+            borderRadius: BorderRadius.circular(4),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _isExpanded ? 'Voir moins' : 'Lire toute la description',
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    _isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+

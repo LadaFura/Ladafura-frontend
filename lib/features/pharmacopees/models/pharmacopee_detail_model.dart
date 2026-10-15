@@ -1,4 +1,5 @@
 import '../../../../core/services/location_service.dart';
+import '../../../../core/utils/image_utils.dart';
 
 /// Mode de retrait proposé par la pharmacopée (Livraison ou Pickup).
 /// Conforme au DTO backend `PopulationPharmacopeeModeRetraitDto.java`.
@@ -197,7 +198,7 @@ class PharmacopeeDetailModel {
       description: json['description']?.toString(),
       telephone: json['telephone']?.toString(),
       email: json['email']?.toString(),
-      photoUrl: json['photoUrl']?.toString(),
+      photoUrl: ImageUtils.resolveImageUrl(json['photoUrl']?.toString()),
       localisation: loc,
       modesRetrait: modes,
       nombreProduits: (json['nombreProduits'] as num?)?.toInt() ?? 0,

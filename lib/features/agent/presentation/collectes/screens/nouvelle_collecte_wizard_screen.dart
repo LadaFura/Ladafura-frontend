@@ -54,14 +54,17 @@ class _NouvelleCollecteWizardScreenState
           },
         ),
         title: Text(
-          'Nouvelle Collecte',
+          draft.collecteId != null
+              ? 'Modifier la Collecte #${draft.collecteId}'
+              : 'Nouvelle Collecte',
           style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
         actions: [
           // Bouton Sauvegarder Brouillon
-          TextButton.icon(
+          IconButton(
+            tooltip: 'Enregistrer le brouillon',
             onPressed: draft.isLoading
                 ? null
                 : () async {
@@ -75,8 +78,17 @@ class _NouvelleCollecteWizardScreenState
                       );
                     }
                   },
-            icon: const Icon(Icons.save_outlined, size: 18),
-            label: const Text('Brouillon'),
+            icon: draft.isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Icon(
+                    Icons.save_outlined,
+                    size: 22,
+                    color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                  ),
           ),
           const SizedBox(width: 8),
         ],
@@ -267,90 +279,151 @@ class _NouvelleCollecteWizardScreenState
                     color: isDark ? AppColors.darkBorder : AppColors.inputBorder,
                   ),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
                   if (draft.currentStep > 0) ...[
-                    OutlinedButton(
-                      onPressed: draft.isLoading
-                          ? null
-                          : () => notifier.setStep(draft.currentStep - 1),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppDimensions.radiusButton),
+                    Expanded(
+                      flex: 1,
+                      child: SizedBox(
+                        height: 48,
+                        child: OutlinedButton.icon(
+                          onPressed: draft.isLoading
+                              ? null
+                              : () => notifier.setStep(draft.currentStep - 1),
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            foregroundColor: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
+                            side: BorderSide(
+                              color: isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.inputBorder,
+                            ),
+                          ),
+                          icon: const Icon(Icons.arrow_back_rounded, size: 16),
+                          label: const FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              'Précédent',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
-                      child: const Text('Précédent'),
                     ),
-                    const SizedBox(width: AppDimensions.space12),
+                    const SizedBox(width: 10),
                   ],
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: (draft.isLoading ||
-                              !draft.isStepValid(draft.currentStep))
-                          ? null
-                          : () async {
-                              if (draft.currentStep < _stepTitles.length - 1) {
-                                notifier.setStep(draft.currentStep + 1);
-                              } else {
-                                final success = await notifier.soumettre();
-                                if (success && context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Fiche de collecte transmise avec succès pour validation !',
+                    flex: (draft.currentStep > 0 &&
+                            draft.currentStep == _stepTitles.length - 1)
+                        ? 2
+                        : 1,
+                    child: SizedBox(
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: (draft.isLoading ||
+                                !draft.isStepValid(draft.currentStep))
+                            ? null
+                            : () async {
+                                if (draft.currentStep < _stepTitles.length - 1) {
+                                  notifier.setStep(draft.currentStep + 1);
+                                } else {
+                                  final success = await notifier.soumettre();
+                                  if (success && context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Fiche de collecte transmise avec succès pour validation !',
+                                        ),
+                                        backgroundColor: Colors.green,
                                       ),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-                                  notifier.reset();
-                                  context.pop();
-                                } else if (!success && context.mounted) {
-                                  final err = ref
-                                          .read(nouvelleCollecteWizardProvider)
-                                          .errorMessage ??
-                                      'Impossible de soumettre la collecte.';
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(err),
-                                      backgroundColor: AppColors.danger,
-                                    ),
-                                  );
+                                    );
+                                    notifier.reset();
+                                    context.pop();
+                                  } else if (!success && context.mounted) {
+                                    final err = ref
+                                            .read(nouvelleCollecteWizardProvider)
+                                            .errorMessage ??
+                                        'Impossible de soumettre la collecte.';
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(err),
+                                        backgroundColor: AppColors.danger,
+                                      ),
+                                    );
+                                  }
                                 }
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: draft.currentStep == _stepTitles.length - 1
-                            ? Colors.green
-                            : AppColors.primary,
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: isDark
-                            ? AppColors.darkSurfaceVariant
-                            : Colors.grey.shade300,
-                        disabledForegroundColor: isDark
-                            ? AppColors.darkTextMuted
-                            : Colors.grey.shade600,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppDimensions.radiusButton),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: draft.isLoading
-                          ? const SizedBox(
-                              height: 18,
-                              width: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : Text(
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
                               draft.currentStep == _stepTitles.length - 1
-                                  ? 'Soumettre pour validation'
-                                  : 'Étape suivante',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                                  ? Colors.green
+                                  : AppColors.primary,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: isDark
+                              ? AppColors.darkSurfaceVariant
+                              : Colors.grey.shade300,
+                          disabledForegroundColor: isDark
+                              ? AppColors.darkTextMuted
+                              : Colors.grey.shade600,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: draft.isLoading
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Flexible(
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        draft.currentStep ==
+                                                _stepTitles.length - 1
+                                            ? 'Soumettre pour validation'
+                                            : (draft.currentStep == 0
+                                                ? 'Étape suivante'
+                                                : 'Suivant'),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  if (draft.currentStep <
+                                      _stepTitles.length - 1) ...[
+                                    const SizedBox(width: 6),
+                                    const Icon(
+                                      Icons.arrow_forward_rounded,
+                                      size: 16,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                      ),
                     ),
                   ),
                 ],

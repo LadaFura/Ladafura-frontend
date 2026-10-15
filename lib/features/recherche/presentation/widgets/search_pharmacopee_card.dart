@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_colors.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_dimensions.dart';
@@ -176,7 +177,7 @@ class SearchPharmacopeeCard extends StatelessWidget {
                               Icons.storefront_outlined,
                               size: 18,
                               color: isDark
-                                  ? AppColors.darkTextMuted
+                                  ? Colors.white70
                                   : const Color(0xFF616161),
                             ),
                             const SizedBox(width: 6),
@@ -185,7 +186,7 @@ class SearchPharmacopeeCard extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 13,
                                 color: isDark
-                                    ? AppColors.darkTextMuted
+                                    ? Colors.white70
                                     : const Color(0xFF616161),
                               ),
                             ),
@@ -216,7 +217,7 @@ class SearchPharmacopeeCard extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 13,
                                 color: isDark
-                                    ? AppColors.darkTextMuted
+                                    ? Colors.white70
                                     : const Color(0xFF757575),
                               ),
                             ),
@@ -236,11 +237,28 @@ class SearchPharmacopeeCard extends StatelessWidget {
 
   Widget _buildBannerImage() {
     final resolvedUrl = ImageUtils.resolveImageUrl(pharma.photoUrl);
-    if (resolvedUrl != null) {
-      return Image.network(
-        resolvedUrl,
+    if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
+      if (resolvedUrl.startsWith('assets/')) {
+        return Image.asset(
+          resolvedUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildFallbackAssetImage(),
+        );
+      }
+      return CachedNetworkImage(
+        imageUrl: resolvedUrl,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _buildFallbackAssetImage(),
+        placeholder: (_, __) => Container(
+          color: const Color(0xFFE8F5E9),
+          child: const Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+        ),
+        errorWidget: (_, __, ___) => _buildFallbackAssetImage(),
       );
     }
     return _buildFallbackAssetImage();

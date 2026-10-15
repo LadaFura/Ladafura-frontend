@@ -1,7 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/utils/image_utils.dart';
 import '../../models/commande_model.dart';
 
 /// Liste des articles d'une commande avec visuel, quantité, conditionnement et sous-total.
@@ -64,11 +66,13 @@ class CommandeDetailLignesList extends StatelessWidget {
                     width: 48,
                     height: 48,
                     child: ligne.photoUrl != null &&
-                            ligne.photoUrl!.startsWith('http')
-                        ? Image.network(
-                            ligne.photoUrl!,
+                            ligne.photoUrl!.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: ImageUtils.resolveImageUrl(ligne.photoUrl) ?? ligne.photoUrl!,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
+                            placeholder: (_, __) =>
+                                _buildProductIcon(primaryColor),
+                            errorWidget: (_, __, ___) =>
                                 _buildProductIcon(primaryColor),
                           )
                         : _buildProductIcon(primaryColor),

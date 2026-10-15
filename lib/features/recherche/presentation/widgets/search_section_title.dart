@@ -58,7 +58,7 @@ class SearchSectionTitle extends StatelessWidget {
               fontWeight: FontWeight.bold,
               color: isPriority
                   ? AppColors.primary
-                  : (isDark ? Colors.white70 : Colors.black87),
+                  : (isDark ? Colors.white : Colors.black87),
             ),
           ),
         ),

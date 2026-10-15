@@ -138,51 +138,6 @@ class _StepMaladiesSymptomesWidgetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // En-tête explicatif
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.medical_services_outlined,
-                color: AppColors.primary,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: AppDimensions.space12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Maladies & Symptômes ciblés',
-                    style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                        .copyWith(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Associez une ou plusieurs affections traitées traditionnellement.',
-                    style: (isDark
-                            ? AppTextStyles.captionDark
-                            : AppTextStyles.caption)
-                        .copyWith(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: AppDimensions.space16),
-
         // Avertissement déontologique
         Container(
           padding: const EdgeInsets.all(AppDimensions.space12),

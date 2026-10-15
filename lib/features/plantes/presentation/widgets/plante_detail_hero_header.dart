@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/utils/image_utils.dart';
+import '../../../../shared/widgets/formatted_html_text.dart';
 import '../../models/plante_model.dart';
 
 /// En-tête Hero immersif pour la page détail de la plante médicinale.
@@ -19,6 +21,7 @@ class PlanteDetailHeroHeader extends StatelessWidget {
   final VoidCallback? onFavorite;
   final bool isFavorite;
   final bool showTopActions;
+  final bool showDescription;
 
   const PlanteDetailHeroHeader({
     super.key,
@@ -28,6 +31,7 @@ class PlanteDetailHeroHeader extends StatelessWidget {
     this.onFavorite,
     this.isFavorite = false,
     this.showTopActions = false,
+    this.showDescription = false,
   });
 
   @override
@@ -58,13 +62,22 @@ class PlanteDetailHeroHeader extends StatelessWidget {
               child: ClipRRect(
                 borderRadius:
                     BorderRadius.circular(AppDimensions.radiusCard * 1.5),
-                child: resolvedUrl != null
-                    ? Image.network(
-                        resolvedUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            _buildPlaceholderImage(isDark),
-                      )
+                child: (resolvedUrl != null && resolvedUrl.isNotEmpty)
+                    ? (resolvedUrl.startsWith('assets/')
+                        ? Image.asset(
+                            resolvedUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                _buildPlaceholderImage(isDark),
+                          )
+                        : CachedNetworkImage(
+                            imageUrl: resolvedUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) =>
+                                _buildPlaceholderImage(isDark),
+                            errorWidget: (_, __, ___) =>
+                                _buildPlaceholderImage(isDark),
+                          ))
                     : _buildPlaceholderImage(isDark),
               ),
             ),
@@ -218,15 +231,12 @@ class PlanteDetailHeroHeader extends StatelessWidget {
           ),
         ],
 
-        // Description botanique
-        if (plante.description.isNotEmpty) ...[
+        // Description botanique avec toggle Voir plus / Voir moins (si activé)
+        if (showDescription && plante.description.isNotEmpty) ...[
           const SizedBox(height: AppDimensions.space12),
-          Text(
-            plante.description,
-            style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body).copyWith(
-              fontSize: 14.5,
-              height: 1.5,
-            ),
+          _ExpandableBotanicalDescription(
+            text: plante.description,
+            isDark: isDark,
           ),
         ],
       ],
@@ -277,6 +287,97 @@ class PlanteDetailHeroHeader extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Widget affichant un résumé botanique pliable / dépliable
+class _ExpandableBotanicalDescription extends StatefulWidget {
+  final String text;
+  final bool isDark;
+
+  const _ExpandableBotanicalDescription({
+    required this.text,
+    required this.isDark,
+  });
+
+  @override
+  State<_ExpandableBotanicalDescription> createState() =>
+      _ExpandableBotanicalDescriptionState();
+}
+
+class _ExpandableBotanicalDescriptionState
+    extends State<_ExpandableBotanicalDescription> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = (widget.isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
+        .copyWith(
+      fontSize: 14.5,
+      height: 1.55,
+    );
+
+    // Si le texte fait moins de 120 caractères, pas besoin de replier
+    final bool canExpand =
+        FormattedHtmlText.stripHtml(widget.text).trim().length > 120;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AnimatedSize(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          alignment: Alignment.topLeft,
+          child: FormattedHtmlText(
+            widget.text,
+            style: style,
+            maxLines: (_isExpanded || !canExpand) ? null : 3,
+            overflow: (_isExpanded || !canExpand)
+                ? TextOverflow.visible
+                : TextOverflow.ellipsis,
+          ),
+        ),
+        if (canExpand) ...[
+          const SizedBox(height: 6),
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            borderRadius: BorderRadius.circular(6),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _isExpanded ? 'Voir moins' : 'Lire la suite',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                      color: widget.isDark
+                          ? AppColors.accent
+                          : AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    _isExpanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    size: 18,
+                    color: widget.isDark
+                        ? AppColors.accent
+                        : AppColors.primary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

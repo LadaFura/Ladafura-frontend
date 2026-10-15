@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -26,110 +27,74 @@ class PlanteProduitsAssociesWidget extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final produitsAsync = ref.watch(produitsByPlanteProvider(planteId));
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // En-tête de section (Design moderne et épuré)
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Produits & Formulations Associés',
-              style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
-                  .copyWith(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              'Remèdes traditionnels préparés contenant cette plante',
-              style: (isDark
-                      ? AppTextStyles.captionDark
-                      : AppTextStyles.caption)
-                  .copyWith(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
+    return produitsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (produits) {
+        if (produits.isEmpty) {
+          return const SizedBox.shrink();
+        }
 
-        const SizedBox(height: AppDimensions.space12),
-
-        produitsAsync.when(
-          loading: () => Container(
-            height: 120,
-            alignment: Alignment.center,
-            child: const CircularProgressIndicator(strokeWidth: 2.5),
-          ),
-          error: (err, _) => Container(
-            padding: const EdgeInsets.all(AppDimensions.space16),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurface : Colors.white,
-              borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-              border: Border.all(
-                color: isDark ? AppColors.darkBorder : AppColors.border,
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.info_outline_rounded,
-                    color: AppColors.textMuted, size: 20),
-                const SizedBox(width: AppDimensions.space8),
-                Expanded(
-                  child: Text(
-                    'Informations sur les produits momentanément indisponibles.',
-                    style: isDark
-                        ? AppTextStyles.captionDark
-                        : AppTextStyles.caption,
-                  ),
+        return Container(
+          padding: const EdgeInsets.all(AppDimensions.space16),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkSurface : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              if (!isDark)
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.035),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
                 ),
-              ],
-            ),
+            ],
           ),
-          data: (produits) {
-            if (produits.isEmpty) {
-              return Container(
-                padding: const EdgeInsets.all(AppDimensions.space16),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurface : Colors.white,
-                  borderRadius:
-                      BorderRadius.circular(AppDimensions.radiusCard),
-                  border: Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.border,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(7),
+                    ),
+                    child: const Icon(Icons.inventory_2_outlined,
+                        size: 14, color: AppColors.primary),
                   ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.inventory_2_outlined,
-                        color: AppColors.textMuted, size: 20),
-                    const SizedBox(width: AppDimensions.space8),
-                    Expanded(
-                      child: Text(
-                        'Aucun produit commercialisé actuellement répertorié pour cette plante.',
-                        style: isDark
-                            ? AppTextStyles.captionDark
-                            : AppTextStyles.caption,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Produits & Formulations Associés',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
                       ),
                     ),
-                  ],
-                ),
-              );
-            }
-
-            return ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: produits.length,
-              separatorBuilder: (_, __) =>
-                  const SizedBox(height: AppDimensions.space12),
-              itemBuilder: (context, index) {
-                final prod = produits[index];
-                return _buildProduitCard(context, prod, isDark);
-              },
-            );
-          },
-        ),
-      ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: produits.length,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: AppDimensions.space12),
+                itemBuilder: (context, index) {
+                  final prod = produits[index];
+                  return _buildProduitCard(context, prod, isDark);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -188,11 +153,21 @@ class PlanteProduitsAssociesWidget extends ConsumerWidget {
                 color: isDark
                     ? AppColors.darkSurfaceVariant
                     : AppColors.surfaceVariant,
-                child: photoUrl != null
-                    ? Image.network(
-                        photoUrl,
+                child: photoUrl != null && photoUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: photoUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Icon(
+                        placeholder: (_, __) => Container(
+                          color: isDark ? AppColors.darkSurfaceVariant : Colors.grey.shade100,
+                          child: const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (_, __, ___) => Icon(
                           Icons.medication_outlined,
                           color:
                               isDark ? AppColors.darkPrimary : AppColors.primary,

@@ -38,6 +38,10 @@ class SearchBarInput extends StatelessWidget {
         onChanged: onChanged,
         textInputAction: TextInputAction.search,
         textAlignVertical: TextAlignVertical.center,
+        style: TextStyle(
+          color: isDark ? Colors.white : AppColors.textPrimary,
+          fontSize: 15,
+        ),
         onSubmitted: (val) {
           if (val.trim().isNotEmpty) {
             onSubmitted(val.trim());
@@ -51,9 +55,9 @@ class SearchBarInput extends StatelessWidget {
           ),
           prefixIcon: IconButton(
             focusNode: FocusNode(skipTraversal: true, canRequestFocus: false),
-            icon: const Icon(
-              Icons.arrow_back,
-              color: Color(0xFF2E3830),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: isDark ? Colors.white : AppColors.textPrimary,
               size: 20,
             ),
             onPressed: () {
@@ -78,8 +82,8 @@ class SearchBarInput extends StatelessWidget {
                     FocusNode(skipTraversal: true, canRequestFocus: false),
                 icon: Container(
                   padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF1E3A2F),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white.withAlpha(50) : const Color(0xFF1E3A2F),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(

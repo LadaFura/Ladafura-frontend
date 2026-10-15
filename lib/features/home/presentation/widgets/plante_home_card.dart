@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_colors.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_dimensions.dart';
@@ -174,13 +175,32 @@ class PlanteHomeCard extends StatelessWidget {
 
   Widget _buildImage(bool isDark) {
     final resolved = ImageUtils.resolveImageUrl(plante.photoUrl);
-    if (resolved != null) {
-      return Image.network(
-        resolved,
+    if (resolved != null && resolved.isNotEmpty) {
+      if (resolved.startsWith('assets/')) {
+        return Image.asset(
+          resolved,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildFallbackGradient(isDark),
+        );
+      }
+      return CachedNetworkImage(
+        imageUrl: resolved,
         width: double.infinity,
         height: double.infinity,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _buildFallbackGradient(isDark),
+        placeholder: (_, __) => Container(
+          color: isDark ? AppColors.darkSurfaceVariant : AppColors.surfaceVariant,
+          child: const Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+        ),
+        errorWidget: (_, __, ___) => _buildFallbackGradient(isDark),
       );
     }
     return _buildFallbackGradient(isDark);

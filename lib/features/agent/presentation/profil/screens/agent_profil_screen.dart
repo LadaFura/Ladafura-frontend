@@ -143,7 +143,7 @@ class AgentProfilScreen extends ConsumerWidget {
                     TextField(
                       controller: zoneCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Zone de couverture terrain',
+                        labelText: 'Zone de couverture',
                         hintText: 'Ex: Région de Sikasso - Cercle de Koutiala',
                         prefixIcon: Icon(Icons.map_outlined),
                       ),
@@ -234,6 +234,7 @@ class AgentProfilScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
         elevation: 0.5,
         title: Text(
@@ -242,16 +243,6 @@ class AgentProfilScreen extends ConsumerWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          IconButton(
-            tooltip: 'Actualiser',
-            icon: Icon(
-              Icons.refresh_rounded,
-              color: isDark ? Colors.white : AppColors.primary,
-            ),
-            onPressed: () => ref.invalidate(agentProfileProvider),
-          ),
-        ],
       ),
       body: SafeArea(
         child: RefreshIndicator(
@@ -372,7 +363,7 @@ class AgentProfilScreen extends ConsumerWidget {
                                                 BorderRadius.circular(6),
                                           ),
                                           child: const Text(
-                                            'AGENT TERRAIN',
+                                            'AGENT DE COLLECTE',
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 10,
@@ -425,18 +416,6 @@ class AgentProfilScreen extends ConsumerWidget {
                                   ],
                                 ),
                               ),
-                              IconButton(
-                                tooltip: 'Modifier mes coordonnées',
-                                onPressed: () => _showEditProfileSheet(
-                                  context,
-                                  ref,
-                                  profile,
-                                ),
-                                icon: const Icon(
-                                  Icons.edit_outlined,
-                                  color: Colors.white,
-                                ),
-                              ),
                             ],
                           ),
                           const SizedBox(height: 16),
@@ -486,12 +465,6 @@ class AgentProfilScreen extends ConsumerWidget {
                       ),
                       children: [
                         _InfoRow(
-                          icon: Icons.badge_outlined,
-                          label: 'Matricule agent',
-                          value: profile.matricule,
-                          isDark: isDark,
-                        ),
-                        _InfoRow(
                           icon: Icons.map_outlined,
                           label: 'Zone de couverture',
                           value: profile.zoneCouverture.isNotEmpty
@@ -509,12 +482,6 @@ class AgentProfilScreen extends ConsumerWidget {
                           isDark: isDark,
                         ),
                         _InfoRow(
-                          icon: Icons.email_outlined,
-                          label: 'E-mail professionnel',
-                          value: profile.email,
-                          isDark: isDark,
-                        ),
-                        _InfoRow(
                           icon: Icons.calendar_today_outlined,
                           label: 'Membre depuis',
                           value: _formatDate(profile.dateCreation),
@@ -526,35 +493,18 @@ class AgentProfilScreen extends ConsumerWidget {
 
                     const SizedBox(height: AppDimensions.space20),
 
-                    // 3. Accès rapide Terrain
+                    // 3. Répertoire des sources
                     _SectionContainer(
-                      title: 'Activités de terrain',
+                      title: 'Activités',
                       isDark: isDark,
                       children: [
                         _ActionTile(
-                          icon: Icons.folder_open_rounded,
-                          title: 'Mes fiches de collecte',
-                          subtitle:
-                              '${profile.nombreTotalCollectes} collecte(s) enregistrée(s)',
-                          isDark: isDark,
-                          onTap: () =>
-                              context.go(RouteNames.agentCollectesPath),
-                        ),
-                        _ActionTile(
                           icon: Icons.people_outline_rounded,
                           title: 'Informateurs & Tradipraticiens',
-                          subtitle: 'Répertoire des sources de terrain',
-                          isDark: isDark,
-                          onTap: () => context.push(RouteNames.agentSourcesPath),
-                        ),
-                        _ActionTile(
-                          icon: Icons.notifications_none_rounded,
-                          title: 'Centre de notifications',
-                          subtitle: 'Alertes de validation et retours comité',
+                          subtitle: 'Répertoire des sources',
                           isDark: isDark,
                           showDivider: false,
-                          onTap: () =>
-                              context.go(RouteNames.agentNotificationsPath),
+                          onTap: () => context.push(RouteNames.agentSourcesPath),
                         ),
                       ],
                     ),

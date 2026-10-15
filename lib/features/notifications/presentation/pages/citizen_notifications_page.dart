@@ -19,6 +19,7 @@ class CitizenNotificationsPage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : const Color(0xFFF8F9FA),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           'Notifications',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
