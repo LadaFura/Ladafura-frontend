@@ -19,13 +19,14 @@ class ApiEndpoints {
 
   /// Adresse IPv4 de la machine de développement sur le réseau Wi-Fi local.
   /// Peut être remplacée au lancement avec --dart-define=API_HOST=<adresse>.
-  static const String devMachineIp = '192.168.10.164';
+  static const String devMachineIp = 'https://ladafura-bakcend.onrender.com';
 
   /// Hôte par défaut pour simulateur iOS et Web
-  static const String defaultHost = 'http://localhost:8080';
+  static const String defaultHost = 'https://ladafura-bakcend.onrender.com';
 
   /// Hôte pour émulateur Android
-  static const String androidEmulatorHost = 'http://10.0.2.2:8080';
+  static const String androidEmulatorHost =
+      'https://ladafura-bakcend.onrender.com';
 
   /// Préfixe global des routes REST version 1
   static const String apiVersion = '/api/v1';
