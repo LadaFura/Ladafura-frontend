@@ -13,17 +13,7 @@ class ImageUtils {
   /// - `uploads/plantes/abc.png` => `http://192.168.10.18:8080/uploads/plantes/abc.png`
   static String? resolveImageUrl(String? url) {
     if (url == null) return null;
-    final trimmed = url.trim();
-    if (trimmed.isEmpty) return null;
-
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-      return trimmed;
-    }
-
-    final host = ApiEndpoints.resolvedHost;
-    if (trimmed.startsWith('/')) {
-      return '$host$trimmed';
-    }
-    return '$host/$trimmed';
+    final res = ApiEndpoints.resolveMediaUrl(url);
+    return res.isEmpty ? null : res;
   }
 }

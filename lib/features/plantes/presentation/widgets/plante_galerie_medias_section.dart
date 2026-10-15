@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
@@ -79,11 +80,21 @@ class PlanteGalerieMediasSection extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      if (resolvedUrl != null)
-                        Image.network(
-                          resolvedUrl,
+                      if (resolvedUrl != null && resolvedUrl.isNotEmpty)
+                        CachedNetworkImage(
+                          imageUrl: resolvedUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Center(
+                          placeholder: (_, __) => Container(
+                            color: isDark ? AppColors.darkSurfaceVariant : Colors.grey.shade100,
+                            child: const Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                              ),
+                            ),
+                          ),
+                          errorWidget: (_, __, ___) => const Center(
                             child: Icon(Icons.image_not_supported_rounded,
                                 color: AppColors.textMuted),
                           ),

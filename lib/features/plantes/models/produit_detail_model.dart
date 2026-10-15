@@ -1,3 +1,5 @@
+import '../../../core/utils/image_utils.dart';
+
 /// DTO pour une plante entrant dans la composition d'un produit.
 /// Conforme à `PopulationCompositionItemDto.java`.
 class CompositionItemModel {
@@ -27,7 +29,7 @@ class CompositionItemModel {
           const [],
       quantite: (json['quantite'] as num?)?.toDouble() ?? 0.0,
       unite: json['unite']?.toString() ?? '',
-      photoUrl: json['photoUrl']?.toString(),
+      photoUrl: ImageUtils.resolveImageUrl(json['photoUrl']?.toString()),
     );
   }
 
@@ -173,7 +175,7 @@ class ProduitDetailModel {
       forme: json['forme']?.toString(),
       compositionTexte: json['compositionTexte']?.toString(),
       prixIndicatif: (json['prixIndicatif'] as num?)?.toDouble() ?? 0.0,
-      photoUrl: json['photoUrl']?.toString(),
+      photoUrl: ImageUtils.resolveImageUrl(json['photoUrl']?.toString()),
       categorieId: (json['categorieId'] as num?)?.toInt(),
       categorieNom: json['categorieNom']?.toString() ?? 'Phytothérapie',
       noteMoyenne: (json['noteMoyenne'] as num?)?.toDouble() ?? 0.0,

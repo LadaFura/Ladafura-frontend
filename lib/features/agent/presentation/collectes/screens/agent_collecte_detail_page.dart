@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -456,10 +457,20 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                 SizedBox(
                   height: 210,
                   width: double.infinity,
-                  child: Image.network(
-                    ApiEndpoints.resolveMediaUrl(detail.photoUrl),
+                  child: CachedNetworkImage(
+                    imageUrl: ApiEndpoints.resolveMediaUrl(detail.photoUrl),
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    placeholder: (_, __) => Container(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      child: const Center(
+                        child: SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                        ),
+                      ),
+                    ),
+                    errorWidget: (_, __, ___) => Container(
                       color: AppColors.primary.withValues(alpha: 0.08),
                       child: const Center(
                         child: Icon(

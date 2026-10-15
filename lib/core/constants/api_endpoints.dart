@@ -63,20 +63,40 @@ class ApiEndpoints {
     final trimmed = rawUrl.trim();
     if (trimmed.isEmpty) return '';
 
+    if (trimmed.startsWith('assets/')) {
+      return trimmed;
+    }
+
     final host = baseUrl.endsWith(apiVersion)
         ? baseUrl.substring(0, baseUrl.length - apiVersion.length)
         : resolvedHost;
 
+    // 1. Si l'URL contient un chemin d'upload (/uploads/...), on normalise avec le host courant
+    final uploadsIndex = trimmed.indexOf('/uploads/');
+    if (uploadsIndex != -1) {
+      return '$host${trimmed.substring(uploadsIndex)}';
+    }
+    if (trimmed.startsWith('uploads/')) {
+      return '$host/$trimmed';
+    }
+
+    // 2. Si l'URL commence par localhost / 127.0.0.1 / 10.0.2.2
+    if (trimmed.startsWith('http://localhost:8080')) {
+      return '$host${trimmed.substring('http://localhost:8080'.length)}';
+    }
+    if (trimmed.startsWith('http://127.0.0.1:8080')) {
+      return '$host${trimmed.substring('http://127.0.0.1:8080'.length)}';
+    }
+    if (trimmed.startsWith('http://10.0.2.2:8080')) {
+      return '$host${trimmed.substring('http://10.0.2.2:8080'.length)}';
+    }
+
+    // 3. URLs distantes absolues (CDN, Firebase, Unsplash, etc.)
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-      if (trimmed.startsWith('http://localhost:8080')) {
-        return '$host${trimmed.substring('http://localhost:8080'.length)}';
-      }
-      if (trimmed.startsWith('http://127.0.0.1:8080')) {
-        return '$host${trimmed.substring('http://127.0.0.1:8080'.length)}';
-      }
       return trimmed;
     }
 
+    // 4. Chemins relatifs
     if (trimmed.startsWith('/')) {
       return '$host$trimmed';
     }

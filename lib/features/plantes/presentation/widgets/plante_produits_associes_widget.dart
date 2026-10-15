@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -152,11 +153,21 @@ class PlanteProduitsAssociesWidget extends ConsumerWidget {
                 color: isDark
                     ? AppColors.darkSurfaceVariant
                     : AppColors.surfaceVariant,
-                child: photoUrl != null
-                    ? Image.network(
-                        photoUrl,
+                child: photoUrl != null && photoUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: photoUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Icon(
+                        placeholder: (_, __) => Container(
+                          color: isDark ? AppColors.darkSurfaceVariant : Colors.grey.shade100,
+                          child: const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (_, __, ___) => Icon(
                           Icons.medication_outlined,
                           color:
                               isDark ? AppColors.darkPrimary : AppColors.primary,

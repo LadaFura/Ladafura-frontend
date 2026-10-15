@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
@@ -43,13 +44,23 @@ class PanierItemCard extends StatelessWidget {
               width: 86,
               height: 86,
               color: isDark ? const Color(0xFF1E3A2F) : const Color(0xFFF1F8F4),
-              child: resolvedUrl != null
-                  ? Image.network(
-                      resolvedUrl,
+              child: resolvedUrl != null && resolvedUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: resolvedUrl,
                       width: double.infinity,
                       height: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
+                      placeholder: (_, __) => Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: primaryColor,
+                          ),
+                        ),
+                      ),
+                      errorWidget: (_, __, ___) =>
                           _buildFallbackThumbnail(isDark, primaryColor),
                     )
                   : _buildFallbackThumbnail(isDark, primaryColor),

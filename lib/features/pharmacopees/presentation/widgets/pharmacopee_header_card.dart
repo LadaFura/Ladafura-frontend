@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
@@ -196,11 +197,21 @@ class PharmacopeeHeaderCard extends StatelessWidget {
 
   Widget _buildBannerImage(bool isDark) {
     final resolvedUrl = ImageUtils.resolveImageUrl(pharmacopee.photoUrl);
-    if (resolvedUrl != null) {
-      return Image.network(
-        resolvedUrl,
+    if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: resolvedUrl,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _buildFallbackImage(isDark),
+        placeholder: (_, __) => Container(
+          color: isDark ? const Color(0xFF1E3A2F) : const Color(0xFFE8F5E9),
+          child: const Center(
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+            ),
+          ),
+        ),
+        errorWidget: (_, __, ___) => _buildFallbackImage(isDark),
       );
     }
     return _buildFallbackImage(isDark);

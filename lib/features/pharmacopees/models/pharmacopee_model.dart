@@ -1,4 +1,5 @@
 import '../../../../core/services/location_service.dart';
+import '../../../../core/utils/image_utils.dart';
 
 /// Modèle synthétique d'une pharmacopée traditionnelle agréée LADAFURA.
 ///
@@ -91,7 +92,7 @@ class PharmacopeeModel {
       nombreProduits: (json['nombreProduits'] as num?)?.toInt() ?? 0,
       noteMoyenne: (json['noteMoyenne'] as num?)?.toDouble() ?? 4.5,
       nombreAvis: (json['nombreAvis'] as num?)?.toInt() ?? 100,
-      photoUrl: json['photoUrl']?.toString(),
+      photoUrl: ImageUtils.resolveImageUrl(json['photoUrl']?.toString()),
       motifCorrespondance: json['motifCorrespondance']?.toString(),
       produitsDisponibles: (json['produitsDisponibles'] as List<dynamic>?)
               ?.map((e) => e.toString())

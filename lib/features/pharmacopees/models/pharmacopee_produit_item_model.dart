@@ -1,3 +1,4 @@
+import '../../../core/utils/image_utils.dart';
 import '../../plantes/models/produit_model.dart';
 
 /// Produit proposé par une pharmacopée avec son prix de vente et son stock disponible.
@@ -84,7 +85,7 @@ class PharmacopeeProduitItemModel {
       prix: (json['prix'] as num?)?.toDouble() ??
           (json['prixIndicatif'] as num?)?.toDouble() ??
           0.0,
-      photoUrl: json['photoUrl']?.toString(),
+      photoUrl: ImageUtils.resolveImageUrl(json['photoUrl']?.toString()),
       categorieId: (json['categorieId'] as num?)?.toInt(),
       categorieNom: json['categorieNom']?.toString() ?? 'Phytothérapie',
       disponible: json['disponible'] as bool? ?? (json['quantiteStock'] != null && (json['quantiteStock'] as num) > 0),

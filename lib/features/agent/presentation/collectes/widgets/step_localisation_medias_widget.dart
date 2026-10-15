@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:ladafura_frontend_flutter/core/utils/image_utils.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_colors.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_dimensions.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_text_styles.dart';
@@ -384,12 +386,23 @@ class _StepLocalisationMediasWidgetState
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-                  child: Image.network(
-                    draft.existingPhotoUrl!,
+                  child: CachedNetworkImage(
+                    imageUrl: ImageUtils.resolveImageUrl(draft.existingPhotoUrl) ?? draft.existingPhotoUrl!,
                     height: 180,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    placeholder: (_, __) => Container(
+                      height: 180,
+                      color: Colors.grey.shade100,
+                      child: const Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                        ),
+                      ),
+                    ),
+                    errorWidget: (_, __, ___) => Container(
                       height: 120,
                       color: Colors.grey.shade200,
                       child: const Center(child: Icon(Icons.broken_image_rounded)),

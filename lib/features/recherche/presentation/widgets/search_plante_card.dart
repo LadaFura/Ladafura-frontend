@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_colors.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_dimensions.dart';
@@ -145,11 +146,30 @@ class SearchPlanteCard extends StatelessWidget {
 
   Widget _buildPlanteImage() {
     final resolvedUrl = ImageUtils.resolveImageUrl(plante.photoUrl);
-    if (resolvedUrl != null) {
-      return Image.network(
-        resolvedUrl,
+    if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
+      if (resolvedUrl.startsWith('assets/')) {
+        return Image.asset(
+          resolvedUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildFallbackIcon(),
+        );
+      }
+      return CachedNetworkImage(
+        imageUrl: resolvedUrl,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _buildFallbackIcon(),
+        placeholder: (_, __) => Container(
+          color: isDark
+              ? AppColors.darkPrimaryContainer
+              : AppColors.primaryLight,
+          child: const Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+        ),
+        errorWidget: (_, __, ___) => _buildFallbackIcon(),
       );
     }
     return _buildFallbackIcon();

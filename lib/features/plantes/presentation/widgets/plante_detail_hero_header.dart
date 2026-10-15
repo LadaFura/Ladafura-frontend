@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
@@ -61,13 +62,22 @@ class PlanteDetailHeroHeader extends StatelessWidget {
               child: ClipRRect(
                 borderRadius:
                     BorderRadius.circular(AppDimensions.radiusCard * 1.5),
-                child: resolvedUrl != null
-                    ? Image.network(
-                        resolvedUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            _buildPlaceholderImage(isDark),
-                      )
+                child: (resolvedUrl != null && resolvedUrl.isNotEmpty)
+                    ? (resolvedUrl.startsWith('assets/')
+                        ? Image.asset(
+                            resolvedUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                _buildPlaceholderImage(isDark),
+                          )
+                        : CachedNetworkImage(
+                            imageUrl: resolvedUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) =>
+                                _buildPlaceholderImage(isDark),
+                            errorWidget: (_, __, ___) =>
+                                _buildPlaceholderImage(isDark),
+                          ))
                     : _buildPlaceholderImage(isDark),
               ),
             ),

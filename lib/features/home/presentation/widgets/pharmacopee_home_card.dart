@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_colors.dart';
 import 'package:ladafura_frontend_flutter/core/constants/app_dimensions.dart';
@@ -184,11 +185,28 @@ class PharmacopeeHomeCard extends StatelessWidget {
 
   Widget _buildImage(bool isDark) {
     final resolved = ImageUtils.resolveImageUrl(pharmacopee.photoUrl);
-    if (resolved != null) {
-      return Image.network(
-        resolved,
+    if (resolved != null && resolved.isNotEmpty) {
+      if (resolved.startsWith('assets/')) {
+        return Image.asset(
+          resolved,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildFallbackAssetImage(isDark),
+        );
+      }
+      return CachedNetworkImage(
+        imageUrl: resolved,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _buildFallbackAssetImage(isDark),
+        placeholder: (_, __) => Container(
+          color: isDark ? const Color(0xFF142B20) : const Color(0xFFE8F5E9),
+          child: const Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+        ),
+        errorWidget: (_, __, ___) => _buildFallbackAssetImage(isDark),
       );
     }
     return _buildFallbackAssetImage(isDark);

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
@@ -90,11 +91,21 @@ class PlanteHeaderCard extends StatelessWidget {
 
   Widget _buildHeaderImage(bool isDark) {
     final resolvedUrl = ImageUtils.resolveImageUrl(plante.photoUrl);
-    if (resolvedUrl != null) {
-      return Image.network(
-        resolvedUrl,
+    if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: resolvedUrl,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _buildPlaceholder(isDark),
+        placeholder: (_, __) => Container(
+          color: isDark ? AppColors.darkSurfaceVariant : Colors.grey.shade100,
+          child: const Center(
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+            ),
+          ),
+        ),
+        errorWidget: (_, __, ___) => _buildPlaceholder(isDark),
       );
     }
     return _buildPlaceholder(isDark);

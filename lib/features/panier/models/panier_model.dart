@@ -1,3 +1,5 @@
+import '../../../core/utils/image_utils.dart';
+
 /// Modèle d'une ligne individuelle du panier d'achat.
 ///
 /// Conforme au DTO backend `PopulationLignePanierResponse.java`.
@@ -50,7 +52,7 @@ class LignePanierModel {
       produitId: (json['produitId'] as num?)?.toInt() ?? 0,
       nomProduit: json['nomProduit']?.toString() ?? 'Produit',
       forme: json['forme']?.toString(),
-      photoUrl: json['photoUrl']?.toString(),
+      photoUrl: ImageUtils.resolveImageUrl(json['photoUrl']?.toString()),
       prixUnitaire: (json['prixUnitaire'] as num?)?.toDouble() ?? 0.0,
       quantite: (json['quantite'] as num?)?.toInt() ?? 1,
       sousTotal: (json['sousTotal'] as num?)?.toDouble() ?? 0.0,
