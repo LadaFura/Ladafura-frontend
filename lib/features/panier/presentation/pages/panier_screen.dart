@@ -168,7 +168,7 @@ class _PanierScreenState extends ConsumerState<PanierScreen> {
         actions: [
           if (!panierState.estVide)
             IconButton(
-              icon: const Icon(Icons.delete_sweep_outlined),
+              icon: const Icon(Icons.delete_outline_rounded),
               tooltip: 'Vider le panier',
               onPressed: () => _confirmViderPanier(context, notifier),
             ),
@@ -278,26 +278,7 @@ class _PanierScreenState extends ConsumerState<PanierScreen> {
 
     return Column(
       children: [
-        // En-tête informatif du panier
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          color: isDark ? AppColors.darkSurface : Colors.grey[100],
-          child: Row(
-            children: [
-              Icon(Icons.info_outline, size: 16, color: primaryColor),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '${panierState.nombreArticles} article(s) dans votre panier',
-                  style: (isDark
-                          ? AppTextStyles.captionDark
-                          : AppTextStyles.caption)
-                      .copyWith(fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        ),
+        // Liste des articles avec séparateurs fins
 
         // Liste des articles avec séparateurs fins
         Expanded(
@@ -343,7 +324,7 @@ class _PanierScreenState extends ConsumerState<PanierScreen> {
           'Êtes-vous sûr de vouloir supprimer tous les articles présents dans votre panier ?',
       confirmLabel: 'Vider le panier',
       cancelLabel: 'Annuler',
-      icon: Icons.delete_sweep_outlined,
+      icon: Icons.delete_outline_rounded,
       isDestructive: true,
       onConfirm: () {
         notifier.vider();
