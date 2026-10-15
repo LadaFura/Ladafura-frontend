@@ -14,12 +14,7 @@ import 'connexion_requise_dialog.dart';
 
 /// Modal / BottomSheet moderne de consultation détaillée d'un remède traditionnel.
 /// Respecte scrupuleusement la séparation : Plante != Produit.
-/// Affiche :
-/// - Photo et informations générales
-/// - Forme galénique & Composition textuelle
-/// - Plantes associées dans la formulation (avec quantités)
-/// - Maladies et troubles ciblés
-/// - Sélecteur de quantité & Bouton d'ajout au panier direct
+/// Présentation ergonomique, moderne et attractive inspirée des fiches produits de référence.
 class ProduitDetailModal extends ConsumerStatefulWidget {
   final PharmacopeeProduitItemModel produitItem;
   final int? pharmacopeeId;
@@ -42,6 +37,7 @@ class ProduitDetailModal extends ConsumerStatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black54,
       builder: (ctx) => ProduitDetailModal(
         produitItem: produit,
         pharmacopeeId: pharmacopeeId,
@@ -66,38 +62,75 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
     _selectedPharmacopeeNom = widget.nomPharmacopee;
   }
 
+  String _formatNumber(num value) {
+    final intValue = value.round();
+    return intValue.toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]} ',
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final detailAsync =
         ref.watch(produitDetailProvider(widget.produitItem.produitId));
+    final double prixUnitaire = widget.produitItem.prix;
+    final double totalPrix = prixUnitaire * _quantite;
 
     return DraggableScrollableSheet(
-      initialChildSize: 0.85,
+      initialChildSize: 0.88,
       minChildSize: 0.5,
       maxChildSize: 0.95,
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: isDark ? AppColors.darkSurface : Colors.white,
+            color: isDark ? const Color(0xFF131F17) : Colors.white,
             borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppDimensions.radiusModal),
+              top: Radius.circular(24),
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 20,
+                offset: const Offset(0, -6),
+              ),
+            ],
           ),
           child: Column(
             children: [
-              // Poignée de glissement
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                width: 48,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white24 : Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(10),
+              // 1. En-tête avec barre de glissement & bouton de fermeture rapide
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 12, 4),
+                child: Row(
+                  children: [
+                    const SizedBox(width: 32),
+                    Expanded(
+                      child: Center(
+                        child: Container(
+                          width: 44,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.white24 : Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: isDark ? Colors.white60 : Colors.grey.shade600,
+                        size: 22,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      tooltip: 'Fermer',
+                    ),
+                  ],
                 ),
               ),
 
-              // Contenu défilable
+              // 2. Contenu défilable
               Expanded(
                 child: ListView(
                   controller: scrollController,
@@ -105,473 +138,163 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
                     horizontal: AppDimensions.space20,
                   ),
                   children: [
-                    // Photo de couverture
-                    ClipRRect(
-                      borderRadius:
-                          BorderRadius.circular(AppDimensions.radiusCard),
-                      child: SizedBox(
-                        height: 180,
-                        width: double.infinity,
-                        child: _buildImage(isDark),
+                    // --- Image Hero avec badges en surimpression ---
+                    _buildHeroImage(isDark),
+                    const SizedBox(height: 18),
+
+                    // --- Titre & Pharmacopée préparatrice ---
+                    Text(
+                      widget.produitItem.nom,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: AppDimensions.space16),
+                    const SizedBox(height: 6),
 
-                    // Nom et Catégorie
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.produitItem.nom,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark
-                                      ? Colors.white
-                                      : AppColors.textPrimary,
-                                ),
-                              ),
-                              if (widget.produitItem.categorieNom != null) ...[
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primaryLight,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    widget.produitItem.categorieNom!,
-                                    style: const TextStyle(
-                                      color: AppColors.primary,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
+                    if (widget.nomPharmacopee != null || _selectedPharmacopeeNom != null) ...[
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.verified_rounded,
+                            size: 16,
+                            color: AppColors.primary,
                           ),
-                        ),
-                        // Prix
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              widget.produitItem.prixFormate,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            Text(
-                              widget.produitItem.stockLibelle,
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Préparé par ${_selectedPharmacopeeNom ?? widget.nomPharmacopee}',
                               style: TextStyle(
-                                fontSize: 11,
-                                color: widget.produitItem.disponible
-                                    ? AppColors.success
-                                    : AppColors.danger,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white70 : AppColors.textSecondary,
                               ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: AppDimensions.space16),
-                    const Divider(height: 1),
-                    const SizedBox(height: AppDimensions.space16),
-
-                    // Forme galénique & conditionnement
-                    if (widget.produitItem.forme != null &&
-                        widget.produitItem.forme!.isNotEmpty) ...[
-                      _buildSectionTitle('Forme & Présentation', isDark),
-                      const SizedBox(height: 6),
-                      Text(
-                        widget.produitItem.forme!,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: isDark
-                              ? AppColors.darkTextSecondary
-                              : AppColors.textSecondary,
-                        ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: AppDimensions.space16),
+                      const SizedBox(height: 12),
                     ],
 
-                    // Description
+                    // --- Badges caractéristiques (Forme, Catégorie, Origine) ---
+                    _buildQuickTags(isDark),
+                    const SizedBox(height: 16),
+
+                    // --- Carte Prix & Disponibilité (Remplace l'ancienne ligne austère) ---
+                    _buildPriceStockBanner(isDark),
+                    const SizedBox(height: 20),
+
+                    // --- Description du remède ---
                     if (widget.produitItem.description != null &&
                         widget.produitItem.description!.isNotEmpty) ...[
-                      _buildSectionTitle('Description du remède', isDark),
-                      const SizedBox(height: 6),
-                      Text(
-                        widget.produitItem.description!,
-                        style: TextStyle(
-                          fontSize: 13,
-                          height: 1.4,
-                          color: isDark
-                              ? AppColors.darkTextSecondary
-                              : AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: AppDimensions.space16),
+                      _buildDescriptionCard(widget.produitItem.description!, isDark),
+                      const SizedBox(height: 20),
                     ],
 
-                    // Données approfondies provenant du backend (Plantes et Maladies)
+                    // --- Données détaillées (Plantes composantes & Maladies ciblées) ---
                     detailAsync.when(
-                      loading: () => const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(AppDimensions.space16),
-                          child: AppLoadingIndicator(),
-                        ),
+                      loading: () => const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Center(child: AppLoadingIndicator()),
                       ),
-                      error: (_, __) => const SizedBox.shrink(),
+                      error: (_, __) => _buildFallbackPlantsAndMaladies(isDark),
                       data: (detail) {
-                        if (detail == null) return const SizedBox.shrink();
+                        if (detail == null) {
+                          return _buildFallbackPlantsAndMaladies(isDark);
+                        }
+
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // 🌿 Plantes dans la formulation (Plante != Produit)
+                            // 🌿 Formulation Botanique (Plantes utilisées)
                             if (detail.compositions.isNotEmpty) ...[
-                              _buildSectionTitle(
-                                  'Plantes composant ce remède', isDark),
-                              const SizedBox(height: 8),
+                              _buildSectionHeader(
+                                icon: Icons.eco_rounded,
+                                title: 'Formulation Botanique',
+                                countBadge: '${detail.compositions.length} plantes',
+                                isDark: isDark,
+                              ),
+                              const SizedBox(height: 10),
                               ...detail.compositions.map((comp) {
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: isDark
-                                        ? Colors.white.withAlpha(8)
-                                        : const Color(0xFFF6FBF7),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: isDark
-                                          ? AppColors.darkBorder
-                                          : const Color(0xFFE2EFE5),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.eco_rounded,
-                                          color: AppColors.primary, size: 18),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              comp.nomScientifique,
-                                              style: TextStyle(
-                                                fontSize: 12.5,
-                                                fontWeight: FontWeight.bold,
-                                                color: isDark
-                                                    ? Colors.white
-                                                    : AppColors.textPrimary,
-                                              ),
-                                            ),
-                                            if (comp.nomsVernaculaires
-                                                .isNotEmpty)
-                                              Text(
-                                                'Nom local : ${comp.nomsVernaculaires.join(", ")}',
-                                                style: const TextStyle(
-                                                  fontSize: 11,
-                                                  color: AppColors.textMuted,
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      if (comp.quantite > 0)
-                                        Text(
-                                          '${comp.quantite} ${comp.unite}',
-                                          style: const TextStyle(
-                                            fontSize: 11.5,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppColors.primary,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
+                                return _buildBotanicalCard(
+                                  nomScientifique: comp.nomScientifique,
+                                  nomsVernaculaires: comp.nomsVernaculaires,
+                                  quantite: comp.quantite > 0
+                                      ? '${comp.quantite} ${comp.unite}'
+                                      : null,
+                                  photoUrl: comp.photoUrl,
+                                  isDark: isDark,
                                 );
                               }),
-                              const SizedBox(height: AppDimensions.space16),
+                              const SizedBox(height: 20),
+                            ] else if (widget.produitItem.plantes.isNotEmpty) ...[
+                              _buildFallbackPlantsList(widget.produitItem.plantes, isDark),
+                              const SizedBox(height: 20),
                             ],
 
-                            // 🎯 Maladies & Indications
+                            // 🎯 Indications & Troubles ciblés
                             if (detail.maladies.isNotEmpty) ...[
-                              _buildSectionTitle(
-                                  'Indications & Troubles ciblés', isDark),
-                              const SizedBox(height: 8),
+                              _buildSectionHeader(
+                                icon: Icons.health_and_safety_outlined,
+                                title: 'Indications & Troubles ciblés',
+                                isDark: isDark,
+                              ),
+                              const SizedBox(height: 10),
                               Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
                                 children: detail.maladies.map((m) {
-                                  return Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 5),
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? AppColors.darkSurface
-                                          : const Color(0xFFFFF3E0),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: const Color(0xFFFFB74D),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.healing_rounded,
-                                          size: 14,
-                                          color: Color(0xFFE65100),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          m.nom,
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            color: Color(0xFFE65100),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
+                                  return _buildHealthChip(m.nom, isDark);
                                 }).toList(),
                               ),
-                              const SizedBox(height: AppDimensions.space16),
+                              const SizedBox(height: 20),
+                            ] else if (widget.produitItem.maladies.isNotEmpty) ...[
+                              _buildFallbackMaladiesList(widget.produitItem.maladies, isDark),
+                              const SizedBox(height: 20),
                             ],
 
-                            // Choix de la pharmacopée proposant ce remède (si ouvert sans pharmacopée préfixée)
+                            // 🏥 Choix de l'officine préparatrice (si plusieurs offres)
                             if (widget.pharmacopeeId == null &&
                                 detail.offresPharmacopees.isNotEmpty) ...[
-                              _buildSectionTitle(
-                                  'Sélectionnez la pharmacopée préparatrice',
-                                  isDark),
-                              const SizedBox(height: 8),
+                              _buildSectionHeader(
+                                icon: Icons.storefront_rounded,
+                                title: 'Sélectionnez la pharmacopée',
+                                countBadge: '${detail.offresPharmacopees.length} pharmacopées',
+                                isDark: isDark,
+                              ),
+                              const SizedBox(height: 10),
                               ...detail.offresPharmacopees.map((offre) {
                                 final currentSelectedId = _selectedPharmacopeeId ??
                                     detail.offresPharmacopees.first.pharmacopeeId;
                                 final isSelected =
                                     currentSelectedId == offre.pharmacopeeId;
-                                return InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedPharmacopeeId = offre.pharmacopeeId;
-                                      _selectedPharmacopeeNom = offre.nomPharmacopee;
-                                    });
-                                  },
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Container(
-                                    margin: const EdgeInsets.only(bottom: 8),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? AppColors.primary.withAlpha(20)
-                                          : (isDark
-                                              ? AppColors.darkSurfaceVariant
-                                              : Colors.grey.shade50),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? AppColors.primary
-                                            : (isDark
-                                                ? AppColors.darkBorder
-                                                : Colors.grey.shade300),
-                                        width: isSelected ? 1.5 : 1,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          isSelected
-                                              ? Icons.radio_button_checked
-                                              : Icons.radio_button_off,
-                                          color: isSelected
-                                              ? AppColors.primary
-                                              : (isDark
-                                                  ? Colors.white54
-                                                  : Colors.grey.shade500),
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                offre.nomPharmacopee,
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                  color: isDark
-                                                      ? Colors.white
-                                                      : AppColors.textPrimary,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                '${offre.commune ?? offre.region ?? "Officine agréée"} • ${offre.prix.round()} FCFA',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: isDark
-                                                      ? Colors.white70
-                                                      : AppColors.textSecondary,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                return _buildPharmacopeeOfferCard(
+                                  offre: offre,
+                                  isSelected: isSelected,
+                                  isDark: isDark,
                                 );
                               }),
-                              const SizedBox(height: AppDimensions.space16),
+                              const SizedBox(height: 16),
                             ],
                           ],
                         );
                       },
                     ),
+
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
 
-              // Barre inférieure fixe : Sélecteur de quantité & Bouton d'ajout
-              Container(
-                padding: EdgeInsets.only(
-                  left: AppDimensions.space16,
-                  right: AppDimensions.space16,
-                  top: AppDimensions.space12,
-                  bottom: MediaQuery.paddingOf(context).bottom + 12,
-                ),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurface : Colors.white,
-                  border: Border(
-                    top: BorderSide(
-                      color: isDark ? AppColors.darkBorder : AppColors.border,
-                    ),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    // Sélecteur de quantité - / +
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color:
-                              isDark ? AppColors.darkBorder : AppColors.border,
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove, size: 18),
-                            onPressed: _quantite > 1
-                                ? () => setState(() => _quantite--)
-                                : null,
-                          ),
-                          Text(
-                            '$_quantite',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.add, size: 18),
-                            onPressed: widget.produitItem.disponible
-                                ? () => setState(() => _quantite++)
-                                : null,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: AppDimensions.space12),
-
-                    // Bouton Ajouter au panier
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: widget.produitItem.disponible
-                            ? () async {
-                                final authState = ref.read(authStateProvider);
-                                if (!authState.isAuthenticated) {
-                                  ConnexionRequiseDialog.show(
-                                    context,
-                                    title: 'Connexion requise',
-                                    description:
-                                        'Veuillez vous connecter pour ajouter ${widget.produitItem.nom} à votre panier.',
-                                  );
-                                  return;
-                                }
-
-                                final notifier =
-                                    ref.read(panierStateProvider.notifier);
-                                
-                                // Déterminer la pharmacopée finale (spécifiée par la page ou sélectionnée / première offre)
-                                int? finalPharmaId = _selectedPharmacopeeId ?? widget.pharmacopeeId;
-                                String? finalPharmaNom = _selectedPharmacopeeNom ?? widget.nomPharmacopee;
-                                
-                                if (finalPharmaId == null) {
-                                  final detail = detailAsync.asData?.value;
-                                  if (detail != null && detail.offresPharmacopees.isNotEmpty) {
-                                    finalPharmaId = detail.offresPharmacopees.first.pharmacopeeId;
-                                    finalPharmaNom = detail.offresPharmacopees.first.nomPharmacopee;
-                                  }
-                                }
-
-                                await notifier.ajouterProduit(
-                                  widget.produitItem.produitId,
-                                  quantite: _quantite,
-                                  pharmacopeeId: finalPharmaId,
-                                  nomPharmacopee: finalPharmaNom,
-                                );
-
-                                if (finalPharmaId != null && finalPharmaNom != null) {
-                                  ref
-                                      .read(checkoutProvider.notifier)
-                                      .initCheckout(
-                                        pharmacopeeId: finalPharmaId,
-                                        nomPharmacopee: finalPharmaNom,
-                                      );
-                                }
-
-                                if (context.mounted) {
-                                  Navigator.pop(context);
-                                }
-                              }
-                            : null,
-                        icon: const Icon(Icons.add_shopping_cart_rounded),
-                        label: Text(
-                          widget.produitItem.disponible
-                              ? 'Ajouter au panier'
-                              : 'Épuisé',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              // 3. Barre inférieure fixe : Sélecteur de quantité & Bouton d'ajout ergonomique
+              _buildBottomActionBar(
+                prixUnitaire: prixUnitaire,
+                totalPrix: totalPrix,
+                isDark: isDark,
+                detailAsync: detailAsync,
               ),
             ],
           ),
@@ -580,26 +303,132 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
     );
   }
 
-  Widget _buildSectionTitle(String title, bool isDark) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.bold,
-        color: isDark ? Colors.white70 : AppColors.textPrimary,
-        letterSpacing: 0.2,
+  // --- Composant : Image Hero avec badge de catégorie & disponibilité ---
+  Widget _buildHeroImage(bool isDark) {
+    return Container(
+      height: 200,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _buildImageWidget(isDark),
+
+            // Dégradé d'assombrissement subtil en bas pour lisibilité
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.1),
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.35),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Badge Catégorie en haut à gauche
+            if (widget.produitItem.categorieNom != null &&
+                widget.produitItem.categorieNom!.isNotEmpty)
+              Positioned(
+                top: 12,
+                left: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.65),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.spa_rounded, color: Color(0xFF68D391), size: 13),
+                      const SizedBox(width: 5),
+                      Text(
+                        widget.produitItem.categorieNom!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            // Badge Disponibilité en bas à droite
+            Positioned(
+              bottom: 12,
+              right: 12,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: widget.produitItem.disponible
+                      ? const Color(0xFF15803D).withValues(alpha: 0.9)
+                      : const Color(0xFFDC2626).withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      widget.produitItem.stockLibelle,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildImage(bool isDark) {
+  Widget _buildImageWidget(bool isDark) {
     final resolved = ImageUtils.resolveImageUrl(widget.produitItem.photoUrl);
     if (resolved != null && resolved.isNotEmpty) {
       if (resolved.startsWith('assets/')) {
         return Image.asset(
           resolved,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildFallback(isDark),
+          errorBuilder: (_, __, ___) => _buildFallbackHero(isDark),
         );
       }
       return CachedNetworkImage(
@@ -611,25 +440,729 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
             child: SizedBox(
               width: 24,
               height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
             ),
           ),
         ),
-        errorWidget: (_, __, ___) => _buildFallback(isDark),
+        errorWidget: (_, __, ___) => _buildFallbackHero(isDark),
       );
     }
-    return _buildFallback(isDark);
+    return _buildFallbackHero(isDark);
   }
 
-  Widget _buildFallback(bool isDark) {
+  // Fond d'image riche et chaleureux lorsqu'aucune photo physique n'est présente
+  Widget _buildFallbackHero(bool isDark) {
     return Container(
-      color: isDark ? const Color(0xFF1B2F23) : const Color(0xFFE8F5E9),
-      child: Center(
-        child: Icon(
-          Icons.medication_rounded,
-          size: 60,
-          color: isDark ? const Color(0xFF2ECC71) : AppColors.primary,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [const Color(0xFF0F3B20), const Color(0xFF1D5A34)]
+              : [const Color(0xFFE8F5E9), const Color(0xFFC8E6C9)],
         ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: (isDark ? Colors.black26 : Colors.white.withValues(alpha: 0.8)),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.local_pharmacy_rounded,
+                size: 42,
+                color: isDark ? const Color(0xFF4ADE80) : AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Remède Traditionnel Authentifié',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white70 : AppColors.primaryDark,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- Composant : Badges rapides (Forme galénique, 100% Naturel, etc.) ---
+  Widget _buildQuickTags(bool isDark) {
+    final List<Widget> tags = [];
+
+    if (widget.produitItem.forme != null && widget.produitItem.forme!.isNotEmpty) {
+      tags.add(_buildBadgeItem(
+        icon: Icons.grain_rounded,
+        label: widget.produitItem.forme!,
+        color: AppColors.primary,
+        bgColor: isDark ? const Color(0xFF183824) : const Color(0xFFEBF7EE),
+        isDark: isDark,
+      ));
+    }
+
+    tags.add(_buildBadgeItem(
+      icon: Icons.verified_outlined,
+      label: '100% Naturel',
+      color: const Color(0xFF0284C7),
+      bgColor: isDark ? const Color(0xFF102A3D) : const Color(0xFFE0F2FE),
+      isDark: isDark,
+    ));
+
+    tags.add(_buildBadgeItem(
+      icon: Icons.local_shipping_outlined,
+      label: 'Retrait & Livraison',
+      color: const Color(0xFFD97706),
+      bgColor: isDark ? const Color(0xFF38260D) : const Color(0xFFFEF3C7),
+      isDark: isDark,
+    ));
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: tags,
+    );
+  }
+
+  Widget _buildBadgeItem({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required Color bgColor,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- Composant : Carte Prix & Disponibilité Moderne ---
+  Widget _buildPriceStockBanner(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF18291F) : const Color(0xFFF0FDF4),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? const Color(0xFF2E5A3E) : const Color(0xFFBBF7D0),
+          width: 1.2,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'PRIX UNITAIRE',
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                  color: isDark ? Colors.white60 : AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                widget.produitItem.prixFormate,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primary,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: widget.produitItem.disponible
+                  ? (isDark ? const Color(0xFF14532D) : const Color(0xFFDCFCE7))
+                  : (isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFEE2E2)),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  widget.produitItem.disponible
+                      ? Icons.check_circle_rounded
+                      : Icons.error_outline_rounded,
+                  size: 15,
+                  color: widget.produitItem.disponible
+                      ? const Color(0xFF16A34A)
+                      : const Color(0xFFDC2626),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  widget.produitItem.stockLibelle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: widget.produitItem.disponible
+                        ? (isDark ? const Color(0xFF86EFAC) : const Color(0xFF15803D))
+                        : (isDark ? const Color(0xFFFCA5A5) : const Color(0xFFB91C1C)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- Composant : Description du remède soignée ---
+  Widget _buildDescriptionCard(String description, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withAlpha(8) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : const Color(0xFFE2E8F0),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.description_outlined,
+                size: 17,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Description & Usage',
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            description,
+            style: TextStyle(
+              fontSize: 13.5,
+              height: 1.55,
+              color: isDark ? AppColors.darkTextSecondary : const Color(0xFF334155),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- Titre de section réutilisable avec icône et badge compteur ---
+  Widget _buildSectionHeader({
+    required IconData icon,
+    required String title,
+    String? countBadge,
+    required bool isDark,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppColors.primary),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 14.5,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : AppColors.textPrimary,
+          ),
+        ),
+        if (countBadge != null) ...[
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E3A28) : const Color(0xFFE8F5E9),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              countBadge,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  // --- Carte Botanique : Présentation valorisante des plantes de la formulation ---
+  Widget _buildBotanicalCard({
+    required String nomScientifique,
+    required List<String> nomsVernaculaires,
+    String? quantite,
+    String? photoUrl,
+    required bool isDark,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withAlpha(10) : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : const Color(0xFFE5E7EB),
+        ),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: Row(
+        children: [
+          // Avatar botanique
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF163E27) : const Color(0xFFEDF7EE),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.eco_rounded,
+              color: AppColors.primary,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // Noms scientifique et vernaculaire
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  nomScientifique,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.italic,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  nomsVernaculaires.isNotEmpty
+                      ? 'Nom local : ${nomsVernaculaires.join(", ")}'
+                      : 'Plante médicinale sauvage',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: isDark ? Colors.white60 : AppColors.textMuted,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+
+          // Dosage / Poids
+          if (quantite != null && quantite.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF183B26) : const Color(0xFFE8F5E9),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                quantite,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // --- Badge Maladie & Indication ---
+  Widget _buildHealthChip(String label, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF332013) : const Color(0xFFFFF7ED),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? const Color(0xFF7C3D12) : const Color(0xFFFDBA74),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.healing_rounded,
+            size: 14,
+            color: Color(0xFFEA580C),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFFC2410C),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- Fallbacks pour Plantes et Maladies si le détail async est en erreur ---
+  Widget _buildFallbackPlantsAndMaladies(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (widget.produitItem.plantes.isNotEmpty) ...[
+          _buildFallbackPlantsList(widget.produitItem.plantes, isDark),
+          const SizedBox(height: 20),
+        ],
+        if (widget.produitItem.maladies.isNotEmpty) ...[
+          _buildFallbackMaladiesList(widget.produitItem.maladies, isDark),
+          const SizedBox(height: 20),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildFallbackPlantsList(List<String> plantes, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(
+          icon: Icons.eco_rounded,
+          title: 'Plantes composant ce remède',
+          countBadge: '${plantes.length}',
+          isDark: isDark,
+        ),
+        const SizedBox(height: 10),
+        ...plantes.map((plante) => _buildBotanicalCard(
+              nomScientifique: plante,
+              nomsVernaculaires: const [],
+              isDark: isDark,
+            )),
+      ],
+    );
+  }
+
+  Widget _buildFallbackMaladiesList(List<String> maladies, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(
+          icon: Icons.health_and_safety_outlined,
+          title: 'Indications & Troubles ciblés',
+          isDark: isDark,
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: maladies.map((m) => _buildHealthChip(m, isDark)).toList(),
+        ),
+      ],
+    );
+  }
+
+  // --- Carte Pharmacopée proposant le produit ---
+  Widget _buildPharmacopeeOfferCard({
+    required dynamic offre,
+    required bool isSelected,
+    required bool isDark,
+  }) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedPharmacopeeId = offre.pharmacopeeId;
+          _selectedPharmacopeeNom = offre.nomPharmacopee;
+        });
+      },
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark ? const Color(0xFF1B3D28) : const Color(0xFFF0FDF4))
+              : (isDark ? Colors.white.withAlpha(6) : Colors.grey.shade50),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primary
+                : (isDark ? AppColors.darkBorder : Colors.grey.shade200),
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+              color: isSelected ? AppColors.primary : Colors.grey,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    offre.nomPharmacopee,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13.5,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${offre.commune ?? offre.region ?? "Pharmacopée agréée"} • ${_formatNumber(offre.prix)} FCFA',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: isDark ? Colors.white70 : AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- Barre d'action inférieure sticky ---
+  Widget _buildBottomActionBar({
+    required double prixUnitaire,
+    required double totalPrix,
+    required bool isDark,
+    required AsyncValue<dynamic> detailAsync,
+  }) {
+    return Container(
+      padding: EdgeInsets.only(
+        left: AppDimensions.space20,
+        right: AppDimensions.space20,
+        top: 14,
+        bottom: MediaQuery.paddingOf(context).bottom + 14,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF131F17) : Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: isDark ? AppColors.darkBorder : const Color(0xFFE2E8F0),
+            width: 1,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Sélecteur de quantité ergonomique avec stepper
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withAlpha(10) : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? AppColors.darkBorder : const Color(0xFFCBD5E1),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.remove_rounded, size: 18),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  onPressed: _quantite > 1
+                      ? () => setState(() => _quantite--)
+                      : null,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    '$_quantite',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add_rounded, size: 18),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  onPressed: widget.produitItem.disponible
+                      ? () => setState(() => _quantite++)
+                      : null,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 14),
+
+          // Bouton Ajouter au panier avec affichage dynamique du sous-total
+          Expanded(
+            child: SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: widget.produitItem.disponible
+                    ? () async {
+                        final authState = ref.read(authStateProvider);
+                        if (!authState.isAuthenticated) {
+                          ConnexionRequiseDialog.show(
+                            context,
+                            title: 'Connexion requise',
+                            description:
+                                'Veuillez vous connecter pour ajouter ${widget.produitItem.nom} à votre panier.',
+                          );
+                          return;
+                        }
+
+                        final notifier = ref.read(panierStateProvider.notifier);
+
+                        int? finalPharmaId =
+                            _selectedPharmacopeeId ?? widget.pharmacopeeId;
+                        String? finalPharmaNom =
+                            _selectedPharmacopeeNom ?? widget.nomPharmacopee;
+
+                        if (finalPharmaId == null) {
+                          final detail = detailAsync.asData?.value;
+                          if (detail != null &&
+                              detail.offresPharmacopees.isNotEmpty) {
+                            finalPharmaId =
+                                detail.offresPharmacopees.first.pharmacopeeId;
+                            finalPharmaNom =
+                                detail.offresPharmacopees.first.nomPharmacopee;
+                          }
+                        }
+
+                        await notifier.ajouterProduit(
+                          widget.produitItem.produitId,
+                          quantite: _quantite,
+                          pharmacopeeId: finalPharmaId,
+                          nomPharmacopee: finalPharmaNom,
+                        );
+
+                        if (finalPharmaId != null && finalPharmaNom != null) {
+                          ref.read(checkoutProvider.notifier).initCheckout(
+                                pharmacopeeId: finalPharmaId,
+                                nomPharmacopee: finalPharmaNom,
+                              );
+                        }
+
+                        if (!mounted) return; if (true) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                children: [
+                                  const Icon(Icons.check_circle_rounded,
+                                      color: Colors.white, size: 20),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      '${widget.produitItem.nom} ($_quantite) ajouté au panier',
+                                      style: const TextStyle(fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              backgroundColor: AppColors.primary,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.shopping_bag_outlined, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      widget.produitItem.disponible
+                          ? 'Ajouter • ${_formatNumber(totalPrix)} FCFA'
+                          : 'Épuisé',
+                      style: const TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

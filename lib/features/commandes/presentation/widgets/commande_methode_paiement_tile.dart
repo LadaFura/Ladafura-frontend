@@ -61,21 +61,16 @@ class CommandeMethodePaiementTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    methode.libelle,
+                    methode.libelle
+                        .replaceAll(RegExp(r'\s*\([^)]*\)'), '')
+                        .trim(),
                     style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
                         .copyWith(
                       fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                          isSelected ? FontWeight.bold : FontWeight.w600,
+                      fontSize: 15,
                     ),
                   ),
-                  if (methode.description.isNotEmpty)
-                    Text(
-                      methode.description,
-                      style: (isDark
-                              ? AppTextStyles.captionDark
-                              : AppTextStyles.caption)
-                          .copyWith(fontSize: 11),
-                    ),
                 ],
               ),
             ),

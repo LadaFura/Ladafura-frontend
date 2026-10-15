@@ -82,7 +82,7 @@ class CommandeConfirmationScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Merci pour votre confiance. Votre commande a été transmise à l\'officine.',
+                'Merci pour votre confiance. Votre commande a été transmise à la pharmacopée.',
                 style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
                     .copyWith(
                   color: isDark ? Colors.grey[300] : Colors.grey[700],

@@ -44,14 +44,14 @@ class CommandePickupInfoCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Retrait au comptoir (Pickup)',
+                  'Retrait au comptoir',
                   style: (isDark ? AppTextStyles.h4Dark : AppTextStyles.h4)
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   adresseOfficine ??
-                      'Votre commande sera mise à disposition directement au comptoir de l\'officine sans frais supplémentaires.',
+                      'Votre commande sera mise à disposition directement au comptoir de la pharmacopée sans frais supplémentaires.',
                   style: (isDark
                           ? AppTextStyles.captionDark
                           : AppTextStyles.caption)

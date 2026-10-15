@@ -50,7 +50,7 @@ class PharmacopeeSelectionModal extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Choisir une officine',
+                    'Choisir une pharmacopée',
                     style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
                         .copyWith(fontSize: 18),
                   ),
@@ -86,7 +86,7 @@ class PharmacopeeSelectionModal extends StatelessWidget {
                     final offre = offres[index];
                     final pharmacopeeId = (offre['pharmacopeeId'] as num?)?.toInt() ?? 0;
                     final nomPharmacopee =
-                        offre['nomPharmacopee']?.toString() ?? 'Officine agréée';
+                        offre['nomPharmacopee']?.toString() ?? 'Pharmacopée agréée';
                     final prix = (offre['prix'] as num?)?.toDouble() ?? 0.0;
                     final telephone = offre['telephone']?.toString();
                     final commune = offre['commune']?.toString();

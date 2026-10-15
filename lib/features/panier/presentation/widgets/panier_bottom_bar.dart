@@ -45,32 +45,17 @@ class PanierBottomBar extends StatelessWidget {
                 Text(
                   'Total des produits :',
                   style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
-                      .copyWith(fontSize: 15),
+                      .copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 Text(
                   montantTotalFormate,
                   style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
                     color: primaryColor,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Frais de mise à disposition :',
-                  style: (isDark ? AppTextStyles.captionDark : AppTextStyles.caption)
-                      .copyWith(fontSize: 12),
-                ),
-                Text(
-                  'Calculés à l\'étape suivante',
-                  style: (isDark ? AppTextStyles.captionDark : AppTextStyles.caption)
-                      .copyWith(
-                    fontStyle: FontStyle.italic,
-                    fontSize: 12,
                   ),
                 ),
               ],

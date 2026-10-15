@@ -258,10 +258,18 @@ class PanierItemCard extends StatelessWidget {
 
   Widget _buildFallbackThumbnail(bool isDark, Color primaryColor) {
     return Center(
-      child: Icon(
-        Icons.medication_liquid_rounded,
-        color: isDark ? AppColors.darkPrimary : AppColors.primary,
-        size: 34,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: primaryColor.withValues(alpha: isDark ? 0.2 : 0.12),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          Icons.spa_rounded,
+          color: primaryColor,
+          size: 24,
+        ),
       ),
     );
   }

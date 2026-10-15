@@ -28,7 +28,11 @@ class CommandePaiementHeader extends StatelessWidget {
         ? 'Commande #${commande!.numero}'
         : 'Règlement de votre panier';
     final String affichageMode =
-        commande?.modeRetrait ?? modeRetrait ?? 'Retrait';
+        (commande?.modeRetrait ?? modeRetrait ?? 'Retrait')
+            .replaceAll(RegExp(r'\s*\([Pp]ickup\)'), '')
+            .replaceAll('officine', 'pharmacopée')
+            .replaceAll('Officine', 'Pharmacopée')
+            .trim();
     final String affichagePharmacie =
         commande?.nomPharmacopee ?? nomPharmacopee ?? 'Pharmacopée';
     final String affichageTotal =

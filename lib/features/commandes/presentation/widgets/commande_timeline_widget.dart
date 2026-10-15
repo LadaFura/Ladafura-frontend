@@ -36,7 +36,7 @@ class CommandeTimelineWidget extends StatelessWidget {
             SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Cette commande a été annulée. Les produits ont été réintégrés aux stocks de l\'officine.',
+                'Cette commande a été annulée. Les produits ont été réintégrés aux stocks de la pharmacopée.',
                 style: TextStyle(color: Colors.redAccent, fontSize: 13),
               ),
             ),
@@ -214,13 +214,13 @@ class CommandeTimelineWidget extends StatelessWidget {
 
   String _getCurrentStepDescription(String statut, bool isLivraison) {
     return switch (statut.toUpperCase()) {
-      'EN_ATTENTE' => 'Étape 1/5 : En attente de validation par l\'officine',
+      'EN_ATTENTE' => 'Étape 1/5 : En attente de validation par la pharmacopée',
       'CONFIRMEE' => 'Étape 2/5 : Commande confirmée par la pharmacopée',
       'PREPAREE' => 'Étape 3/5 : Préparation des remèdes terminée',
       'EN_LIVRAISON' => 'Étape 4/5 : Colis confié au livreur vers votre adresse',
-      'DISPONIBLE_PICKUP' => 'Étape 4/5 : Disponible au comptoir de l\'officine',
+      'DISPONIBLE_PICKUP' => 'Étape 4/5 : Disponible au comptoir de la pharmacopée',
       'LIVREE' => 'Étape 5/5 : Commande livrée avec succès',
-      'RETIREE' => 'Étape 5/5 : Commande retirée en officine',
+      'RETIREE' => 'Étape 5/5 : Commande retirée en pharmacopée',
       _ => statut,
     };
   }

@@ -36,13 +36,20 @@ class ModeRetraitOptionModel {
   }
 
   factory ModeRetraitOptionModel.fromJson(Map<String, dynamic> json) {
+    String rawLibelle = json['libelle']?.toString() ??
+        (json['type'] == 'LIVRAISON'
+            ? 'Livraison à domicile'
+            : 'Retrait en pharmacopée');
+    rawLibelle = rawLibelle
+        .replaceAll(RegExp(r'\s*\([Pp]ickup\)'), '')
+        .replaceAll('officine', 'pharmacopée')
+        .replaceAll('Officine', 'Pharmacopée')
+        .trim();
+
     return ModeRetraitOptionModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
       type: json['type']?.toString() ?? 'PICKUP',
-      libelle: json['libelle']?.toString() ??
-          (json['type'] == 'LIVRAISON'
-              ? 'Livraison à domicile'
-              : 'Retrait en officine'),
+      libelle: rawLibelle,
       actif: json['actif'] as bool? ?? true,
       frais: (json['frais'] as num?)?.toDouble() ?? 0.0,
       gratuit: json['gratuit'] as bool? ?? false,

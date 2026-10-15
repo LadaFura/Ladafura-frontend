@@ -192,7 +192,7 @@ class _CommandesScreenState extends ConsumerState<CommandesScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Vos commandes passées auprès des officines de pharmacopée apparaîtront ici.',
+                              'Vos commandes passées auprès des pharmacopées apparaîtront ici.',
                               style: (isDark
                                       ? AppTextStyles.captionDark
                                       : AppTextStyles.caption)

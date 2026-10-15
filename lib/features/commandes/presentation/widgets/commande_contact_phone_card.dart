@@ -45,12 +45,6 @@ class CommandeContactPhoneCard extends StatelessWidget {
               hintText: 'Ex: +223 70 12 34 56',
               prefixIcon: const Icon(Icons.phone_outlined, size: 20),
               errorText: telephoneError,
-              helperText:
-                  'Permet à l\'pharmacopée de vous joindre quand votre commande est prête.',
-              helperStyle: TextStyle(
-                fontSize: 11,
-                color: isDark ? Colors.white60 : Colors.black54,
-              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
