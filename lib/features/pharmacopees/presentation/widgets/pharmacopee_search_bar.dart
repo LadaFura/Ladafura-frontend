@@ -60,10 +60,12 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? AppColors.darkBackground : AppColors.surface;
+    final bgColor = widget.isPinned
+        ? (isDark ? AppColors.darkBackground : AppColors.surface)
+        : Colors.transparent;
     final topPadding = widget.isPinned
         ? (MediaQuery.paddingOf(context).top + AppDimensions.space8)
-        : AppDimensions.space8;
+        : 0.0;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),

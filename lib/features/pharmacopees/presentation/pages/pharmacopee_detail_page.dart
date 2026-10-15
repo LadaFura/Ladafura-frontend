@@ -16,7 +16,6 @@ import '../widgets/donner_avis_modal.dart';
 import '../widgets/pharmacopee_avis_section.dart';
 import '../widgets/pharmacopee_detail_header.dart';
 import '../widgets/pharmacopee_detail_skeleton.dart';
-import '../widgets/pharmacopee_mini_map_card.dart';
 import '../widgets/pharmacopee_modes_retrait_selector.dart';
 import '../widgets/pharmacopee_produit_card.dart';
 import '../widgets/pharmacopee_quick_actions_bar.dart';
@@ -226,18 +225,6 @@ class _PharmacopeeDetailPageState extends ConsumerState<PharmacopeeDetailPage> {
               ),
 
               const SliverToBoxAdapter(
-                child: SizedBox(height: 8),
-              ),
-
-              // Carte interactive & Itinéraire Google Maps
-              SliverToBoxAdapter(
-                child: PharmacopeeMiniMapCard(
-                  pharmacopee: pharma,
-                  userCoordinates: userCoords,
-                ),
-              ),
-
-              const SliverToBoxAdapter(
                 child: SizedBox(height: 10),
               ),
 
@@ -357,29 +344,16 @@ class _PharmacopeeDetailPageState extends ConsumerState<PharmacopeeDetailPage> {
               ),
 
               if (_selectedTabIndex == 0) ...[
-                // 3. Barre de recherche de produits fixée au défilement (Sticky pinned header avec bouton retour)
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _StickySearchBarDelegate(
+                // 3. Barre de recherche de produits contextuelle
+                SliverToBoxAdapter(
+                  child: PharmacopeeSearchBar(
+                    pharmacopeeNom: pharma.nom,
+                    searchQuery: controllerState.searchQuery,
+                    onSearchChanged: controller.setSearchQuery,
+                    categories: categories,
                     selectedCategory: controllerState.selectedCategory,
-                    builder: (context, isPinned) => PharmacopeeSearchBar(
-                      pharmacopeeNom: pharma.nom,
-                      searchQuery: controllerState.searchQuery,
-                      onSearchChanged: controller.setSearchQuery,
-                      categories: categories,
-                      selectedCategory: controllerState.selectedCategory,
-                      onCategorySelected: controller.selectCategory,
-                      isPinned: isPinned,
-                      onBack: () {
-                        if (context.canPop()) {
-                          context.pop();
-                        } else {
-                          Navigator.of(context).maybePop();
-                        }
-                      },
-                    ),
-                    baseHeight: categories.isNotEmpty ? 118.0 : 64.0,
-                    topSafeArea: MediaQuery.paddingOf(context).top,
+                    onCategorySelected: controller.selectCategory,
+                    isPinned: false,
                   ),
                 ),
 
@@ -583,46 +557,4 @@ class _PharmacopeeDetailPageState extends ConsumerState<PharmacopeeDetailPage> {
   }
 }
 
-/// Délégué pour épingler la barre de recherche en haut au défilement (sticky header)
-/// avec animation fluide lors de la transition et dégagement supérieur sous la barre d'état.
-class _StickySearchBarDelegate extends SliverPersistentHeaderDelegate {
-  final Widget Function(BuildContext context, bool isPinned) builder;
-  final double baseHeight;
-  final double topSafeArea;
-  final String? selectedCategory;
 
-  const _StickySearchBarDelegate({
-    required this.builder,
-    required this.baseHeight,
-    required this.topSafeArea,
-    this.selectedCategory,
-  });
-
-  // Lorsque non scrollé (shrinkOffset == 0), la hauteur est exactement baseHeight.
-  // Lors du scroll, elle atteint baseHeight + topSafeArea pour passer sous la barre d'état.
-  @override
-  double get minExtent =>
-      (baseHeight + topSafeArea) > 0.0 ? (baseHeight + topSafeArea) : 66.0;
-
-  @override
-  double get maxExtent =>
-      (baseHeight + topSafeArea) > 0.0 ? (baseHeight + topSafeArea) : 66.0;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    // La barre est considérée fixée / épinglée dès qu'il y a recouvrement ou défilement
-    final isPinned = overlapsContent || shrinkOffset > 0;
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: builder(context, isPinned),
-    );
-  }
-
-  @override
-  bool shouldRebuild(covariant _StickySearchBarDelegate oldDelegate) {
-    return oldDelegate.baseHeight != baseHeight ||
-        oldDelegate.topSafeArea != topSafeArea ||
-        oldDelegate.selectedCategory != selectedCategory;
-  }
-}
