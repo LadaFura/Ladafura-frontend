@@ -29,10 +29,11 @@ class ListeCollectes extends ConsumerWidget {
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
         elevation: 0.5,
         title: Text(
-          'Mes Collectes Terrain',
+          'Mes Collectes',
           style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -143,7 +144,7 @@ class ListeCollectes extends ConsumerWidget {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                'Appuyez sur "Nouvelle collecte" pour débuter un enregistrement de terrain.',
+                                'Appuyez sur "Nouvelle collecte" pour débuter un enregistrement.',
                                 textAlign: TextAlign.center,
                                 style: (isDark
                                         ? AppTextStyles.captionDark

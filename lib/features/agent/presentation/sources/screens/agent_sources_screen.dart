@@ -52,7 +52,7 @@ class _AgentSourcesScreenState extends ConsumerState<AgentSourcesScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Ajouter un informateur de terrain',
+                  'Ajouter un informateur',
                   style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3)
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -140,6 +140,7 @@ class _AgentSourcesScreenState extends ConsumerState<AgentSourcesScreen> {
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
         elevation: 0.5,
         title: Text(

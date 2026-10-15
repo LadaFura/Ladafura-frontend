@@ -81,10 +81,11 @@ class AgentNotificationsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
         elevation: 0.5,
         title: Text(
-          'Notifications Terrain',
+          'Notifications',
           style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
             fontWeight: FontWeight.bold,
           ),

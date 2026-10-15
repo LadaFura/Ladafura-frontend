@@ -71,7 +71,7 @@ class AgentProfileHeaderCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
-                    'AGENT TERRAIN',
+                    'AGENT DE COLLECTE',
                     style: TextStyle(
                       color: AppColors.accent,
                       fontSize: 10,

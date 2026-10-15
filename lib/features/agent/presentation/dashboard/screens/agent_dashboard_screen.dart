@@ -61,6 +61,7 @@ class AgentDashboardScreen extends ConsumerWidget {
       // ============================================================
 
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor:
             isDark ? AppColors.darkSurface : Colors.white,
         elevation: 0.5,

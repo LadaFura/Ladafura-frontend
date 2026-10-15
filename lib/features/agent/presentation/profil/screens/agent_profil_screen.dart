@@ -143,7 +143,7 @@ class AgentProfilScreen extends ConsumerWidget {
                     TextField(
                       controller: zoneCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Zone de couverture terrain',
+                        labelText: 'Zone de couverture',
                         hintText: 'Ex: Région de Sikasso - Cercle de Koutiala',
                         prefixIcon: Icon(Icons.map_outlined),
                       ),
@@ -234,6 +234,7 @@ class AgentProfilScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
         elevation: 0.5,
         title: Text(
@@ -362,7 +363,7 @@ class AgentProfilScreen extends ConsumerWidget {
                                                 BorderRadius.circular(6),
                                           ),
                                           child: const Text(
-                                            'AGENT TERRAIN',
+                                            'AGENT DE COLLECTE',
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 10,
@@ -492,15 +493,15 @@ class AgentProfilScreen extends ConsumerWidget {
 
                     const SizedBox(height: AppDimensions.space20),
 
-                    // 3. Répertoire Terrain
+                    // 3. Répertoire des sources
                     _SectionContainer(
-                      title: 'Activités de terrain',
+                      title: 'Activités',
                       isDark: isDark,
                       children: [
                         _ActionTile(
                           icon: Icons.people_outline_rounded,
                           title: 'Informateurs & Tradipraticiens',
-                          subtitle: 'Répertoire des sources de terrain',
+                          subtitle: 'Répertoire des sources',
                           isDark: isDark,
                           showDivider: false,
                           onTap: () => context.push(RouteNames.agentSourcesPath),
