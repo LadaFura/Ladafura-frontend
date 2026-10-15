@@ -205,13 +205,9 @@ class AuthRepository {
         return user;
       }
     } on DioException catch (e) {
-      // Si le serveur répond explicitement 401 Unauthorized (token révoqué ou invalide)
-      if (e.response?.statusCode == 401) {
-        await _storageService.clearSession();
-        _apiClient.clearAuthToken();
-        return null;
-      }
-      if (cachedUser != null) return cachedUser;
+      // Si l'endpoint neutre échoue, ne pas vider la session immédiatement pour permettre
+      // la synchronisation ou la tentative avec l'endpoint dédié
+      if (cachedUser != null && e.response?.statusCode != 401) return cachedUser;
     } catch (_) {
       if (cachedUser != null) return cachedUser;
     }
