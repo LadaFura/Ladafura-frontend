@@ -11,6 +11,7 @@ class SearchBarInput extends StatelessWidget {
   final ValueChanged<String> onSubmitted;
   final VoidCallback onClear;
   final VoidCallback? onBack;
+  final bool showBackButton;
   final bool isDark;
 
   const SearchBarInput({
@@ -21,6 +22,7 @@ class SearchBarInput extends StatelessWidget {
     required this.onSubmitted,
     required this.onClear,
     this.onBack,
+    this.showBackButton = false,
     required this.isDark,
   });
 
@@ -53,24 +55,31 @@ class SearchBarInput extends StatelessWidget {
             color: isDark ? AppColors.darkTextMuted : const Color(0xFF6B7B70),
             fontSize: 14,
           ),
-          prefixIcon: IconButton(
-            focusNode: FocusNode(skipTraversal: true, canRequestFocus: false),
-            icon: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: isDark ? Colors.white : AppColors.textPrimary,
-              size: 20,
-            ),
-            onPressed: () {
-              if (onBack != null) {
-                onBack!();
-              } else if (Navigator.of(context).canPop()) {
-                Navigator.of(context).pop();
-              } else {
-                controller.clear();
-                onClear();
-              }
-            },
-          ),
+          prefixIcon: showBackButton
+              ? IconButton(
+                  focusNode:
+                      FocusNode(skipTraversal: true, canRequestFocus: false),
+                  icon: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    if (onBack != null) {
+                      onBack!();
+                    } else if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop();
+                    } else {
+                      controller.clear();
+                      onClear();
+                    }
+                  },
+                )
+              : Icon(
+                  Icons.search_rounded,
+                  color: isDark ? Colors.white70 : const Color(0xFF0D5C3A),
+                  size: 22,
+                ),
           suffixIcon: ValueListenableBuilder<TextEditingValue>(
             valueListenable: controller,
             builder: (context, value, _) {

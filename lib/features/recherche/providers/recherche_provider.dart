@@ -119,7 +119,7 @@ class RechercheNotifier extends StateNotifier<RechercheState> {
 
   /// Met à jour la catégorie sélectionnée
   void setCategory(SearchCategory category, {GeoCoordinates? userLocation}) {
-    if (state.status == RechercheStatus.idle) {
+    if (state.query.isEmpty || state.status == RechercheStatus.idle) {
       exploreCategory(category, userLocation: userLocation);
     } else {
       state = state.copyWith(selectedCategory: category);
@@ -148,7 +148,7 @@ class RechercheNotifier extends StateNotifier<RechercheState> {
     try {
       if (needPharmacopees) {
         final pharmaService = _ref.read(pharmacopeeServiceProvider);
-        final list = await pharmaService.getPharmacopees(page: 0, size: 20);
+        final list = await pharmaService.getPharmacopees(page: 0, size: 50);
         if (list.isNotEmpty) {
           pharmacopees = list
               .map((p) => PharmacopeeSearchItem(
@@ -179,7 +179,7 @@ class RechercheNotifier extends StateNotifier<RechercheState> {
 
       if (needPlantes) {
         final planteService = _ref.read(planteServiceProvider);
-        final list = await planteService.getPlantes(page: 0, size: 20);
+        final list = await planteService.getPlantes(page: 0, size: 50);
         if (list.isNotEmpty) {
           plantes = list
               .map((p) => PlanteSearchItem(

@@ -70,6 +70,12 @@ class _CitizenSearchScreenState extends ConsumerState<CitizenSearchScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    ref.listen<RechercheState>(rechercheProvider, (prev, next) {
+      if (next.query != _controller.text) {
+        _controller.text = next.query;
+      }
+    });
+
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
       body: SafeArea(
@@ -83,26 +89,44 @@ class _CitizenSearchScreenState extends ConsumerState<CitizenSearchScreen> {
                 AppDimensions.space16,
                 AppDimensions.space8,
               ),
-              child: SearchBarInput(
-                key: const ValueKey('citizen_search_bar_input'),
-                controller: _controller,
-                focusNode: _focusNode,
-                onChanged: _onSearchChanged,
-                onSubmitted: (val) {
-                  if (val.trim().isNotEmpty) {
-                    ref.read(recentSearchesProvider.notifier).addSearch(val);
-                  }
-                  final userLocation =
-                      ref.read(userLocationProvider).valueOrNull;
-                  ref
-                      .read(rechercheProvider.notifier)
-                      .search(val, userLocation: userLocation);
+              child: ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _controller,
+                builder: (context, textValue, _) {
+                  final searchState = ref.watch(rechercheProvider);
+                  final isFirstPage =
+                      searchState.status == RechercheStatus.idle &&
+                      textValue.text.trim().isEmpty;
+
+                  return SearchBarInput(
+                    key: const ValueKey('citizen_search_bar_input'),
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    showBackButton: !isFirstPage,
+                    onBack: !isFirstPage
+                        ? () {
+                            _focusNode.unfocus();
+                            _controller.clear();
+                            ref.read(rechercheProvider.notifier).reset();
+                          }
+                        : null,
+                    onChanged: _onSearchChanged,
+                    onSubmitted: (val) {
+                      if (val.trim().isNotEmpty) {
+                        ref.read(recentSearchesProvider.notifier).addSearch(val);
+                      }
+                      final userLocation =
+                          ref.read(userLocationProvider).valueOrNull;
+                      ref
+                          .read(rechercheProvider.notifier)
+                          .search(val, userLocation: userLocation);
+                    },
+                    onClear: () {
+                      _controller.clear();
+                      ref.read(rechercheProvider.notifier).reset();
+                    },
+                    isDark: isDark,
+                  );
                 },
-                onClear: () {
-                  _controller.clear();
-                  ref.read(rechercheProvider.notifier).reset();
-                },
-                isDark: isDark,
               ),
             ),
 
