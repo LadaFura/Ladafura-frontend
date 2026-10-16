@@ -37,12 +37,25 @@ class AccueilScreen extends ConsumerWidget {
         centerTitle: false,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.space16,
-            vertical: AppDimensions.space12,
-          ),
-          child: Column(
+        child: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: () async {
+            ref.invalidate(nearbyPharmacopeesProvider);
+            ref.invalidate(popularPlantesProvider);
+            try {
+              await Future.wait([
+                ref.read(nearbyPharmacopeesProvider.future),
+                ref.read(popularPlantesProvider.future),
+              ]);
+            } catch (_) {}
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.space16,
+              vertical: AppDimensions.space12,
+            ),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Barre de recherche redirigeant vers la recherche universelle
@@ -168,7 +181,8 @@ class AccueilScreen extends ConsumerWidget {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   /// En-tête générique de section avec bouton "Voir tout >"

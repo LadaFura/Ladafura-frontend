@@ -42,6 +42,7 @@ class SearchResultsList extends StatelessWidget {
         results.plantes.isNotEmpty;
 
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(AppDimensions.space16),
       children: [
         // Sélecteur de catégorie modulaire pour filtrer dynamiquement les résultats

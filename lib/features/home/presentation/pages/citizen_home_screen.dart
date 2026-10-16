@@ -44,6 +44,12 @@ class CitizenHomeScreen extends ConsumerWidget {
             ref.invalidate(nearbyPharmacopeesProvider);
             ref.invalidate(popularPlantesProvider);
             ref.invalidate(unreadNotificationCountProvider);
+            try {
+              await Future.wait([
+                ref.read(nearbyPharmacopeesProvider.future),
+                ref.read(popularPlantesProvider.future),
+              ]);
+            } catch (_) {}
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),

@@ -195,6 +195,12 @@ class _PharmacopeeDetailPageState extends ConsumerState<PharmacopeeDetailPage> {
               ref.invalidate(pharmacopeeFullDetailProvider(pharmacopeeId));
               ref.invalidate(pharmacopeeAvisProvider(pharmacopeeId));
               ref.invalidate(pharmacopeeEligibiliteAvisProvider(pharmacopeeId));
+              try {
+                await Future.wait([
+                  ref.read(pharmacopeeFullDetailProvider(pharmacopeeId).future),
+                  ref.read(pharmacopeeAvisProvider(pharmacopeeId).future),
+                ]);
+              } catch (_) {}
             },
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),

@@ -40,6 +40,7 @@ class SearchIdleSuggestions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.space16,
         vertical: AppDimensions.space12,

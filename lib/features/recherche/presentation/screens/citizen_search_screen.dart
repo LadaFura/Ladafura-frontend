@@ -157,6 +157,27 @@ class _CitizenSearchScreenState extends ConsumerState<CitizenSearchScreen> {
     );
   }
 
+  Future<void> _handleRefresh() async {
+    final state = ref.read(rechercheProvider);
+    final userLocation = ref.read(userLocationProvider).valueOrNull;
+
+    ref.invalidate(maladiesSuggestionsProvider);
+
+    if (state.query.trim().isNotEmpty) {
+      await ref
+          .read(rechercheProvider.notifier)
+          .search(state.query, userLocation: userLocation);
+    } else if (state.status != RechercheStatus.idle) {
+      await ref
+          .read(rechercheProvider.notifier)
+          .exploreCategory(state.selectedCategory, userLocation: userLocation);
+    } else {
+      try {
+        await ref.read(maladiesSuggestionsProvider.future);
+      } catch (_) {}
+    }
+  }
+
   Widget _buildBody({
     required BuildContext context,
     required bool isDark,
@@ -184,86 +205,102 @@ class _CitizenSearchScreenState extends ConsumerState<CitizenSearchScreen> {
       );
     }
 
+    Widget content;
+
     // État 2 : Erreur réseau / serveur
     if (state.status == RechercheStatus.error) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.space24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.cloud_off_rounded,
-                size: 64,
-                color: AppColors.accent,
-              ),
-              const SizedBox(height: AppDimensions.space16),
-              Text(
-                state.errorMessage ?? 'Erreur lors de la recherche',
-                textAlign: TextAlign.center,
-                style: isDark ? AppTextStyles.h3Dark : AppTextStyles.h3,
-              ),
-              const SizedBox(height: AppDimensions.space16),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
+      content = LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppDimensions.space24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.cloud_off_rounded,
+                      size: 64,
+                      color: AppColors.accent,
+                    ),
+                    const SizedBox(height: AppDimensions.space16),
+                    Text(
+                      state.errorMessage ?? 'Erreur lors de la recherche',
+                      textAlign: TextAlign.center,
+                      style: isDark ? AppTextStyles.h3Dark : AppTextStyles.h3,
+                    ),
+                    const SizedBox(height: AppDimensions.space16),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: const Text('Réessayer'),
+                      onPressed: () {
+                        if (state.query.isNotEmpty) {
+                          ref.read(rechercheProvider.notifier).search(state.query);
+                        } else {
+                          ref
+                              .read(rechercheProvider.notifier)
+                              .exploreCategory(state.selectedCategory);
+                        }
+                      },
+                    ),
+                  ],
                 ),
-                icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Réessayer'),
-                onPressed: () {
-                  if (state.query.isNotEmpty) {
-                    ref.read(rechercheProvider.notifier).search(state.query);
-                  } else {
-                    ref
-                        .read(rechercheProvider.notifier)
-                        .exploreCategory(state.selectedCategory);
-                  }
-                },
               ),
-            ],
+            ),
           ),
         ),
       );
     }
-
     // État 3 : Aucun résultat trouvé
-    if (state.isEmpty ||
+    else if (state.isEmpty ||
         (state.status == RechercheStatus.success &&
             (state.results == null || state.results!.isEmpty))) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.space24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.search_off_rounded,
-                  size: 64, color: AppColors.textMuted),
-              const SizedBox(height: AppDimensions.space16),
-              Text(
-                state.query.isNotEmpty
-                    ? 'Aucun résultat pour "${state.query}"'
-                    : 'Aucun élément disponible.',
-                style: isDark ? AppTextStyles.h3Dark : AppTextStyles.h3,
-              ),
-              const SizedBox(height: AppDimensions.space8),
-              Text(
-                'Essayez avec un nom de plante, une maladie (ex: Paludisme) ou le nom d\'une localité.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
-                  fontSize: 13,
+      content = LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppDimensions.space24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.search_off_rounded,
+                        size: 64, color: AppColors.textMuted),
+                    const SizedBox(height: AppDimensions.space16),
+                    Text(
+                      state.query.isNotEmpty
+                          ? 'Aucun résultat pour "${state.query}"'
+                          : 'Aucun élément disponible.',
+                      style: isDark ? AppTextStyles.h3Dark : AppTextStyles.h3,
+                    ),
+                    const SizedBox(height: AppDimensions.space8),
+                    Text(
+                      'Essayez avec un nom de plante, une maladie (ex: Paludisme) ou le nom d\'une localité.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       );
     }
-
     // État 4 : Résultats disponibles
-    if (state.hasResults && state.results != null) {
-      return SearchResultsList(
+    else if (state.hasResults && state.results != null) {
+      content = SearchResultsList(
         results: state.results!,
         category: state.selectedCategory,
         userLocation: userLocation,
@@ -272,31 +309,39 @@ class _CitizenSearchScreenState extends ConsumerState<CitizenSearchScreen> {
         onCategorySelected: _onCategorySelected,
       );
     }
-
     // État 5 : En attente de saisie (Idle)
-    final recentSearches = ref.watch(recentSearchesProvider);
-    final maladiesAsync = ref.watch(maladiesSuggestionsProvider);
-    final maladies = maladiesAsync.valueOrNull ?? const [
-      'Diabète',
-      'Hypertension',
-      'Fatigue',
-      'Digestion',
-      'Anémie',
-      'Toux',
-      'Paludisme',
-    ];
+    else {
+      final recentSearches = ref.watch(recentSearchesProvider);
+      final maladiesAsync = ref.watch(maladiesSuggestionsProvider);
+      final maladies = maladiesAsync.valueOrNull ??
+          const [
+            'Diabète',
+            'Hypertension',
+            'Fatigue',
+            'Digestion',
+            'Anémie',
+            'Toux',
+            'Paludisme',
+          ];
 
-    return SearchIdleSuggestions(
-      recentSearches: recentSearches,
-      maladies: maladies,
-      onRemoveRecent: (term) =>
-          ref.read(recentSearchesProvider.notifier).removeSearch(term),
-      onClearAllRecent: () =>
-          ref.read(recentSearchesProvider.notifier).clearAll(),
-      onSelectTerm: _triggerSearch,
-      onSelectCategory: _onCategorySelected,
-      selectedCategory: state.selectedCategory,
-      isDark: isDark,
+      content = SearchIdleSuggestions(
+        recentSearches: recentSearches,
+        maladies: maladies,
+        onRemoveRecent: (term) =>
+            ref.read(recentSearchesProvider.notifier).removeSearch(term),
+        onClearAllRecent: () =>
+            ref.read(recentSearchesProvider.notifier).clearAll(),
+        onSelectTerm: _triggerSearch,
+        onSelectCategory: _onCategorySelected,
+        selectedCategory: state.selectedCategory,
+        isDark: isDark,
+      );
+    }
+
+    return RefreshIndicator(
+      color: AppColors.primary,
+      onRefresh: _handleRefresh,
+      child: content,
     );
   }
 }

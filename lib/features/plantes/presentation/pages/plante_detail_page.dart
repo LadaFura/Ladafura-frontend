@@ -196,6 +196,12 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
           onRefresh: () async {
             ref.invalidate(planteDetailProvider(widget.planteId));
             ref.invalidate(produitsByPlanteProvider(plante.id));
+            try {
+              await Future.wait([
+                ref.read(planteDetailProvider(widget.planteId).future),
+                ref.read(produitsByPlanteProvider(plante.id).future),
+              ]);
+            } catch (_) {}
           },
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(
