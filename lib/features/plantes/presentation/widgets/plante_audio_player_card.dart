@@ -128,7 +128,15 @@ class _PlanteAudioPlayerCardState extends State<PlanteAudioPlayerCard>
         File(trimmed).existsSync()) {
       return DeviceFileSource(trimmed);
     }
-    final resolved = ApiEndpoints.resolveMediaUrl(trimmed);
+    var resolved = ApiEndpoints.resolveMediaUrl(trimmed);
+    if (resolved.contains('res.cloudinary.com') &&
+        resolved.contains('/video/upload/')) {
+      resolved = resolved.replaceAll(
+        RegExp(r'\.(webm|ogg|oga|opus|weba|wav|aac)(\?.*)?$',
+            caseSensitive: false),
+        '.mp3',
+      );
+    }
     return UrlSource(resolved);
   }
 

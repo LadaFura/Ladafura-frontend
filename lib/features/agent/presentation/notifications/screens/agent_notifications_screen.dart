@@ -17,6 +17,7 @@ class AgentNotificationsScreen extends ConsumerWidget {
   static const List<Map<String, String>> _filters = [
     {'id': 'TOUTES', 'label': 'Toutes'},
     {'id': 'NON_LUES', 'label': 'Non lues'},
+    {'id': 'COLLECTE_ATTRIBUEE', 'label': 'Attribuées'},
     {'id': 'COLLECTE_VALIDEE', 'label': 'Validées'},
     {'id': 'COLLECTE_CORRECTION', 'label': 'À corriger'},
     {'id': 'COLLECTE_REJETEE', 'label': 'Rejetées'},
@@ -42,6 +43,7 @@ class AgentNotificationsScreen extends ConsumerWidget {
         return AppColors.danger;
       case 'COLLECTE_CORRECTION':
         return Colors.orange;
+      case 'COLLECTE_ATTRIBUEE':
       case 'COLLECTE_STATUT':
         return AppColors.primary;
     }
@@ -65,10 +67,29 @@ class AgentNotificationsScreen extends ConsumerWidget {
         return Icons.cancel_outlined;
       case 'COLLECTE_CORRECTION':
         return Icons.edit_note_rounded;
+      case 'COLLECTE_ATTRIBUEE':
+        return Icons.assignment_ind_rounded;
       case 'COLLECTE_STATUT':
         return Icons.sync_alt_rounded;
       default:
         return Icons.notifications_active_outlined;
+    }
+  }
+
+  String _typeLabel(String type) {
+    switch (type.toUpperCase()) {
+      case 'COLLECTE_ATTRIBUEE':
+        return 'Nouvelle attribution';
+      case 'COLLECTE_VALIDEE':
+        return 'Collecte validée';
+      case 'COLLECTE_REJETEE':
+        return 'Collecte refusée';
+      case 'COLLECTE_CORRECTION':
+        return 'Correction requise';
+      case 'COLLECTE_STATUT':
+        return 'Statut collecte';
+      default:
+        return 'Information';
     }
   }
 
@@ -77,6 +98,7 @@ class AgentNotificationsScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final activeFilter = ref.watch(agentNotificationsFilterProvider);
     final notificationsAsync = ref.watch(agentNotificationsListProvider);
+    final unreadCount = ref.watch(agentUnreadNotificationsCountProvider).valueOrNull ?? 0;
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.surface,
@@ -84,13 +106,47 @@ class AgentNotificationsScreen extends ConsumerWidget {
         automaticallyImplyLeading: false,
         backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
         elevation: 0.5,
-        title: Text(
-          'Notifications',
-          style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+        title: Row(
+          children: [
+            Text(
+              'Notifications',
+              style: (isDark ? AppTextStyles.h3Dark : AppTextStyles.h3).copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (unreadCount > 0) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4A621),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$unreadCount non lue${unreadCount > 1 ? 's' : ''}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF14532D),
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
         actions: [
+          IconButton(
+            tooltip: 'Actualiser',
+            icon: Icon(
+              Icons.refresh_rounded,
+              color: isDark ? Colors.white : AppColors.primary,
+            ),
+            onPressed: () {
+              ref.invalidate(agentNotificationsListProvider);
+              ref.invalidate(agentUnreadNotificationsCountProvider);
+              ref.invalidate(dashboardAgentProvider);
+            },
+          ),
           IconButton(
             tooltip: 'Tout marquer comme lu',
             icon: Icon(
@@ -103,6 +159,7 @@ class AgentNotificationsScreen extends ConsumerWidget {
                     .read(agentApiServiceProvider)
                     .markAllNotificationsAsRead();
                 ref.invalidate(agentNotificationsListProvider);
+                ref.invalidate(agentUnreadNotificationsCountProvider);
                 ref.invalidate(dashboardAgentProvider);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -184,6 +241,7 @@ class AgentNotificationsScreen extends ConsumerWidget {
                 color: AppColors.primary,
                 onRefresh: () async {
                   ref.invalidate(agentNotificationsListProvider);
+                  ref.invalidate(agentUnreadNotificationsCountProvider);
                   ref.invalidate(dashboardAgentProvider);
                 },
                 child: notificationsAsync.when(
@@ -221,8 +279,10 @@ class AgentNotificationsScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton.icon(
-                            onPressed: () =>
-                                ref.invalidate(agentNotificationsListProvider),
+                            onPressed: () {
+                              ref.invalidate(agentNotificationsListProvider);
+                              ref.invalidate(agentUnreadNotificationsCountProvider);
+                            },
                             icon: const Icon(Icons.refresh_rounded),
                             label: const Text('Réessayer'),
                             style: ElevatedButton.styleFrom(
@@ -295,6 +355,7 @@ class AgentNotificationsScreen extends ConsumerWidget {
                           isDark: isDark,
                           color: _typeColor(notif.type, notif.niveau),
                           icon: _typeIcon(notif.type),
+                          typeLabel: _typeLabel(notif.type),
                           formattedDate: _formatDate(notif.dateNotification),
                           onTap: () async {
                             if (!notif.lue) {
@@ -303,6 +364,7 @@ class AgentNotificationsScreen extends ConsumerWidget {
                                     .read(agentApiServiceProvider)
                                     .markNotificationAsRead(notif.id);
                                 ref.invalidate(agentNotificationsListProvider);
+                                ref.invalidate(agentUnreadNotificationsCountProvider);
                                 ref.invalidate(dashboardAgentProvider);
                               } catch (_) {}
                             }
@@ -322,6 +384,7 @@ class AgentNotificationsScreen extends ConsumerWidget {
                                   .read(agentApiServiceProvider)
                                   .deleteNotification(notif.id);
                               ref.invalidate(agentNotificationsListProvider);
+                              ref.invalidate(agentUnreadNotificationsCountProvider);
                               ref.invalidate(dashboardAgentProvider);
                             } catch (e) {
                               if (context.mounted) {
@@ -425,6 +488,7 @@ class _NotificationTile extends StatelessWidget {
   final bool isDark;
   final Color color;
   final IconData icon;
+  final String typeLabel;
   final String formattedDate;
   final VoidCallback onTap;
   final VoidCallback onDelete;
@@ -434,6 +498,7 @@ class _NotificationTile extends StatelessWidget {
     required this.isDark,
     required this.color,
     required this.icon,
+    required this.typeLabel,
     required this.formattedDate,
     required this.onTap,
     required this.onDelete,
@@ -442,6 +507,9 @@ class _NotificationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final unread = !notif.lue;
+    final isActionableRejectOrCorrection =
+        notif.type.toUpperCase() == 'COLLECTE_REJETEE' ||
+        notif.type.toUpperCase() == 'COLLECTE_CORRECTION';
 
     return InkWell(
       onTap: onTap,
@@ -452,7 +520,7 @@ class _NotificationTile extends StatelessWidget {
           color: unread
               ? (isDark
                   ? AppColors.primary.withValues(alpha: 0.14)
-                  : AppColors.primary.withValues(alpha: 0.06))
+                  : const Color(0xFFE8F5E9))
               : (isDark ? AppColors.darkSurface : Colors.white),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
@@ -494,15 +562,38 @@ class _NotificationTile extends StatelessWidget {
                       ),
                       if (unread)
                         Container(
-                          width: 8,
-                          height: 8,
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           margin: const EdgeInsets.only(left: 6),
                           decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
+                            color: const Color(0xFFF4A621),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            'Non lue',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF14532D),
+                            ),
                           ),
                         ),
                     ],
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      typeLabel,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -536,7 +627,9 @@ class _NotificationTile extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'Voir la collecte #${notif.referenceId}',
+                              isActionableRejectOrCorrection
+                                  ? 'Corriger & soumettre #${notif.referenceId}'
+                                  : 'Voir la collecte #${notif.referenceId}',
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,

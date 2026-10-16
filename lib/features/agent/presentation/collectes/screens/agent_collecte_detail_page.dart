@@ -262,6 +262,34 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                                   height: 1.4,
                                 ),
                               ),
+                              if (detail.modifiable) ...[
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  height: 34,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      ref
+                                          .read(nouvelleCollecteWizardProvider.notifier)
+                                          .loadFromDetail(detail, recap);
+                                      context.push(RouteNames.agentNouvelleCollectePath);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.danger,
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    icon: const Icon(Icons.edit_note_rounded, size: 16),
+                                    label: const Text(
+                                      'Corriger et soumettre à nouveau',
+                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),

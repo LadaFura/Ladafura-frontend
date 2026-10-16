@@ -385,5 +385,18 @@ class AgentApiService {
   Future<void> deleteNotification(int id) async {
     await _dio.delete('${ApiEndpoints.agentNotifications}/$id');
   }
+
+  Future<int> getUnreadNotificationsCount() async {
+    try {
+      final response = await _dio.get('${ApiEndpoints.agentNotifications}/stats');
+      final data = response.data;
+      if (data is Map && data['nonLues'] != null) {
+        return data['nonLues'] is int
+            ? data['nonLues'] as int
+            : int.tryParse(data['nonLues'].toString()) ?? 0;
+      }
+    } catch (_) {}
+    return 0;
+  }
 }
 

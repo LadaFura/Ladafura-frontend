@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ladafura_frontend_flutter/features/agent/providers/agent_providers.dart';
 import 'package:ladafura_frontend_flutter/features/agent/providers/dashboard_provider.dart';
 
 import '../../../../../core/constants/app_colors.dart';
@@ -45,6 +46,7 @@ class AgentDashboardScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final dashboardAsync = ref.watch(dashboardAgentProvider);
+    final unreadCount = ref.watch(agentUnreadNotificationsCountProvider).valueOrNull ?? 0;
 
     final dashboard = dashboardAsync.valueOrNull;
 
@@ -67,6 +69,33 @@ class AgentDashboardScreen extends ConsumerWidget {
         elevation: 0.5,
         title: const AppLogo.horizontal(height: 32),
         centerTitle: false,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: IconButton(
+              tooltip: 'Notifications',
+              onPressed: () => context.go(RouteNames.agentNotificationsPath),
+              icon: Badge(
+                isLabelVisible: unreadCount > 0,
+                backgroundColor: const Color(0xFFF4A621),
+                textColor: const Color(0xFF14532D),
+                label: Text(
+                  unreadCount > 99 ? '99+' : '$unreadCount',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                child: Icon(
+                  unreadCount > 0
+                      ? Icons.notifications_active_outlined
+                      : Icons.notifications_none_rounded,
+                  color: isDark ? Colors.white : AppColors.primary,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
 
       // ============================================================
@@ -78,6 +107,7 @@ class AgentDashboardScreen extends ConsumerWidget {
           color: AppColors.primary,
           onRefresh: () async {
             ref.invalidate(dashboardAgentProvider);
+            ref.invalidate(agentUnreadNotificationsCountProvider);
           },
           child: dashboardAsync.when(
             // --------------------------------------------------------

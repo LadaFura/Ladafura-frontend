@@ -76,6 +76,12 @@ final agentNotificationsListProvider =
   return api.getNotifications();
 });
 
+/// Provider du compteur de notifications non lues pour l'agent de collecte
+final agentUnreadNotificationsCountProvider = FutureProvider<int>((ref) async {
+  final api = ref.watch(agentApiServiceProvider);
+  return api.getUnreadNotificationsCount();
+});
+
 // =============================================================================
 // STATE & NOTIFIER DU WIZARD « NOUVELLE COLLECTE »
 // =============================================================================
