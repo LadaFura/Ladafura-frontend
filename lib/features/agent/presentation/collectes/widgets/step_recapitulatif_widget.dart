@@ -65,10 +65,10 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
                           : Colors.green.shade50)
                       : (isDark
                           ? AppColors.darkSurfaceVariant
-                          : Colors.amber.shade50),
+                          : AppColors.primaryLight),
                   borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
                   border: Border.all(
-                    color: isConforme ? Colors.green : Colors.amber.shade700,
+                    color: isConforme ? AppColors.success : AppColors.info,
                     width: 1.5,
                   ),
                 ),
@@ -77,8 +77,8 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
                     Icon(
                       isConforme
                           ? Icons.check_circle_rounded
-                          : Icons.warning_amber_rounded,
-                      color: isConforme ? Colors.green : Colors.amber.shade800,
+                          : Icons.info_outline_rounded,
+                      color: isConforme ? AppColors.success : AppColors.info,
                       size: 32,
                     ),
                     const SizedBox(width: 12),
@@ -96,10 +96,12 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                               color: isConforme
-                                  ? Colors.green.shade800
+                                  ? (isDark
+                                      ? AppColors.darkPrimary
+                                      : Colors.green.shade800)
                                   : (hasBlockingErrors
                                       ? AppColors.danger
-                                      : Colors.amber.shade900),
+                                      : AppColors.info),
                             ),
                           ),
                           const SizedBox(height: 2),

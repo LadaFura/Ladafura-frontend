@@ -95,7 +95,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                   label: const Text('Consulter en mode visiteur (Sans compte)'),
                   style: TextButton.styleFrom(
                     foregroundColor:
-                        isDark ? AppColors.darkAccent : AppColors.accent,
+                        isDark ? AppColors.darkPrimary : AppColors.primary,
                     textStyle: AppTextStyles.button
                         .copyWith(fontWeight: FontWeight.w500),
                   ),

@@ -198,7 +198,7 @@ class _CardExpandableDescriptionState
                       fontSize: 13.5,
                       fontWeight: FontWeight.w700,
                       color: widget.isDark
-                          ? AppColors.accent
+                          ? AppColors.darkPrimary
                           : AppColors.primary,
                     ),
                   ),
@@ -209,7 +209,7 @@ class _CardExpandableDescriptionState
                         : Icons.keyboard_arrow_down_rounded,
                     size: 18,
                     color: widget.isDark
-                        ? AppColors.accent
+                        ? AppColors.darkPrimary
                         : AppColors.primary,
                   ),
                 ],

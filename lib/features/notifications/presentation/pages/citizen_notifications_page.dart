@@ -284,16 +284,21 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
+          color: isSelected
+              ? AppColors.primary
+              : (isDark ? AppColors.darkSurfaceVariant : Colors.transparent),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.primary : const Color(0xFFDEE2E6),
+            color: isSelected
+                ? AppColors.primary
+                : (isDark ? AppColors.darkBorder : const Color(0xFFDEE2E6)),
             width: 1,
           ),
         ),
@@ -302,7 +307,9 @@ class _FilterChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            color: isSelected ? Colors.white : AppColors.textPrimary,
+            color: isSelected
+                ? Colors.white
+                : (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
           ),
         ),
       ),
@@ -356,7 +363,9 @@ class _NotificationCard extends StatelessWidget {
                 : (item.lue ? Colors.white : const Color(0xFFF1F8F4)),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: !item.lue ? AppColors.primary.withValues(alpha: 0.3) : const Color(0xFFE9ECEF),
+              color: !item.lue
+                  ? AppColors.primary.withValues(alpha: 0.3)
+                  : (isDark ? AppColors.darkBorder : const Color(0xFFE9ECEF)),
               width: !item.lue ? 1.2 : 0.8,
             ),
             boxShadow: [

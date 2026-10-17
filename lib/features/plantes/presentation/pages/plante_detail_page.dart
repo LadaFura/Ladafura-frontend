@@ -338,10 +338,14 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2C2213) : const Color(0xFFFEF3C7),
+        color: isDark
+            ? AppColors.darkPrimaryContainer.withValues(alpha: 0.45)
+            : AppColors.primaryLight,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? const Color(0xFF78350F) : const Color(0xFFFDE68A),
+          color: isDark
+              ? AppColors.darkPrimary.withValues(alpha: 0.35)
+              : AppColors.primary.withValues(alpha: 0.25),
           width: 0.9,
         ),
       ),
@@ -353,7 +357,7 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
             child: Icon(
               Icons.health_and_safety_outlined,
               size: 19,
-              color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706),
+              color: isDark ? AppColors.darkPrimary : AppColors.primary,
             ),
           ),
           const SizedBox(width: 10),
@@ -363,7 +367,9 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
                 style: TextStyle(
                   fontSize: 12,
                   height: 1.45,
-                  color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.primaryDark,
                 ),
                 children: const [
                   TextSpan(
@@ -629,7 +635,7 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Maladies / affections traitées (Badges ambrés)
+          // 1. Maladies / affections traitées
           if (plante.maladiesAssociees.isNotEmpty) ...[
             _buildSubLabel(isDark, 'Maladies / affections traitées'),
             const SizedBox(height: 6),
@@ -641,15 +647,23 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7),
+                    color: (isDark ? AppColors.darkPrimary : AppColors.primary)
+                        .withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color:
+                          (isDark ? AppColors.darkPrimary : AppColors.primary)
+                              .withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Text(
                     m.nom,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF92400E),
+                      color: isDark
+                          ? AppColors.darkPrimary
+                          : AppColors.primaryDark,
                     ),
                   ),
                 );
@@ -733,13 +747,13 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isDark
-                  ? const Color(0xFF78350F).withValues(alpha: 0.28)
-                  : const Color(0xFFFFFBEB),
+                  ? AppColors.darkPrimaryContainer.withValues(alpha: 0.4)
+                  : AppColors.primaryLight,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isDark
-                    ? const Color(0xFFF59E0B).withValues(alpha: 0.45)
-                    : const Color(0xFFFCD34D),
+                    ? AppColors.darkPrimary.withValues(alpha: 0.35)
+                    : AppColors.primary.withValues(alpha: 0.25),
                 width: 1,
               ),
             ),
@@ -749,11 +763,9 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
                 Row(
                   children: [
                     Icon(
-                      Icons.warning_amber_rounded,
+                      Icons.info_outline_rounded,
                       size: 18,
-                      color: isDark
-                          ? const Color(0xFFFBBF24)
-                          : const Color(0xFFD97706),
+                      color: isDark ? AppColors.darkPrimary : AppColors.primary,
                     ),
                     const SizedBox(width: 6),
                     Text(
@@ -762,8 +774,8 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
                         fontSize: 12.5,
                         fontWeight: FontWeight.w700,
                         color: isDark
-                            ? const Color(0xFFFBBF24)
-                            : const Color(0xFFB45309),
+                            ? AppColors.darkPrimary
+                            : AppColors.primaryDark,
                       ),
                     ),
                   ],
@@ -776,8 +788,8 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
                     fontSize: 13,
                     height: 1.45,
                     color: isDark
-                        ? const Color(0xFFFDE68A)
-                        : const Color(0xFF92400E),
+                        ? AppColors.darkTextPrimary
+                        : AppColors.primaryDark,
                   ),
                 ),
               ],

@@ -494,7 +494,13 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
                   },
                 )
               : null,
+          filled: false,
           border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          disabledBorder: InputBorder.none,
+          errorBorder: InputBorder.none,
+          focusedErrorBorder: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: AppDimensions.space16,
             vertical: AppDimensions.space12,
@@ -824,15 +830,27 @@ class _CarteScreenState extends ConsumerState<CarteScreen> {
                       return ChoiceChip(
                         label: Text(region),
                         selected: isSelected,
-                        selectedColor: isDark
-                            ? AppColors.darkPrimaryContainer
-                            : AppColors.primaryLight,
+                        checkmarkColor: Colors.white,
+                        selectedColor: AppColors.primary,
+                        backgroundColor: isDark
+                            ? AppColors.darkSurfaceVariant
+                            : Colors.grey.shade100,
+                        side: BorderSide(
+                          color: isSelected
+                              ? AppColors.primary
+                              : (isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.border),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                         labelStyle: TextStyle(
                           color: isSelected
-                              ? (isDark
-                                  ? AppColors.darkPrimary
-                                  : AppColors.primaryDark)
-                              : (isDark ? Colors.white70 : Colors.black87),
+                              ? Colors.white
+                              : (isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary),
                           fontWeight:
                               isSelected ? FontWeight.bold : FontWeight.normal,
                         ),

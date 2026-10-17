@@ -18,13 +18,13 @@ Color getStatusColor(String status) {
       return Colors.grey;
 
     case 'EN_ATTENTE':
-      return AppColors.darkAccent;
+      return AppColors.info;
 
     case 'SOUMISE':
       return AppColors.primary;
 
     case 'EN_EXAMEN':
-      return Colors.orange;
+      return AppColors.info;
 
     case 'VALIDEE':
       return AppColors.success;
@@ -77,8 +77,8 @@ class AgentDashboardScreen extends ConsumerWidget {
               onPressed: () => context.go(RouteNames.agentNotificationsPath),
               icon: Badge(
                 isLabelVisible: unreadCount > 0,
-                backgroundColor: const Color(0xFFF4A621),
-                textColor: const Color(0xFF14532D),
+                backgroundColor: AppColors.danger,
+                textColor: Colors.white,
                 label: Text(
                   unreadCount > 99 ? '99+' : '$unreadCount',
                   style: const TextStyle(
@@ -231,7 +231,7 @@ class AgentDashboardScreen extends ConsumerWidget {
 
                     decoration: BoxDecoration(
                       color: isDark
-                          ? AppColors.darkAccent
+                          ? AppColors.darkPrimaryContainer
                           : AppColors.primary,
 
                       borderRadius:
@@ -478,8 +478,9 @@ class AgentDashboardScreen extends ConsumerWidget {
                               statistiques?.brouillons ??
                                   0,
                           label: 'Brouillons',
-                          color:
-                              AppColors.darkAccent,
+                          color: isDark
+                              ? AppColors.darkPrimary
+                              : AppColors.primary,
                           isDark: isDark,
                         ),
                       ),
@@ -511,7 +512,7 @@ class AgentDashboardScreen extends ConsumerWidget {
                                   0,
                           label: 'À compléter',
                           color:
-                              AppColors.darkAccent,
+                              AppColors.info,
                           isDark: isDark,
                         ),
                       ),

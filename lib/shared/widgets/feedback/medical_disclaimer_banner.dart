@@ -23,9 +23,9 @@ class MedicalDisclaimerBanner extends StatelessWidget {
         ? AppColors.darkPrimaryContainer.withValues(alpha: 0.5)
         : AppColors.badgeInstitutionnelBg;
     final borderColor = isDark
-        ? AppColors.darkAccent.withValues(alpha: 0.3)
-        : AppColors.badgeInstitutionnelDot.withValues(alpha: 0.3);
-    final iconColor = isDark ? AppColors.darkAccent : AppColors.accent;
+        ? AppColors.darkPrimary.withValues(alpha: 0.35)
+        : AppColors.primary.withValues(alpha: 0.25);
+    final iconColor = isDark ? AppColors.darkPrimary : AppColors.primary;
     final textColor =
         isDark ? AppColors.darkTextPrimary : AppColors.badgeInstitutionnelText;
 

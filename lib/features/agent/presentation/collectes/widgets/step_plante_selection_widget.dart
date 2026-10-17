@@ -314,11 +314,31 @@ class _StepPlanteSelectionWidgetState
                       children: _languesLocales.map((langue) {
                         final isSelected = _selectedLangue == langue;
                         return ChoiceChip(
-                          label: Text(
-                            langue,
-                            style: const TextStyle(fontSize: 11),
-                          ),
+                          label: Text(langue),
                           selected: isSelected,
+                          checkmarkColor: Colors.white,
+                          selectedColor: AppColors.primary,
+                          backgroundColor: isDark
+                              ? AppColors.darkSurfaceVariant
+                              : Colors.grey.shade100,
+                          side: BorderSide(
+                            color: isSelected
+                                ? AppColors.primary
+                                : (isDark
+                                    ? AppColors.darkBorder
+                                    : AppColors.border),
+                          ),
+                          labelStyle: TextStyle(
+                            fontSize: 11,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? Colors.white
+                                : (isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.textPrimary),
+                          ),
                           onSelected: (_) =>
                               setState(() => _selectedLangue = langue),
                         );

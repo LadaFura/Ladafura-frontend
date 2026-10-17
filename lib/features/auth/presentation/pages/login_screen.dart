@@ -274,7 +274,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: Text(
                       'Continuer en mode visiteur (Sans connexion)',
                       style: AppTextStyles.caption.copyWith(
-                        color: isDark ? AppColors.darkAccent : AppColors.accent,
+                        color: isDark ? AppColors.darkPrimary : AppColors.primary,
                         decoration: TextDecoration.underline,
                       ),
                     ),

@@ -26,13 +26,33 @@ class AppTheme {
         onPrimary: Colors.white,
         primaryContainer: AppColors.primaryLight,
         onPrimaryContainer: AppColors.primaryDark,
-        secondary: AppColors.accent,
+        secondary: AppColors.primary,
         onSecondary: Colors.white,
         error: AppColors.danger,
         onError: Colors.white,
         surface: AppColors.surface,
         onSurface: AppColors.textPrimary,
         outline: AppColors.border,
+      ),
+
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.surfaceVariant,
+        selectedColor: AppColors.primary,
+        checkmarkColor: Colors.white,
+        labelStyle: const TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+        secondaryLabelStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+        side: const BorderSide(color: AppColors.border, width: 1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
       ),
 
       // Typographie Roboto stricte (Light)
@@ -179,16 +199,38 @@ class AppTheme {
       colorScheme: const ColorScheme(
         brightness: Brightness.dark,
         primary: AppColors.darkPrimary,
-        onPrimary: AppColors.darkBackground,
+        onPrimary: Colors.white,
         primaryContainer: AppColors.darkPrimaryContainer,
         onPrimaryContainer: AppColors.darkOnPrimaryContainer,
-        secondary: AppColors.darkAccent,
-        onSecondary: Colors.black,
+        secondary: AppColors.primary,
+        onSecondary: Colors.white,
+        secondaryContainer: AppColors.primary,
+        onSecondaryContainer: Colors.white,
         error: AppColors.darkDanger,
-        onError: Colors.black,
+        onError: Colors.white,
         surface: AppColors.darkSurface,
         onSurface: AppColors.darkTextPrimary,
         outline: AppColors.darkBorder,
+      ),
+
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.darkSurfaceVariant,
+        selectedColor: AppColors.primary,
+        checkmarkColor: Colors.white,
+        labelStyle: const TextStyle(
+          color: AppColors.darkTextPrimary,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+        secondaryLabelStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+        side: const BorderSide(color: AppColors.darkBorder, width: 1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
       ),
 
       // Typographie Poppins stricte (Dark)
@@ -203,8 +245,7 @@ class AppTheme {
         bodyLarge: AppTextStyles.bodyDark,
         bodyMedium: AppTextStyles.bodySecondaryDark,
         bodySmall: AppTextStyles.captionDark,
-        labelLarge:
-            AppTextStyles.button.copyWith(color: AppColors.darkBackground),
+        labelLarge: AppTextStyles.button.copyWith(color: Colors.white),
         labelMedium: AppTextStyles.labelDark,
         labelSmall: AppTextStyles.badge,
       ),
@@ -227,12 +268,12 @@ class AppTheme {
       // Boutons principaux (Dark)
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.darkPrimary,
-          foregroundColor: AppColors.darkBackground,
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
           elevation: 0,
           minimumSize: const Size(64, AppDimensions.buttonHeight),
           textStyle: AppTextStyles.button.copyWith(
-            color: AppColors.darkBackground,
+            color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
           shape: RoundedRectangleBorder(

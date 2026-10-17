@@ -18,9 +18,9 @@ class CollecteCardWidget extends StatelessWidget {
 
   Color _getStatusColor(dynamic statut) {
     final s = statut?.toString().toUpperCase() ?? '';
-    if (s.contains('VALIDEE')) return Colors.green;
+    if (s.contains('VALIDEE')) return AppColors.success;
     if (s.contains('REJETEE')) return AppColors.danger;
-    if (s.contains('SOUMISE') || s.contains('EXAMEN')) return Colors.amber.shade800;
+    if (s.contains('SOUMISE') || s.contains('EXAMEN')) return AppColors.info;
     return Colors.blueGrey;
   }
 

@@ -96,15 +96,12 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
         color: isDark ? AppColors.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
         border: Border.all(
-          color: isDark
-              ? AppColors.darkBorder
-              : AppColors.accent.withAlpha(40),
-          width: 1.1,
+          color: isDark ? AppColors.darkBorder : AppColors.border,
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: (isDark ? Colors.black : Colors.amber.shade100)
-                .withAlpha(25),
+            color: Colors.black.withAlpha(isDark ? 25 : 10),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -164,19 +161,24 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppDimensions.space12),
               decoration: BoxDecoration(
-                color: AppColors.warning.withAlpha(20),
+                color: (isDark ? AppColors.darkPrimary : AppColors.primary)
+                    .withAlpha(20),
                 borderRadius:
                     BorderRadius.circular(AppDimensions.radiusButton),
                 border: Border.all(
-                  color: AppColors.warning.withAlpha(80),
+                  color: (isDark ? AppColors.darkPrimary : AppColors.primary)
+                      .withAlpha(60),
                   width: 0.8,
                 ),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.warning_amber_rounded,
-                      color: AppColors.warning, size: 18),
+                  Icon(
+                    Icons.info_outline_rounded,
+                    color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                    size: 18,
+                  ),
                   const SizedBox(width: AppDimensions.space8),
                   Expanded(
                     child: FormattedHtmlText(
@@ -186,8 +188,8 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
                               : AppTextStyles.caption)
                           .copyWith(
                         color: isDark
-                            ? Colors.amber.shade200
-                            : const Color(0xFFB45309),
+                            ? AppColors.darkTextPrimary
+                            : AppColors.primaryDark,
                         fontWeight: FontWeight.w600,
                         fontSize: 12.5,
                       ),

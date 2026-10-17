@@ -42,7 +42,7 @@ class AgentNotificationsScreen extends ConsumerWidget {
       case 'COLLECTE_REJETEE':
         return AppColors.danger;
       case 'COLLECTE_CORRECTION':
-        return Colors.orange;
+        return AppColors.info;
       case 'COLLECTE_ATTRIBUEE':
       case 'COLLECTE_STATUT':
         return AppColors.primary;
@@ -53,7 +53,7 @@ class AgentNotificationsScreen extends ConsumerWidget {
       case 'URGENT':
         return AppColors.danger;
       case 'ATTENTION':
-        return Colors.orange;
+        return AppColors.info;
       default:
         return AppColors.primary;
     }
@@ -119,7 +119,7 @@ class AgentNotificationsScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF4A621),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -127,7 +127,7 @@ class AgentNotificationsScreen extends ConsumerWidget {
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF14532D),
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -135,18 +135,6 @@ class AgentNotificationsScreen extends ConsumerWidget {
           ],
         ),
         actions: [
-          IconButton(
-            tooltip: 'Actualiser',
-            icon: Icon(
-              Icons.refresh_rounded,
-              color: isDark ? Colors.white : AppColors.primary,
-            ),
-            onPressed: () {
-              ref.invalidate(agentNotificationsListProvider);
-              ref.invalidate(agentUnreadNotificationsCountProvider);
-              ref.invalidate(dashboardAgentProvider);
-            },
-          ),
           IconButton(
             tooltip: 'Tout marquer comme lu',
             icon: Icon(
@@ -205,6 +193,7 @@ class AgentNotificationsScreen extends ConsumerWidget {
                       child: FilterChip(
                         label: Text(f['label']!),
                         selected: isSelected,
+                        checkmarkColor: Colors.white,
                         selectedColor: AppColors.primary,
                         labelStyle: TextStyle(
                           color: isSelected
@@ -219,6 +208,16 @@ class AgentNotificationsScreen extends ConsumerWidget {
                         backgroundColor: isDark
                             ? AppColors.darkSurfaceVariant
                             : Colors.grey.shade100,
+                        side: BorderSide(
+                          color: isSelected
+                              ? AppColors.primary
+                              : (isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.border),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                         onSelected: (_) {
                           ref
                               .read(agentNotificationsFilterProvider.notifier)
@@ -565,7 +564,7 @@ class _NotificationTile extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           margin: const EdgeInsets.only(left: 6),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF4A621),
+                            color: AppColors.primary,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(
@@ -573,7 +572,7 @@ class _NotificationTile extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF14532D),
+                              color: Colors.white,
                             ),
                           ),
                         ),

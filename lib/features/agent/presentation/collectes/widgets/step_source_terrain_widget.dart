@@ -289,14 +289,60 @@ class _StepSourceTerrainWidgetState extends ConsumerState<StepSourceTerrainWidge
                     children: [
                       const Text('Profil : ', style: TextStyle(fontSize: 12)),
                       ChoiceChip(
-                        label: const Text('Tradipraticien', style: TextStyle(fontSize: 11)),
+                        label: const Text('Tradipraticien'),
                         selected: _selectedRole == 'THERAPEUTE',
+                        checkmarkColor: Colors.white,
+                        selectedColor: AppColors.primary,
+                        backgroundColor: isDark
+                            ? AppColors.darkSurfaceVariant
+                            : Colors.grey.shade100,
+                        side: BorderSide(
+                          color: _selectedRole == 'THERAPEUTE'
+                              ? AppColors.primary
+                              : (isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.border),
+                        ),
+                        labelStyle: TextStyle(
+                          fontSize: 11,
+                          fontWeight: _selectedRole == 'THERAPEUTE'
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: _selectedRole == 'THERAPEUTE'
+                              ? Colors.white
+                              : (isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary),
+                        ),
                         onSelected: (s) => setState(() => _selectedRole = 'THERAPEUTE'),
                       ),
                       const SizedBox(width: 8),
                       ChoiceChip(
-                        label: const Text('Herboriste', style: TextStyle(fontSize: 11)),
+                        label: const Text('Herboriste'),
                         selected: _selectedRole == 'HERBORISTE',
+                        checkmarkColor: Colors.white,
+                        selectedColor: AppColors.primary,
+                        backgroundColor: isDark
+                            ? AppColors.darkSurfaceVariant
+                            : Colors.grey.shade100,
+                        side: BorderSide(
+                          color: _selectedRole == 'HERBORISTE'
+                              ? AppColors.primary
+                              : (isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.border),
+                        ),
+                        labelStyle: TextStyle(
+                          fontSize: 11,
+                          fontWeight: _selectedRole == 'HERBORISTE'
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: _selectedRole == 'HERBORISTE'
+                              ? Colors.white
+                              : (isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary),
+                        ),
                         onSelected: (s) => setState(() => _selectedRole = 'HERBORISTE'),
                       ),
                     ],

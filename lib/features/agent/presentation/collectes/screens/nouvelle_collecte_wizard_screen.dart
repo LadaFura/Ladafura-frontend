@@ -131,7 +131,7 @@ class _NouvelleCollecteWizardScreenState
                               ..showSnackBar(
                                 SnackBar(
                                   content: Text(msg),
-                                  backgroundColor: Colors.orange.shade800,
+                                  backgroundColor: AppColors.info,
                                 ),
                               );
                             notifier.setStep(s);
@@ -240,14 +240,14 @@ class _NouvelleCollecteWizardScreenState
                   vertical: 8,
                 ),
                 color: isDark
-                    ? Colors.amber.shade900.withValues(alpha: 0.25)
-                    : Colors.amber.shade50,
+                    ? AppColors.darkPrimaryContainer.withValues(alpha: 0.45)
+                    : AppColors.primaryLight,
                 child: Row(
                   children: [
                     Icon(
                       Icons.info_outline_rounded,
                       size: 16,
-                      color: Colors.amber.shade800,
+                      color: isDark ? AppColors.darkPrimary : AppColors.primary,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -257,8 +257,8 @@ class _NouvelleCollecteWizardScreenState
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: isDark
-                              ? Colors.amber.shade200
-                              : Colors.amber.shade900,
+                              ? AppColors.darkTextPrimary
+                              : AppColors.primaryDark,
                         ),
                       ),
                     ),

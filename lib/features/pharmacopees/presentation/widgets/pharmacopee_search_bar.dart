@@ -169,7 +169,13 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
                               },
                             )
                           : null,
+                      filled: false,
                       border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      focusedErrorBorder: InputBorder.none,
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: AppDimensions.space12,

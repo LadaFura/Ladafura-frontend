@@ -161,7 +161,7 @@ class PlanteDetailHeroHeader extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.verified_rounded,
-                        color: AppColors.accent, size: 16),
+                        color: AppColors.darkPrimary, size: 16),
                     const SizedBox(width: 6),
                     Text(
                       'Spécimen Botanique Répertorié',
@@ -358,7 +358,7 @@ class _ExpandableBotanicalDescriptionState
                       fontSize: 13.5,
                       fontWeight: FontWeight.w700,
                       color: widget.isDark
-                          ? AppColors.accent
+                          ? AppColors.darkPrimary
                           : AppColors.primary,
                     ),
                   ),
@@ -369,7 +369,7 @@ class _ExpandableBotanicalDescriptionState
                         : Icons.keyboard_arrow_down_rounded,
                     size: 18,
                     color: widget.isDark
-                        ? AppColors.accent
+                        ? AppColors.darkPrimary
                         : AppColors.primary,
                   ),
                 ],

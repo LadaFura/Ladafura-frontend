@@ -145,11 +145,13 @@ class _StepMaladiesSymptomesWidgetState
           padding: const EdgeInsets.all(AppDimensions.space12),
           decoration: BoxDecoration(
             color: isDark
-                ? AppColors.darkSurfaceVariant
-                : Colors.amber.shade50,
+                ? AppColors.darkPrimaryContainer.withValues(alpha: 0.4)
+                : AppColors.primaryLight,
             borderRadius: BorderRadius.circular(AppDimensions.radiusInput),
             border: Border.all(
-              color: isDark ? AppColors.darkBorder : Colors.amber.shade200,
+              color: isDark
+                  ? AppColors.darkPrimary.withValues(alpha: 0.35)
+                  : AppColors.primary.withValues(alpha: 0.25),
             ),
           ),
           child: Row(
@@ -157,7 +159,7 @@ class _StepMaladiesSymptomesWidgetState
             children: [
               Icon(
                 Icons.info_outline_rounded,
-                color: Colors.amber.shade800,
+                color: isDark ? AppColors.darkPrimary : AppColors.primary,
                 size: 18,
               ),
               const SizedBox(width: 8),
@@ -168,8 +170,8 @@ class _StepMaladiesSymptomesWidgetState
                     fontSize: 11,
                     height: 1.4,
                     color: isDark
-                        ? AppColors.darkTextSecondary
-                        : Colors.amber.shade900,
+                        ? AppColors.darkTextPrimary
+                        : AppColors.primaryDark,
                   ),
                 ),
               ),

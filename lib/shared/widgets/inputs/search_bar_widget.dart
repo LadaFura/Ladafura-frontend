@@ -107,7 +107,13 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                 hintText: widget.hintText,
                 hintStyle:
                     AppTextStyles.bodySecondary.copyWith(color: hintColor),
+                filled: false,
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),

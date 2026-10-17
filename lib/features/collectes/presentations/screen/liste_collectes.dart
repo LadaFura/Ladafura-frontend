@@ -107,15 +107,6 @@ class _ListeCollectesState extends ConsumerState<ListeCollectes> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Actualiser',
-            onPressed: () {
-              ref.invalidate(agentCollectesListProvider);
-            },
-          ),
-        ],
       ),
       body: SafeArea(
         child: Column(
@@ -164,6 +155,7 @@ class _ListeCollectesState extends ConsumerState<ListeCollectes> {
                           child: FilterChip(
                             label: Text(f['label']!),
                             selected: isSel,
+                            checkmarkColor: Colors.white,
                             selectedColor: AppColors.primary,
                             labelStyle: TextStyle(
                               color: isSel
@@ -178,6 +170,16 @@ class _ListeCollectesState extends ConsumerState<ListeCollectes> {
                             backgroundColor: isDark
                                 ? AppColors.darkSurfaceVariant
                                 : Colors.grey.shade100,
+                            side: BorderSide(
+                              color: isSel
+                                  ? AppColors.primary
+                                  : (isDark
+                                      ? AppColors.darkBorder
+                                      : AppColors.border),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                             onSelected: (selected) {
                               ref
                                   .read(agentCollectesFilterProvider.notifier)

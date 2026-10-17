@@ -43,8 +43,8 @@ class AgentCollecteDetailPage extends ConsumerWidget {
       case 'EN_EXAMEN':
         return const _StatusStyle(
           label: 'En examen',
-          color: Color(0xFFB45309),
-          bgColor: Color(0xFFFEF3C7),
+          color: Color(0xFF1D4ED8),
+          bgColor: Color(0xFFDBEAFE),
           icon: Icons.hourglass_top_rounded,
         );
       case 'BROUILLON':
@@ -148,7 +148,7 @@ class AgentCollecteDetailPage extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline_rounded, size: 48, color: Colors.orange),
+                const Icon(Icons.error_outline_rounded, size: 48, color: AppColors.danger),
                 const SizedBox(height: 12),
                 Text(
                   'Impossible de charger cette fiche de collecte.',
@@ -202,7 +202,7 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                   _buildStatusNoticeCard(
                     isDark: isDark,
                     icon: Icons.verified_rounded,
-                    color: Colors.green,
+                    color: AppColors.success,
                     title: 'Fiche de collecte validée & intégrée',
                     message:
                         'Cette collecte a été approuvée par le comité scientifique et intégrée au patrimoine botanique officiel. Elle n\'est plus modifiable.',
@@ -213,7 +213,7 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                   _buildStatusNoticeCard(
                     isDark: isDark,
                     icon: Icons.hourglass_top_rounded,
-                    color: Colors.amber.shade800,
+                    color: AppColors.info,
                     title: 'Examen en cours par le comité',
                     message:
                         'Cette fiche de collecte a été transmise pour modération. Toute modification est suspendue pendant son examen.',
@@ -758,15 +758,22 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7),
+                    color: (isDark ? AppColors.darkPrimary : AppColors.primary)
+                        .withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: (isDark ? AppColors.darkPrimary : AppColors.primary)
+                          .withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Text(
                     m,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF92400E),
+                      color: isDark
+                          ? AppColors.darkPrimary
+                          : AppColors.primaryDark,
                     ),
                   ),
                 );
@@ -806,13 +813,13 @@ class AgentCollecteDetailPage extends ConsumerWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isDark
-                    ? const Color(0xFF78350F).withValues(alpha: 0.28)
-                    : const Color(0xFFFFFBEB),
+                    ? AppColors.darkPrimaryContainer.withValues(alpha: 0.4)
+                    : AppColors.primaryLight,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isDark
-                      ? const Color(0xFFF59E0B).withValues(alpha: 0.45)
-                      : const Color(0xFFFCD34D),
+                      ? AppColors.darkPrimary.withValues(alpha: 0.35)
+                      : AppColors.primary.withValues(alpha: 0.25),
                   width: 1,
                 ),
               ),
@@ -822,11 +829,9 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                   Row(
                     children: [
                       Icon(
-                        Icons.warning_amber_rounded,
+                        Icons.info_outline_rounded,
                         size: 18,
-                        color: isDark
-                            ? const Color(0xFFFBBF24)
-                            : const Color(0xFFD97706),
+                        color: isDark ? AppColors.darkPrimary : AppColors.primary,
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -835,8 +840,8 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                           color: isDark
-                              ? const Color(0xFFFBBF24)
-                              : const Color(0xFFB45309),
+                              ? AppColors.darkPrimary
+                              : AppColors.primaryDark,
                         ),
                       ),
                     ],
@@ -849,8 +854,8 @@ class AgentCollecteDetailPage extends ConsumerWidget {
                       fontSize: 13,
                       height: 1.45,
                       color: isDark
-                          ? const Color(0xFFFDE68A)
-                          : const Color(0xFF92400E),
+                          ? AppColors.darkTextPrimary
+                          : AppColors.primaryDark,
                     ),
                   ),
                 ],

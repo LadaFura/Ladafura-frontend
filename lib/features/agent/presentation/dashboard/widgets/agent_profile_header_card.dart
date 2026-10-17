@@ -67,13 +67,13 @@ class AgentProfileHeaderCard extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.25),
+                    color: Colors.white.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
                     'AGENT DE COLLECTE',
                     style: TextStyle(
-                      color: AppColors.accent,
+                      color: Colors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.8,
