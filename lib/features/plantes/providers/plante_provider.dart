@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ladafura_frontend_flutter/core/network/network_providers.dart';
+import '../../home/providers/home_discovery_provider.dart';
+import '../../home/services/home_service.dart';
 import '../models/plante_model.dart';
 import '../services/plante_service.dart';
 
@@ -21,7 +23,12 @@ final plantesListProvider =
 final planteDetailProvider = FutureProvider.autoDispose
     .family<PopulationPlanteDetailModel?, int>((ref, id) async {
   final service = ref.watch(planteServiceProvider);
-  return service.getPlanteDetail(id);
+  final detail = await service.getPlanteDetail(id);
+  if (detail != null) {
+    HomeService.recordLocalPlantConsultation(id);
+    ref.invalidate(popularPlantesProvider);
+  }
+  return detail;
 });
 
 final produitDetailProvider = FutureProvider.autoDispose

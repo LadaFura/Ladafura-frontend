@@ -46,8 +46,9 @@ class UserLocationNotifier extends StateNotifier<AsyncValue<GeoCoordinates?>> {
 
   Future<void> _initLocation() async {
     try {
-      final pos = await _locationService.getCurrentPosition();
-      state = AsyncValue.data(pos);
+      final pos = await _locationService.requestPositionWithPermission() ??
+          await _locationService.getCurrentPosition();
+      state = AsyncValue.data(pos ?? _locationService.lastKnownPosition ?? GeoCoordinates.bamako);
     } catch (_) {
       state = AsyncValue.data(_locationService.lastKnownPosition ?? GeoCoordinates.bamako);
     }

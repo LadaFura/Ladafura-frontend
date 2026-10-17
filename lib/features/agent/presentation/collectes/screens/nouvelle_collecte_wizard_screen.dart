@@ -340,6 +340,8 @@ class _NouvelleCollecteWizardScreenState
                             ? null
                             : () async {
                                 if (draft.currentStep < _stepTitles.length - 1) {
+                                  // Sauvegarde automatique transparente de l'étape sur le serveur
+                                  notifier.saveDraft();
                                   notifier.setStep(draft.currentStep + 1);
                                 } else {
                                   final success = await notifier.soumettre();

@@ -388,6 +388,10 @@ class NouvelleCollecteWizardNotifier extends StateNotifier<NouvelleCollecteDraft
       // Enregistrer connaissance & maladies
       if (validPlanteId != null && state.usageRapporte.trim().isNotEmpty) {
         try {
+          final validMaladieIds = state.selectedMaladies
+              .map((m) => m.id)
+              .where((mid) => mid > 0)
+              .toList();
           await _api.enregistrerConnaissance(
             collecteId: id,
             planteId: validPlanteId,
@@ -402,9 +406,13 @@ class NouvelleCollecteWizardNotifier extends StateNotifier<NouvelleCollecteDraft
                 ? state.precaution.trim()
                 : null,
             sourceId: validSourceId,
-            maladieIds: state.selectedMaladies.map((m) => m.id).toList(),
+            maladieIds: validMaladieIds.isNotEmpty ? validMaladieIds : null,
           );
-        } catch (_) {}
+        } catch (e) {
+          // Journaliser pour faciliter le diagnostic en cas d'échec
+          // ignore: avoid_print
+          print('Erreur lors de l\'enregistrement de la connaissance: $e');
+        }
       }
 
       // Enregistrer localisation si saisie

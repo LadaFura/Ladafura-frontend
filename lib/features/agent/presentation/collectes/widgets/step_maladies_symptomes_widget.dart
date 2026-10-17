@@ -135,9 +135,11 @@ class _StepMaladiesSymptomesWidgetState
     final selectedMaladies = draftState.selectedMaladies;
     final query = _searchController.text.trim();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
         // Avertissement déontologique
         Container(
           padding: const EdgeInsets.all(AppDimensions.space12),
@@ -453,6 +455,7 @@ class _StepMaladiesSymptomesWidgetState
             }).toList(),
           ),
       ],
-    );
-  }
+    ),
+  );
+}
 }

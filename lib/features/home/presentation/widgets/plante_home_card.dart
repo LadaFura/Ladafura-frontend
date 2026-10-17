@@ -150,7 +150,9 @@ class PlanteHomeCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 1),
                     Text(
-                      '${plante.nombreConnaissances} sav. • ${plante.nombreEtudesScientifiques} étud.',
+                      plante.nombreConsultations > 0
+                          ? '${plante.nombreConsultations} consult. • ${plante.nombreConnaissances} sav.'
+                          : '${plante.nombreConnaissances} sav. • ${plante.nombreEtudesScientifiques} étud.',
                       style: (isDark
                               ? AppTextStyles.captionDark
                               : AppTextStyles.caption)

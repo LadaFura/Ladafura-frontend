@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../shared/widgets/formatted_html_text.dart';
 import '../../models/plante_model.dart';
 
 /// Carte moderne présentant les savoirs traditionnels et usages ancestraux rapportés.
@@ -145,13 +146,13 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
                   item.modePreparation!.isNotEmpty)
                 _buildTagChip(
                   icon: Icons.coffee_maker_outlined,
-                  label: 'Préparation : ${item.modePreparation}',
+                  label: 'Préparation : ${FormattedHtmlText.stripHtml(item.modePreparation!)}',
                   isDark: isDark,
                 ),
               if (item.posologie != null && item.posologie!.isNotEmpty)
                 _buildTagChip(
                   icon: Icons.medical_services_outlined,
-                  label: 'Posologie : ${item.posologie}',
+                  label: 'Posologie : ${FormattedHtmlText.stripHtml(item.posologie!)}',
                   isDark: isDark,
                 ),
             ],
@@ -178,7 +179,7 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
                       color: AppColors.warning, size: 18),
                   const SizedBox(width: AppDimensions.space8),
                   Expanded(
-                    child: Text(
+                    child: FormattedHtmlText(
                       'Précautions : ${item.precautions}',
                       style: (isDark
                               ? AppTextStyles.captionDark

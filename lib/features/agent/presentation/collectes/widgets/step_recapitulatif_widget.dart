@@ -52,8 +52,10 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
           // 1. Statut de conformité
           Builder(
             builder: (context) {
-              final isConforme =
-                  draft.isAllStepsValid || (recap?.conformePourSoumission ?? false);
+              final hasBlockingErrors =
+                  recap != null && recap.erreursBloquantes.isNotEmpty;
+              final isConforme = !hasBlockingErrors &&
+                  (draft.isAllStepsValid || (recap?.conformePourSoumission ?? false));
               return Container(
                 padding: const EdgeInsets.all(AppDimensions.space16),
                 decoration: BoxDecoration(
@@ -87,20 +89,26 @@ class _StepRecapitulatifWidgetState extends ConsumerState<StepRecapitulatifWidge
                           Text(
                             isConforme
                                 ? 'Dossier Conforme pour Soumission'
-                                : 'Vérification des étapes requise',
+                                : (hasBlockingErrors
+                                    ? 'Dossier incomplet pour la soumission'
+                                    : 'Vérification des étapes requise'),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                               color: isConforme
                                   ? Colors.green.shade800
-                                  : Colors.amber.shade900,
+                                  : (hasBlockingErrors
+                                      ? AppColors.danger
+                                      : Colors.amber.shade900),
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             isConforme
                                 ? 'Tous les critères indispensables sont validés. Vous pouvez soumettre la fiche.'
-                                : 'Appuyez sur une section ci-dessous pour compléter ou modifier ses informations.',
+                                : (hasBlockingErrors
+                                    ? 'Veuillez corriger le(s) point(s) bloquant(s) ci-dessous avant de soumettre.'
+                                    : 'Appuyez sur une section ci-dessous pour compléter ou modifier ses informations.'),
                             style: TextStyle(
                               fontSize: 11,
                               color: isDark

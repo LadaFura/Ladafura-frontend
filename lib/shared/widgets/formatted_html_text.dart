@@ -38,6 +38,76 @@ class FormattedHtmlText extends StatelessWidget {
     );
   }
 
+  /// Normalise le contenu HTML ou texte enrichi :
+  /// - Convertit les entités HTML (&nbsp;, &amp;...)
+  /// - Transforme les blocs <div>, <p>, <br> en retours à la ligne
+  /// - Isole chaque puce (•) sur sa propre ligne
+  /// - Convertit le Markdown (**gras**, *italique*) en balises simples
+  static String normalizeRichContent(String raw, {bool singleLine = false}) {
+    if (raw.isEmpty) return raw;
+
+    var text = raw;
+
+    // 1. Convertir les entités HTML fréquentes
+    text = text
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'");
+
+    // 2. Déplacer les puces à l'extérieur des balises de gras (ex: <b>• Titre</b> -> • <b>Titre</b>)
+    text = text.replaceAllMapped(
+      RegExp(r'<(b|strong)>\s*([•●▪])\s*', caseSensitive: false),
+      (m) => '${m[2]} <${m[1]}>',
+    );
+
+    // 3. Normaliser les balises de fin de bloc HTML en sauts de ligne
+    text = text.replaceAll(RegExp(r'</(div|p|li|h[1-6])>', caseSensitive: false), '\n');
+    text = text.replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n');
+
+    // 4. Si <div> ou <p> démarre sans saut de ligne devant, insérer un saut de ligne
+    text = text.replaceAll(RegExp(r'(?<!\n)\s*<(div|p)[^>]*>', caseSensitive: false), '\n');
+
+    // 5. Traiter les puces : si une puce (•, ●, ▪) apparaît au milieu d'un texte,
+    // l'isoler sur une nouvelle ligne pour éviter qu'elle soit collée à la phrase précédente
+    text = text.replaceAllMapped(
+      RegExp(r'([^\n\r])\s*([•●▪])\s*'),
+      (m) => '${m[1]}\n• ',
+    );
+
+    // 6. Supprimer les balises orphelines <div>, <p>, <span> qui ne formatent pas
+    text = text.replaceAll(RegExp(r'<(div|p|span)[^>]*>', caseSensitive: false), '');
+    text = text.replaceAll(RegExp(r'</(span)>', caseSensitive: false), '');
+
+    // 7. Convertir le Markdown courant (**gras** -> <b>gras</b>, *italique* -> <i>italique</i>)
+    text = text.replaceAllMapped(
+      RegExp(r'\*\*([^*]+)\*\*'),
+      (m) => '<b>${m[1]}</b>',
+    );
+    text = text.replaceAllMapped(
+      RegExp(r'(?<!\*)\*([^*]+)\*(?!\*)'),
+      (m) => '<i>${m[1]}</i>',
+    );
+
+    // 8. Nettoyer et trimmer chaque ligne pour un rendu impeccable
+    final lines = text
+        .split('\n')
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty)
+        .map((l) => l.replaceAll(RegExp(r'([•●▪])\s+'), '• '))
+        .toList();
+
+    text = lines.join('\n');
+
+    if (singleLine) {
+      text = text.replaceAll(RegExp(r'[\r\n]+'), ' ');
+    }
+
+    return text.trim();
+  }
+
   /// Convertit une chaîne contenant des balises HTML simples en une arborescence de TextSpan.
   static TextSpan buildTextSpan({
     required String html,
@@ -48,9 +118,12 @@ class FormattedHtmlText extends StatelessWidget {
       return TextSpan(text: '', style: baseStyle);
     }
 
-    // Si le texte ne contient aucune balise HTML, retour direct optimisé
-    if (!html.contains('<') || !html.contains('>')) {
-      return TextSpan(text: html, style: baseStyle);
+    // Normalisation préalable du texte
+    final normalized = normalizeRichContent(html, singleLine: singleLineFallback);
+
+    // Si le texte ne contient plus aucune balise HTML après normalisation, retour direct
+    if (!normalized.contains('<') || !normalized.contains('>')) {
+      return TextSpan(text: normalized, style: baseStyle);
     }
 
     final tagExp = RegExp(r'<(/?[a-zA-Z0-9]+)([^>]*)>');
@@ -66,13 +139,7 @@ class FormattedHtmlText extends StatelessWidget {
 
     void addChunk(String raw) {
       if (raw.isEmpty) return;
-      var clean = raw
-          .replaceAll('&nbsp;', ' ')
-          .replaceAll('&amp;', '&')
-          .replaceAll('&lt;', '<')
-          .replaceAll('&gt;', '>')
-          .replaceAll('&quot;', '"')
-          .replaceAll('&#39;', "'");
+      var clean = raw;
 
       if (singleLineFallback) {
         clean = clean.replaceAll(RegExp(r'[\r\n]+'), ' ');
@@ -101,9 +168,9 @@ class FormattedHtmlText extends StatelessWidget {
       spans.add(TextSpan(text: clean, style: chunkStyle));
     }
 
-    for (final match in tagExp.allMatches(html)) {
+    for (final match in tagExp.allMatches(normalized)) {
       if (match.start > lastIndex) {
-        addChunk(html.substring(lastIndex, match.start));
+        addChunk(normalized.substring(lastIndex, match.start));
       }
 
       final rawTag = match.group(1)!.toLowerCase();
@@ -146,7 +213,14 @@ class FormattedHtmlText extends StatelessWidget {
 
         case 'br':
         case 'br/':
-          if (!singleLineFallback) addChunk('\n');
+        case 'div':
+        case '/div':
+          if (!singleLineFallback && spans.isNotEmpty) {
+            final last = spans.last;
+            if (last is TextSpan && last.text != null && !last.text!.endsWith('\n')) {
+              addChunk('\n');
+            }
+          }
           break;
 
         case 'p':
@@ -225,8 +299,8 @@ class FormattedHtmlText extends StatelessWidget {
       lastIndex = match.end;
     }
 
-    if (lastIndex < html.length) {
-      addChunk(html.substring(lastIndex));
+    if (lastIndex < normalized.length) {
+      addChunk(normalized.substring(lastIndex));
     }
 
     return TextSpan(children: spans, style: baseStyle);
@@ -234,21 +308,10 @@ class FormattedHtmlText extends StatelessWidget {
 
   /// Débarrasse une chaîne de ses balises HTML et convertit les listes en puces texte.
   static String stripHtml(String html) {
-    if (!html.contains('<') || !html.contains('>')) return html;
-    return html
-        .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
-        .replaceAll(RegExp(r'</li>', caseSensitive: false), '\n')
-        .replaceAll(RegExp(r'<li[^>]*>', caseSensitive: false), '• ')
-        .replaceAll(RegExp(r'</p>', caseSensitive: false), '\n\n')
-        .replaceAll(RegExp(r'</div>', caseSensitive: false), '\n')
+    if (html.isEmpty) return html;
+    final normalized = normalizeRichContent(html);
+    return normalized
         .replaceAll(RegExp(r'<[^>]*>'), '')
-        .replaceAll('&nbsp;', ' ')
-        .replaceAll('&amp;', '&')
-        .replaceAll('&lt;', '<')
-        .replaceAll('&gt;', '>')
-        .replaceAll('&quot;', '"')
-        .replaceAll('&#39;', "'")
-        .replaceAll(RegExp(r'\n{3,}'), '\n\n')
         .trim();
   }
 }

@@ -20,6 +20,17 @@ class CitizenNotificationsPage extends ConsumerWidget {
       backgroundColor: isDark ? AppColors.darkBackground : const Color(0xFFF8F9FA),
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          tooltip: 'Retour',
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(RouteNames.citizenProfilPath);
+            }
+          },
+        ),
         title: const Text(
           'Notifications',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),

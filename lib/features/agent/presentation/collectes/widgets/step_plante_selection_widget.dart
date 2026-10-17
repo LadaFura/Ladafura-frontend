@@ -325,9 +325,13 @@ class _StepPlanteSelectionWidgetState
                       }).toList(),
                     ),
                     const SizedBox(height: 12),
+                    const Text(
+                      'Description botanique (optionnel) :',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 6),
                     FormattingToolbarWidget(
                       controller: _descriptionController,
-                      label: 'Description botanique (optionnel)',
                     ),
                     TextField(
                       controller: _descriptionController,
@@ -458,8 +462,9 @@ class _StepPlanteSelectionWidgetState
           if (_plantes.isEmpty && !_isLoading) ...[
             Expanded(
               child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(AppDimensions.space20),
+                child: SingleChildScrollView(
+                  child: Container(
+                    padding: const EdgeInsets.all(AppDimensions.space20),
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
                     color: isDark ? AppColors.darkSurface : Colors.grey.shade50,
@@ -492,6 +497,7 @@ class _StepPlanteSelectionWidgetState
                 ),
               ),
             ),
+          )
           ] else ...[
             Expanded(
               child: ListView.separated(

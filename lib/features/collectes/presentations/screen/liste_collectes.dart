@@ -7,10 +7,20 @@ import 'package:ladafura_frontend_flutter/core/constants/app_text_styles.dart';
 import 'package:ladafura_frontend_flutter/core/routing/route_names.dart';
 import 'package:ladafura_frontend_flutter/features/agent/providers/agent_providers.dart';
 import 'package:ladafura_frontend_flutter/features/agent/presentation/collectes/widgets/collecte_card_widget.dart';
+import 'package:ladafura_frontend_flutter/features/collectes/models/agent_collecte_summary_response.dart';
+import 'package:ladafura_frontend_flutter/shared/widgets/inputs/search_bar_widget.dart';
 
-/// Écran listant l'ensemble des collectes de terrain de l'agent avec filtres par statut.
-class ListeCollectes extends ConsumerWidget {
+/// Écran listant l'ensemble des collectes de terrain de l'agent avec recherche dynamique et filtres par statut.
+class ListeCollectes extends ConsumerStatefulWidget {
   const ListeCollectes({super.key});
+
+  @override
+  ConsumerState<ListeCollectes> createState() => _ListeCollectesState();
+}
+
+class _ListeCollectesState extends ConsumerState<ListeCollectes> {
+  late final TextEditingController _searchController;
+  String _searchQuery = '';
 
   final List<Map<String, String>> _filtres = const [
     {'id': 'TOUTES', 'label': 'Toutes'},
@@ -21,7 +31,66 @@ class ListeCollectes extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  String _normalize(String input) {
+    return input
+        .toLowerCase()
+        .replaceAll('é', 'e')
+        .replaceAll('è', 'e')
+        .replaceAll('ê', 'e')
+        .replaceAll('ë', 'e')
+        .replaceAll('à', 'a')
+        .replaceAll('â', 'a')
+        .replaceAll('î', 'i')
+        .replaceAll('ï', 'i')
+        .replaceAll('ô', 'o')
+        .replaceAll('ù', 'u')
+        .replaceAll('û', 'u')
+        .replaceAll('ç', 'c');
+  }
+
+  List<AgentCollecteSummaryResponse> _filterCollectes(
+    List<AgentCollecteSummaryResponse> collectes,
+    String query,
+  ) {
+    if (query.trim().isEmpty) return collectes;
+    final q = _normalize(query.trim());
+
+    return collectes.where((c) {
+      final plante = _normalize(c.nomScientifiquePlante ?? '');
+      final source = _normalize(c.nomSource ?? '');
+      final localite = _normalize(c.localite ?? '');
+      final cercle = _normalize(c.cercle ?? '');
+      final region = _normalize(c.region ?? '');
+      final desc = _normalize(c.description ?? '');
+      final idStr = c.id.toString();
+      final hashId = '#$idStr';
+      final statutStr = _normalize(c.statut?.toString() ?? '');
+
+      return plante.contains(q) ||
+          source.contains(q) ||
+          localite.contains(q) ||
+          cercle.contains(q) ||
+          region.contains(q) ||
+          desc.contains(q) ||
+          idStr == q ||
+          hashId == q ||
+          statutStr.contains(q);
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final selectedFilter = ref.watch(agentCollectesFilterProvider);
     final collectesAsync = ref.watch(agentCollectesListProvider);
@@ -38,52 +107,146 @@ class ListeCollectes extends ConsumerWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Actualiser',
+            onPressed: () {
+              ref.invalidate(agentCollectesListProvider);
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
           children: [
-            // Barre de filtres horizontaux
+            // Barre supérieure : Recherche + Filtres
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.space16,
-                vertical: AppDimensions.space8,
-              ),
               color: isDark ? AppColors.darkSurface : Colors.white,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: _filtres.map((f) {
-                    final isSel = selectedFilter == f['id'];
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: FilterChip(
-                        label: Text(f['label']!),
-                        selected: isSel,
-                        selectedColor: AppColors.primary,
-                        labelStyle: TextStyle(
-                          color: isSel
-                              ? Colors.white
-                              : (isDark
-                                  ? AppColors.darkTextPrimary
-                                  : AppColors.textPrimary),
-                          fontWeight:
-                              isSel ? FontWeight.bold : FontWeight.normal,
-                          fontSize: 12,
-                        ),
-                        backgroundColor: isDark
-                            ? AppColors.darkSurfaceVariant
-                            : Colors.grey.shade100,
-                        onSelected: (selected) {
-                          ref
-                              .read(agentCollectesFilterProvider.notifier)
-                              .state = f['id']!;
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
+              child: Column(
+                children: [
+                  // Widget de recherche
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppDimensions.space16,
+                      AppDimensions.space8,
+                      AppDimensions.space16,
+                      AppDimensions.space8,
+                    ),
+                    child: SearchBarWidget(
+                      controller: _searchController,
+                      hintText: 'Rechercher (plante, localité, source...)',
+                      onChanged: (val) {
+                        setState(() {
+                          _searchQuery = val;
+                        });
+                      },
+                      onClear: () {
+                        setState(() {
+                          _searchQuery = '';
+                        });
+                      },
+                    ),
+                  ),
+
+                  // Barre de filtres horizontaux
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimensions.space16,
+                      vertical: AppDimensions.space4,
+                    ),
+                    child: Row(
+                      children: _filtres.map((f) {
+                        final isSel = selectedFilter == f['id'];
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: FilterChip(
+                            label: Text(f['label']!),
+                            selected: isSel,
+                            selectedColor: AppColors.primary,
+                            labelStyle: TextStyle(
+                              color: isSel
+                                  ? Colors.white
+                                  : (isDark
+                                      ? AppColors.darkTextPrimary
+                                      : AppColors.textPrimary),
+                              fontWeight:
+                                  isSel ? FontWeight.bold : FontWeight.normal,
+                              fontSize: 12,
+                            ),
+                            backgroundColor: isDark
+                                ? AppColors.darkSurfaceVariant
+                                : Colors.grey.shade100,
+                            onSelected: (selected) {
+                              ref
+                                  .read(agentCollectesFilterProvider.notifier)
+                                  .state = f['id']!;
+                            },
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.space8),
+                ],
               ),
             ),
+
+            // Indicateur de résultat de recherche active
+            if (_searchQuery.trim().isNotEmpty)
+              collectesAsync.maybeWhen(
+                data: (allCollectes) {
+                  final matches = _filterCollectes(allCollectes, _searchQuery);
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimensions.space16,
+                      vertical: AppDimensions.space8,
+                    ),
+                    color: (isDark ? AppColors.darkPrimary : AppColors.primary)
+                        .withValues(alpha: 0.08),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.filter_list_rounded,
+                          size: 16,
+                          color:
+                              isDark ? AppColors.darkPrimary : AppColors.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '${matches.length} collecte${matches.length > 1 ? 's' : ''} trouvée${matches.length > 1 ? 's' : ''} pour « $_searchQuery »',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isDark
+                                  ? AppColors.darkPrimary
+                                  : AppColors.primary,
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                          child: const Text(
+                            'Effacer',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.danger,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                orElse: () => const SizedBox.shrink(),
+              ),
 
             // Liste de résultats
             Expanded(
@@ -93,7 +256,8 @@ class ListeCollectes extends ConsumerWidget {
                   ref.invalidate(agentCollectesListProvider);
                 },
                 child: collectesAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (err, stack) => SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: Container(
@@ -103,15 +267,19 @@ class ListeCollectes extends ConsumerWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.error_outline, size: 48, color: Colors.orange),
+                          const Icon(Icons.error_outline,
+                              size: 48, color: Colors.orange),
                           const SizedBox(height: 12),
                           Text(
                             'Impossible de charger les collectes.',
-                            style: isDark ? AppTextStyles.bodyDark : AppTextStyles.body,
+                            style: isDark
+                                ? AppTextStyles.bodyDark
+                                : AppTextStyles.body,
                           ),
                           const SizedBox(height: 8),
                           ElevatedButton(
-                            onPressed: () => ref.invalidate(agentCollectesListProvider),
+                            onPressed: () =>
+                                ref.invalidate(agentCollectesListProvider),
                             child: const Text('Réessayer'),
                           ),
                         ],
@@ -123,7 +291,7 @@ class ListeCollectes extends ConsumerWidget {
                       return SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         child: Container(
-                          height: MediaQuery.of(context).size.height * 0.6,
+                          height: MediaQuery.of(context).size.height * 0.5,
                           alignment: Alignment.center,
                           padding: const EdgeInsets.all(AppDimensions.space24),
                           child: Column(
@@ -132,7 +300,9 @@ class ListeCollectes extends ConsumerWidget {
                               Icon(
                                 Icons.spa_outlined,
                                 size: 56,
-                                color: isDark ? AppColors.darkTextMuted : Colors.grey.shade400,
+                                color: isDark
+                                    ? AppColors.darkTextMuted
+                                    : Colors.grey.shade400,
                               ),
                               const SizedBox(height: 16),
                               Text(
@@ -161,17 +331,79 @@ class ListeCollectes extends ConsumerWidget {
                       );
                     }
 
+                    final filtered = _filterCollectes(collectes, _searchQuery);
+
+                    if (filtered.isEmpty) {
+                      return SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Container(
+                          height: MediaQuery.of(context).size.height * 0.5,
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.all(AppDimensions.space24),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding:
+                                    const EdgeInsets.all(AppDimensions.space16),
+                                decoration: BoxDecoration(
+                                  color: AppColors.warning.withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.search_off_rounded,
+                                  size: 48,
+                                  color: AppColors.warning,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Aucun résultat pour « $_searchQuery »',
+                                style: (isDark
+                                        ? AppTextStyles.h3Dark
+                                        : AppTextStyles.h3)
+                                    .copyWith(fontSize: 16),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Vérifiez l\'orthographe du nom de la plante, du lieu ou de l\'informateur.',
+                                textAlign: TextAlign.center,
+                                style: (isDark
+                                        ? AppTextStyles.captionDark
+                                        : AppTextStyles.caption)
+                                    .copyWith(
+                                  color: isDark
+                                      ? AppColors.darkTextMuted
+                                      : AppColors.textMuted,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              OutlinedButton.icon(
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _searchQuery = '');
+                                },
+                                icon: const Icon(Icons.clear_rounded, size: 18),
+                                label: const Text('Effacer la recherche'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
                     return ListView.separated(
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.all(AppDimensions.space16),
-                      itemCount: collectes.length,
+                      itemCount: filtered.length,
                       separatorBuilder: (ctx, i) => const SizedBox(height: 12),
                       itemBuilder: (ctx, index) {
-                        final c = collectes[index];
+                        final c = filtered[index];
                         return CollecteCardWidget(
                           collecte: c,
                           onTap: () {
-                            context.push('${RouteNames.agentCollectesPath}/${c.id}');
+                            context.push(
+                                '${RouteNames.agentCollectesPath}/${c.id}');
                           },
                         );
                       },
@@ -223,7 +455,9 @@ class ListeCollectes extends ConsumerWidget {
                         heroTag: 'agent_collectes_nav_fab',
                         tooltip: 'Nouvelle collecte',
                         onPressed: () {
-                          ref.read(nouvelleCollecteWizardProvider.notifier).reset();
+                          ref
+                              .read(nouvelleCollecteWizardProvider.notifier)
+                              .reset();
                           context.push(RouteNames.agentNouvelleCollectePath);
                         },
                         backgroundColor: AppColors.primary,

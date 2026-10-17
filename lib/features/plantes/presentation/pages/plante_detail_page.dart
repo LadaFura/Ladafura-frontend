@@ -728,12 +728,62 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
         ],
         if (item.precautions != null &&
             item.precautions!.trim().isNotEmpty) ...[
-          _buildInfoRow(
-            isDark: isDark,
-            label: 'Précautions d\'usage',
-            value: item.precautions!,
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFF78350F).withValues(alpha: 0.28)
+                  : const Color(0xFFFFFBEB),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark
+                    ? const Color(0xFFF59E0B).withValues(alpha: 0.45)
+                    : const Color(0xFFFCD34D),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      size: 18,
+                      color: isDark
+                          ? const Color(0xFFFBBF24)
+                          : const Color(0xFFD97706),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Précautions d\'usage',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: isDark
+                            ? const Color(0xFFFBBF24)
+                            : const Color(0xFFB45309),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                FormattedHtmlText(
+                  item.precautions!,
+                  style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
+                      .copyWith(
+                    fontSize: 13,
+                    height: 1.45,
+                    color: isDark
+                        ? const Color(0xFFFDE68A)
+                        : const Color(0xFF92400E),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
         ],
         if (item.sourceNom != null && item.sourceNom!.trim().isNotEmpty) ...[
           Text(

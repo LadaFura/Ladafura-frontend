@@ -86,7 +86,7 @@ class CitizenHomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppDimensions.space20),
 
-              // 3. Section "Pharmacopées à proximité" (liste horizontale de plusieurs pharmacopées)
+              // 4. Section "Pharmacopées à proximité" (maximum 10 pharmacopées les plus proches)
               _buildSectionHeader(
                 context: context,
                 title: 'Pharmacopées à proximité',
@@ -97,18 +97,19 @@ class CitizenHomeScreen extends ConsumerWidget {
 
               pharmacopeesAsync.when(
                 data: (pharmacopees) {
-                  if (pharmacopees.isEmpty) {
+                  final items = pharmacopees.take(10).toList();
+                  if (items.isEmpty) {
                     return const SizedBox.shrink();
                   }
                   return SizedBox(
                     height: 250,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: pharmacopees.length,
+                      itemCount: items.length,
                       separatorBuilder: (_, __) =>
                           const SizedBox(width: AppDimensions.space12),
                       itemBuilder: (context, index) {
-                        final ph = pharmacopees[index];
+                        final ph = items[index];
                         return PharmacopeeHomeCard(
                           width: 300,
                           pharmacopee: ph,
@@ -131,7 +132,7 @@ class CitizenHomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppDimensions.space24),
 
-              // 5. Section "Plantes les plus consultées"
+              // 5. Section "Plantes les plus consultées" (maximum 15 plantes)
               _buildSectionHeader(
                 context: context,
                 title: 'Plantes les plus consultées',
@@ -147,16 +148,17 @@ class CitizenHomeScreen extends ConsumerWidget {
 
               plantesAsync.when(
                 data: (plantes) {
-                  if (plantes.isEmpty) return const SizedBox.shrink();
+                  final items = plantes.take(15).toList();
+                  if (items.isEmpty) return const SizedBox.shrink();
                   return SizedBox(
                     height: AppDimensions.cardPlantHomeHeight,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: plantes.length,
+                      itemCount: items.length,
                       separatorBuilder: (_, __) =>
                           const SizedBox(width: AppDimensions.space12),
                       itemBuilder: (context, index) {
-                        final plante = plantes[index];
+                        final plante = items[index];
                         return PlanteHomeCard(
                           plante: plante,
                           onTap: () => context.push(
@@ -183,7 +185,7 @@ class CitizenHomeScreen extends ConsumerWidget {
   );
   }
 
-  /// En-tête générique de section avec bouton "Voir tout >"
+  /// En-tête générique de section avec bouton "Voir plus >"
   Widget _buildSectionHeader({
     required BuildContext context,
     required String title,
@@ -213,7 +215,7 @@ class CitizenHomeScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Voir tout',
+                  'Voir plus',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,

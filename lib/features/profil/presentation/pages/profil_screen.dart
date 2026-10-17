@@ -7,19 +7,15 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routing/route_names.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../auth/providers/auth_state_provider.dart';
+import '../../../notifications/providers/notification_provider.dart';
 import '../../providers/profil_provider.dart';
 import '../widgets/modern_profile_user_card.dart';
 import '../widgets/modern_setting_section.dart';
 import '../widgets/profil_logout_dialog.dart';
 
-/// Page principale du Profil & Paramètres inspirée de l'interface moderne fournie.
-/// Intègre rigoureusement les constantes de design system (AppDimensions, AppTextStyles, AppColors).
-/// Organisée en sections cartes arrondies avec titres clairs :
-/// - En-tête : Avatar rond, Nom, Email, Action "Modifier mon profil"
-/// - Détails du compte : Mes informations, Mes commandes
-/// - Activités & Cible : Mes favoris, Mes notifications
-/// - Général : Langue, Mode Sombre/Clair, Paramètres
-/// - Assistance & Compte : À propos, Se déconnecter
+/// Page principale du Profil Citoyen / Population.
+/// Design épuré sans duplication, avec navigation directe vers les notifications,
+/// sélection de langue interactive, modal À propos et gestion du mode sombre.
 class ProfilScreen extends ConsumerWidget {
   const ProfilScreen({super.key});
 
@@ -32,6 +28,169 @@ class ProfilScreen extends ConsumerWidget {
         context.go(RouteNames.loginPath);
       }
     }
+  }
+
+  void _showLanguageSelector(BuildContext context, bool isDark) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppDimensions.radiusModal),
+        ),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.space20,
+              vertical: AppDimensions.space16,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white24 : Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppDimensions.space16),
+                Text(
+                  'Langue de l\'application',
+                  style: isDark ? AppTextStyles.h3Dark : AppTextStyles.h3,
+                ),
+                const SizedBox(height: AppDimensions.space16),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Text('🇲🇱', style: TextStyle(fontSize: 26)),
+                  title: Text(
+                    'Français (Mali)',
+                    style: (isDark ? AppTextStyles.bodyDark : AppTextStyles.body)
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: const Text('Langue active'),
+                  trailing: const Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.primary,
+                  ),
+                  onTap: () => Navigator.pop(ctx),
+                ),
+                const Divider(),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Text('🇲🇱', style: TextStyle(fontSize: 26)),
+                  title: Text(
+                    'Bamanankan (Bambara)',
+                    style: isDark ? AppTextStyles.bodyDark : AppTextStyles.body,
+                  ),
+                  subtitle: const Text('Bientôt disponible'),
+                  trailing: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.warning.withAlpha(20),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Bientôt',
+                      style: AppTextStyles.badge.copyWith(
+                        color: AppColors.warning,
+                      ),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Le support complet du Bamanankan arrive prochainement !',
+                        ),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: AppDimensions.space12),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showAboutDialog(BuildContext context, bool isDark) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radiusModal),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppDimensions.space8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withAlpha(20),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.local_florist_rounded,
+                color: AppColors.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: AppDimensions.space12),
+            Expanded(
+              child: Text(
+                'À propos de LADAFURA',
+                style: isDark ? AppTextStyles.h4Dark : AppTextStyles.h4,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'LADAFURA Mobile v1.0.0 (Bêta)',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: AppDimensions.space8),
+            Text(
+              'Plateforme numérique de référence pour la valorisation, la traçabilité et la diffusion sécurisée de la pharmacopée traditionnelle et des plantes médicinales.',
+              style: isDark
+                  ? AppTextStyles.bodySecondaryDark
+                  : AppTextStyles.bodySecondary,
+            ),
+            const SizedBox(height: AppDimensions.space12),
+            Text(
+              '© 2026 LADAFURA. Tous droits réservés.',
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark ? Colors.white38 : AppColors.textMuted,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Fermer'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -94,7 +253,8 @@ class ProfilScreen extends ConsumerWidget {
     final profil = profilState.profil;
     final totalCommandes = profil?.nombreTotalCommandes ?? 0;
     final totalFavoris = profil?.nombreTotalFavoris ?? 0;
-    final unreadNotifs = profilState.unreadNotificationsCount;
+    final unreadNotifs = ref.watch(unreadNotificationCountProvider).valueOrNull ??
+        profilState.unreadNotificationsCount;
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
@@ -109,7 +269,12 @@ class ProfilScreen extends ConsumerWidget {
         elevation: 0,
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.read(profilProvider.notifier).chargerProfil(),
+        onRefresh: () async {
+          await Future.wait([
+            ref.read(profilProvider.notifier).chargerProfil(),
+            ref.refresh(unreadNotificationCountProvider.future),
+          ]);
+        },
         child: profilState.isLoading && profil == null
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
@@ -120,7 +285,7 @@ class ProfilScreen extends ConsumerWidget {
                 ),
                 child: Column(
                   children: [
-                    // 1. En-tête profil inspiré de la référence (Carte blanche arrondie)
+                    // 1. En-tête profil (Avatar, Nom, Email/Tel, Action "Modifier mon profil")
                     ModernProfileUserCard(
                       profil: profil,
                       onEditProfile: () {
@@ -129,18 +294,10 @@ class ProfilScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppDimensions.space20),
 
-                    // 2. Section "Détails du compte" (Account details)
+                    // 2. Section "Mon Activité" (Commandes, Favoris, Notifications)
                     ModernSettingSection(
-                      title: 'Détails du compte',
+                      title: 'Mon Activité',
                       items: [
-                        ModernSettingItem(
-                          icon: Icons.person_outline_rounded,
-                          title: 'Mes informations',
-                          valueText: profil?.telephone ?? '',
-                          onTap: () {
-                            context.pushNamed(RouteNames.citizenModifierProfil);
-                          },
-                        ),
                         ModernSettingItem(
                           icon: Icons.receipt_long_outlined,
                           title: 'Mes commandes',
@@ -171,14 +328,6 @@ class ProfilScreen extends ConsumerWidget {
                             context.pushNamed(RouteNames.citizenCommandes);
                           },
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: AppDimensions.space20),
-
-                    // 3. Section "Activité & Favoris" (Target)
-                    ModernSettingSection(
-                      title: 'Activité & Favoris',
-                      items: [
                         ModernSettingItem(
                           icon: Icons.favorite_border_rounded,
                           title: 'Mes remèdes favoris',
@@ -230,35 +379,17 @@ class ProfilScreen extends ConsumerWidget {
                                 )
                               : null,
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  unreadNotifs > 0
-                                      ? 'Vous avez $unreadNotifs notification(s) non lue(s).'
-                                      : 'Aucune nouvelle notification pour le moment.',
-                                  style: AppTextStyles.bodySecondary,
-                                ),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
+                            context.pushNamed(RouteNames.citizenNotifications);
                           },
                         ),
                       ],
                     ),
                     const SizedBox(height: AppDimensions.space20),
 
-                    // 4. Section "Général" (General)
+                    // 3. Section "Préférences" (Mode Sombre, Langue, Paramètres avancés)
                     ModernSettingSection(
-                      title: 'Général',
+                      title: 'Préférences',
                       items: [
-                        ModernSettingItem(
-                          icon: Icons.language_rounded,
-                          title: 'Langue',
-                          valueText: 'Français',
-                          onTap: () {
-                            context.pushNamed(RouteNames.citizenParametres);
-                          },
-                        ),
                         ModernSettingItem(
                           icon: isDark
                               ? Icons.dark_mode_rounded
@@ -273,7 +404,8 @@ class ProfilScreen extends ConsumerWidget {
                             onChanged: (val) {
                               ref
                                   .read(themeModeProvider.notifier)
-                                  .setThemeMode(val ? ThemeMode.dark : ThemeMode.light);
+                                  .setThemeMode(
+                                      val ? ThemeMode.dark : ThemeMode.light);
                             },
                           ),
                           onTap: () {
@@ -281,6 +413,12 @@ class ProfilScreen extends ConsumerWidget {
                                 .read(themeModeProvider.notifier)
                                 .toggleTheme(currentIsDark: isDark);
                           },
+                        ),
+                        ModernSettingItem(
+                          icon: Icons.language_rounded,
+                          title: 'Langue',
+                          valueText: 'Français',
+                          onTap: () => _showLanguageSelector(context, isDark),
                         ),
                         ModernSettingItem(
                           icon: Icons.tune_rounded,
@@ -293,17 +431,15 @@ class ProfilScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppDimensions.space20),
 
-                    // 5. Section "Assistance & Session" (Support)
+                    // 4. Section "Assistance & Session"
                     ModernSettingSection(
                       title: 'Assistance & Session',
                       items: [
                         ModernSettingItem(
-                          icon: Icons.help_outline_rounded,
+                          icon: Icons.info_outline_rounded,
                           title: 'À propos de LADAFURA',
                           valueText: 'v1.0.0',
-                          onTap: () {
-                            context.pushNamed(RouteNames.citizenParametres);
-                          },
+                          onTap: () => _showAboutDialog(context, isDark),
                         ),
                         ModernSettingItem(
                           icon: Icons.logout_rounded,

@@ -12,6 +12,7 @@ class PlanteSommaireModel {
   final List<String> maladies;
   final int nombreConnaissances;
   final int nombreEtudesScientifiques;
+  final int nombreConsultations;
 
   const PlanteSommaireModel({
     required this.id,
@@ -22,6 +23,7 @@ class PlanteSommaireModel {
     this.maladies = const [],
     this.nombreConnaissances = 0,
     this.nombreEtudesScientifiques = 0,
+    this.nombreConsultations = 0,
   });
 
   /// Nom local ou vernaculaire principal (ex: "Kinkéliba") ou repli sur le nom scientifique.
@@ -46,6 +48,7 @@ class PlanteSommaireModel {
     List<String>? maladies,
     int? nombreConnaissances,
     int? nombreEtudesScientifiques,
+    int? nombreConsultations,
   }) {
     return PlanteSommaireModel(
       id: id ?? this.id,
@@ -57,6 +60,7 @@ class PlanteSommaireModel {
       nombreConnaissances: nombreConnaissances ?? this.nombreConnaissances,
       nombreEtudesScientifiques:
           nombreEtudesScientifiques ?? this.nombreEtudesScientifiques,
+      nombreConsultations: nombreConsultations ?? this.nombreConsultations,
     );
   }
 
@@ -69,6 +73,7 @@ class PlanteSommaireModel {
         'maladies': maladies,
         'nombreConnaissances': nombreConnaissances,
         'nombreEtudesScientifiques': nombreEtudesScientifiques,
+        'nombreConsultations': nombreConsultations,
       };
 
   factory PlanteSommaireModel.fromJson(Map<String, dynamic> json) {
@@ -97,6 +102,7 @@ class PlanteSommaireModel {
       nombreConnaissances: (json['nombreConnaissances'] as num?)?.toInt() ?? 0,
       nombreEtudesScientifiques:
           (json['nombreEtudesScientifiques'] as num?)?.toInt() ?? 0,
+      nombreConsultations: (json['nombreConsultations'] as num?)?.toInt() ?? 0,
     );
   }
 

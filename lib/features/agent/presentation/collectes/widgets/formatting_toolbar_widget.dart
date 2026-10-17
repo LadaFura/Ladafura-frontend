@@ -131,55 +131,65 @@ class FormattingToolbarWidget extends StatelessWidget {
           width: 0.8,
         ),
       ),
-      child: Row(
-        children: [
-          if (label != null) ...[
-            Text(
-              label!,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (label != null && label!.trim().isNotEmpty) ...[
+              Text(
+                label!,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+                ),
               ),
+              const SizedBox(width: 8),
+              Container(
+                height: 14,
+                width: 1,
+                color: isDark ? AppColors.darkBorder : Colors.grey.shade300,
+              ),
+              const SizedBox(width: 8),
+            ],
+            // Bouton Gras
+            _buildToolButton(
+              context: context,
+              icon: Icons.format_bold_rounded,
+              tooltip: 'Gras (**texte**)',
+              onPressed: _formatBold,
+              label: 'Gras',
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
+            // Bouton Italique
+            _buildToolButton(
+              context: context,
+              icon: Icons.format_italic_rounded,
+              tooltip: 'Italique (*texte*)',
+              onPressed: _formatItalic,
+            ),
+            const SizedBox(width: 4),
+            // Bouton Puces
+            _buildToolButton(
+              context: context,
+              icon: Icons.format_list_bulleted_rounded,
+              tooltip: 'Liste à puces (•)',
+              onPressed: _formatBullet,
+              label: 'Puces',
+            ),
+            const SizedBox(width: 4),
+            // Bouton Numérotation
+            _buildToolButton(
+              context: context,
+              icon: Icons.format_list_numbered_rounded,
+              tooltip: 'Liste numérotée (1., 2., ...)',
+              onPressed: _formatNumbered,
+              label: '1. 2.',
+            ),
           ],
-          const Spacer(),
-          // Bouton Gras
-          _buildToolButton(
-            context: context,
-            icon: Icons.format_bold_rounded,
-            tooltip: 'Gras (**texte**)',
-            onPressed: _formatBold,
-            label: 'Gras',
-          ),
-          const SizedBox(width: 4),
-          // Bouton Italique
-          _buildToolButton(
-            context: context,
-            icon: Icons.format_italic_rounded,
-            tooltip: 'Italique (*texte*)',
-            onPressed: _formatItalic,
-          ),
-          const SizedBox(width: 4),
-          // Bouton Puces
-          _buildToolButton(
-            context: context,
-            icon: Icons.format_list_bulleted_rounded,
-            tooltip: 'Liste à puces (•)',
-            onPressed: _formatBullet,
-            label: 'Puces',
-          ),
-          const SizedBox(width: 4),
-          // Bouton Numérotation
-          _buildToolButton(
-            context: context,
-            icon: Icons.format_list_numbered_rounded,
-            tooltip: 'Liste numérotée (1., 2., ...)',
-            onPressed: _formatNumbered,
-            label: '1. 2. 3.',
-          ),
-        ],
+        ),
       ),
     );
   }

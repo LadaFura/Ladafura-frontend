@@ -180,7 +180,7 @@ final List<PlanteSommaireModel> _fallbackPlantes = [
   ),
 ];
 
-/// Provider pour les pharmacopées les plus proches du visiteur ou citoyen
+/// Provider pour les pharmacopées les plus proches du visiteur ou citoyen (10 maximum)
 final nearbyPharmacopeesProvider =
     FutureProvider<List<PharmacopeeModel>>((ref) async {
   final homeService = ref.watch(homeServiceProvider);
@@ -188,13 +188,18 @@ final nearbyPharmacopeesProvider =
   final userLocation = userLocationAsync.valueOrNull;
 
   try {
-    final list = await homeService.fetchPharmacopees(page: 0, size: 10);
+    final list = await homeService.fetchPharmacopees(
+      page: 0,
+      size: 10,
+      latitude: userLocation?.latitude,
+      longitude: userLocation?.longitude,
+    );
     if (list.isNotEmpty) {
-      // Tri par distance croissante
+      // Tri par distance croissante par rapport à la géolocalisation du citoyen et limite à 10
       list.sort((a, b) => a
           .distanceToKm(userLocation)
           .compareTo(b.distanceToKm(userLocation)));
-      return list;
+      return list.take(10).toList();
     }
   } catch (_) {
     // Repli local en cas d'erreur
@@ -203,7 +208,7 @@ final nearbyPharmacopeesProvider =
   final list = List<PharmacopeeModel>.from(_fallbackPharmacopees);
   list.sort((a, b) =>
       a.distanceToKm(userLocation).compareTo(b.distanceToKm(userLocation)));
-  return list;
+  return list.take(10).toList();
 });
 
 /// Provider pour les médicaments traditionnels (Fura) les plus populaires
@@ -222,19 +227,19 @@ final popularProduitsProvider = FutureProvider<List<ProduitModel>>((ref) async {
   return _fallbackProduits;
 });
 
-/// Provider pour les plantes médicinales les plus consultées
+/// Provider pour les plantes médicinales les plus consultées (15 maximum)
 final popularPlantesProvider =
     FutureProvider<List<PlanteSommaireModel>>((ref) async {
   final homeService = ref.watch(homeServiceProvider);
 
   try {
-    final list = await homeService.fetchPopularPlantes(page: 0, size: 10);
+    final list = await homeService.fetchPopularPlantes(page: 0, size: 15);
     if (list.isNotEmpty) {
-      return list;
+      return list.take(15).toList();
     }
   } catch (_) {
     // Repli local
   }
 
-  return _fallbackPlantes;
+  return _fallbackPlantes.take(15).toList();
 });
