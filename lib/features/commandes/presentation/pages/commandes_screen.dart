@@ -147,8 +147,9 @@ class _CommandesScreenState extends ConsumerState<CommandesScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline_rounded,
-                            size: 54, color: Colors.orange),
+                        Icon(Icons.error_outline_rounded,
+                            size: 54,
+                            color: isDark ? AppColors.darkDanger : AppColors.danger),
                         const SizedBox(height: 12),
                         Text(
                           'Erreur de chargement des commandes',

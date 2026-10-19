@@ -35,6 +35,7 @@ import '../../shared/widgets/navigation/app_shell.dart';
 import '../../shared/widgets/navigation/navigation_provider.dart';
 import '../network/network_providers.dart';
 import '../services/services_providers.dart';
+import '../constants/app_colors.dart';
 import 'route_guard.dart';
 import 'route_names.dart';
 
@@ -504,7 +505,7 @@ GoRouter appRouter(AppRouterRef ref) {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.orange),
+            const Icon(Icons.error_outline, size: 64, color: AppColors.danger),
             const SizedBox(height: 16),
             Text(
               'Route non trouvée : ${state.matchedLocation}',

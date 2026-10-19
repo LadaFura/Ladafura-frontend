@@ -88,7 +88,7 @@ class _StepMaladiesSymptomesWidgetState
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Cette affection est déjà dans votre liste.'),
-          backgroundColor: Colors.orange,
+          backgroundColor: AppColors.warning,
         ),
       );
       return;

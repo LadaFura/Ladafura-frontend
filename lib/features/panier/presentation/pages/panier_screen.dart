@@ -87,7 +87,7 @@ class _PanierScreenState extends ConsumerState<PanierScreen> {
           const SnackBar(
             content: Text(
                 'Aucune pharmacopée agréée ne propose actuellement ce remède.'),
-            backgroundColor: Colors.orange,
+            backgroundColor: AppColors.warning,
           ),
         );
         return;
@@ -200,8 +200,9 @@ class _PanierScreenState extends ConsumerState<PanierScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded,
-                  size: 64, color: Colors.orange),
+              Icon(Icons.error_outline_rounded,
+                  size: 64,
+                  color: isDark ? AppColors.darkDanger : AppColors.danger),
               const SizedBox(height: AppDimensions.space16),
               Text(
                 'Impossible de charger votre panier',

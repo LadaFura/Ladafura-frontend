@@ -201,7 +201,7 @@ class _AgentSourcesScreenState extends ConsumerState<AgentSourcesScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.error_outline, size: 48, color: Colors.orange),
+                          const Icon(Icons.error_outline, size: 48, color: AppColors.danger),
                           const SizedBox(height: 12),
                           Text('Erreur de chargement: $err'),
                           const SizedBox(height: 8),

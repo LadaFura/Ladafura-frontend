@@ -169,11 +169,13 @@ class ProfilActiviteSection extends StatelessWidget {
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.amber.withAlpha(25),
+                color: (isDark ? AppColors.darkPrimary : AppColors.primary)
+                    .withAlpha(25),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.notifications_outlined,
-                  color: Colors.amber, size: 20),
+              child: Icon(Icons.notifications_outlined,
+                  color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                  size: 20),
             ),
             title: Text(
               'Notifications',

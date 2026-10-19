@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../models/commande_model.dart';
+import 'commande_statut_badge.dart';
 
 class CommandeCard extends StatelessWidget {
   final CommandeModel commande;
@@ -42,23 +43,7 @@ class CommandeCard extends StatelessWidget {
                 style: (isDark ? AppTextStyles.h4Dark : AppTextStyles.h4)
                     .copyWith(fontWeight: FontWeight.bold),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.space8,
-                  vertical: AppDimensions.space4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withAlpha(20),
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusBadge),
-                ),
-                child: Text(
-                  commande.statut,
-                  style: AppTextStyles.caption.copyWith(
-                    color: isDark ? AppColors.darkPrimary : AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              CommandeStatutBadge(statut: commande.statut),
             ],
           ),
           const SizedBox(height: AppDimensions.space8),

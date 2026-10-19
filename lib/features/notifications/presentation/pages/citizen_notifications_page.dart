@@ -380,7 +380,7 @@ class _NotificationCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Icône selon type
-              _buildLeadingIcon(item.type, item.niveau),
+              _buildLeadingIcon(item.type, item.niveau, isDark),
               const SizedBox(width: 12),
 
               // Contenu
@@ -440,27 +440,42 @@ class _NotificationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLeadingIcon(String type, NotificationNiveau niveau) {
+  Widget _buildLeadingIcon(String type, NotificationNiveau niveau, bool isDark) {
     IconData icon;
     Color bg;
     Color fg;
 
-    if (type.contains('COMMANDE')) {
+    final t = type.toUpperCase();
+    if (t.contains('REJET') ||
+        t.contains('ANNUL') ||
+        t.contains('REFUS') ||
+        niveau == NotificationNiveau.urgent ||
+        t.contains('ALERTE')) {
+      icon = (t.contains('ANNUL') || t.contains('REJET') || t.contains('REFUS'))
+          ? Icons.cancel_outlined
+          : Icons.error_outline_rounded;
+      fg = isDark ? AppColors.darkDanger : AppColors.danger;
+      bg = fg.withValues(alpha: isDark ? 0.2 : 0.12);
+    } else if (t.contains('ATTENTE') ||
+        t.contains('PRECAUTION') ||
+        t.contains('AVERTISSEMENT')) {
+      icon = t.contains('ATTENTE')
+          ? Icons.hourglass_top_rounded
+          : Icons.warning_amber_rounded;
+      fg = isDark ? AppColors.darkWarning : const Color(0xFFD97706);
+      bg = fg.withValues(alpha: isDark ? 0.2 : 0.12);
+    } else if (t.contains('COMMANDE')) {
       icon = Icons.shopping_bag_outlined;
-      bg = const Color(0xFFE8F5E9);
-      fg = AppColors.primary;
-    } else if (type.contains('AVIS')) {
+      fg = isDark ? AppColors.darkPrimary : AppColors.primary;
+      bg = fg.withValues(alpha: isDark ? 0.2 : 0.12);
+    } else if (t.contains('AVIS')) {
       icon = Icons.star_border_rounded;
-      bg = const Color(0xFFFFF8E1);
-      fg = Colors.amber.shade800;
-    } else if (niveau == NotificationNiveau.urgent || type.contains('ALERTE')) {
-      icon = Icons.warning_amber_rounded;
-      bg = const Color(0xFFFFEBEE);
-      fg = Colors.red.shade700;
+      fg = isDark ? AppColors.darkWarning : const Color(0xFFD97706);
+      bg = fg.withValues(alpha: isDark ? 0.2 : 0.12);
     } else {
       icon = Icons.notifications_none_rounded;
-      bg = const Color(0xFFE3F2FD);
-      fg = Colors.blue.shade700;
+      fg = isDark ? AppColors.darkInfo : AppColors.info;
+      bg = fg.withValues(alpha: isDark ? 0.2 : 0.12);
     }
 
     return Container(

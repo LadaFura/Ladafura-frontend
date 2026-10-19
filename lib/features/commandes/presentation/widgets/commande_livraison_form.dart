@@ -50,7 +50,7 @@ class _CommandeLivraisonFormState extends ConsumerState<CommandeLivraisonForm> {
               content: Text(
                 'Impossible de récupérer votre position GPS. Veuillez vérifier vos autorisations ou utiliser la saisie manuelle.',
               ),
-              backgroundColor: Colors.orange,
+              backgroundColor: AppColors.warning,
             ),
           );
           setState(() {

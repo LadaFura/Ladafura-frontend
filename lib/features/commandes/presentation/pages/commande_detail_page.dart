@@ -105,8 +105,9 @@ class CommandeDetailPage extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline_rounded,
-                            size: 48, color: Colors.orange),
+                        Icon(Icons.error_outline_rounded,
+                            size: 48,
+                            color: isDark ? AppColors.darkDanger : AppColors.danger),
                         const SizedBox(height: 12),
                         Text('Erreur de chargement : $err',
                             textAlign: TextAlign.center),
@@ -168,8 +169,11 @@ class CommandeDetailPage extends ConsumerWidget {
                   if (cmd.annulable) ...[
                     OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.redAccent,
-                        side: const BorderSide(color: Colors.redAccent),
+                        foregroundColor:
+                            isDark ? AppColors.darkDanger : AppColors.danger,
+                        side: BorderSide(
+                          color: isDark ? AppColors.darkDanger : AppColors.danger,
+                        ),
                         minimumSize: const Size(double.infinity, 48),
                         shape: RoundedRectangleBorder(
                           borderRadius:

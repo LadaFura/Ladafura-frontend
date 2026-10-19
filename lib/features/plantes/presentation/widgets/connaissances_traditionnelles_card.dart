@@ -161,13 +161,15 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppDimensions.space12),
               decoration: BoxDecoration(
-                color: (isDark ? AppColors.darkPrimary : AppColors.primary)
-                    .withAlpha(20),
+                color: isDark
+                    ? const Color(0xFF382A15)
+                    : const Color(0xFFFEF3C7),
                 borderRadius:
                     BorderRadius.circular(AppDimensions.radiusButton),
                 border: Border.all(
-                  color: (isDark ? AppColors.darkPrimary : AppColors.primary)
-                      .withAlpha(60),
+                  color: isDark
+                      ? AppColors.darkWarning.withValues(alpha: 0.45)
+                      : AppColors.warning.withValues(alpha: 0.4),
                   width: 0.8,
                 ),
               ),
@@ -175,8 +177,8 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(
-                    Icons.info_outline_rounded,
-                    color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                    Icons.warning_amber_rounded,
+                    color: isDark ? AppColors.darkWarning : const Color(0xFFD97706),
                     size: 18,
                   ),
                   const SizedBox(width: AppDimensions.space8),
@@ -188,8 +190,8 @@ class ConnaissancesTraditionnellesCard extends StatelessWidget {
                               : AppTextStyles.caption)
                           .copyWith(
                         color: isDark
-                            ? AppColors.darkTextPrimary
-                            : AppColors.primaryDark,
+                            ? const Color(0xFFFDE68A)
+                            : const Color(0xFF92400E),
                         fontWeight: FontWeight.w600,
                         fontSize: 12.5,
                       ),

@@ -20,14 +20,14 @@ class MedicalDisclaimerBanner extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final bgColor = isDark
-        ? AppColors.darkPrimaryContainer.withValues(alpha: 0.5)
-        : AppColors.badgeInstitutionnelBg;
+        ? const Color(0xFF382A15)
+        : const Color(0xFFFEF3C7);
     final borderColor = isDark
-        ? AppColors.darkPrimary.withValues(alpha: 0.35)
-        : AppColors.primary.withValues(alpha: 0.25);
-    final iconColor = isDark ? AppColors.darkPrimary : AppColors.primary;
+        ? AppColors.darkWarning.withValues(alpha: 0.45)
+        : AppColors.warning.withValues(alpha: 0.4);
+    final iconColor = isDark ? AppColors.darkWarning : const Color(0xFFD97706);
     final textColor =
-        isDark ? AppColors.darkTextPrimary : AppColors.badgeInstitutionnelText;
+        isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E);
 
     if (compact) {
       return Container(

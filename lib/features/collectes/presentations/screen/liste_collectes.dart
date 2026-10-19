@@ -269,8 +269,9 @@ class _ListeCollectesState extends ConsumerState<ListeCollectes> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.error_outline,
-                              size: 48, color: Colors.orange),
+                          Icon(Icons.error_outline,
+                              size: 48,
+                              color: isDark ? AppColors.darkDanger : AppColors.danger),
                           const SizedBox(height: 12),
                           Text(
                             'Impossible de charger les collectes.',

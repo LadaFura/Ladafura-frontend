@@ -112,7 +112,7 @@ class _PharmacopeeDetailPageState extends ConsumerState<PharmacopeeDetailPage> {
           SnackBar(
             content: Text(
               eligibilite.message ??
-                  'Vous devez avoir passé au moins une commande livrée auprès de cette pharmacopée pour déposer un avis.',
+                  'Vous devez avoir passé au moins une commande livrée ou retirée auprès de cette pharmacopée pour déposer un avis.',
             ),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 4),

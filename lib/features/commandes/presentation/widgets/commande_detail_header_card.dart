@@ -73,29 +73,44 @@ class CommandeDetailHeaderCard extends StatelessWidget {
                 style: (isDark ? AppTextStyles.captionDark : AppTextStyles.caption)
                     .copyWith(fontSize: 13),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: (commande.statutPaiement == 'PAYE' ||
-                          commande.statutPaiement == 'REUSSI')
-                      ? Colors.green.withAlpha(25)
-                      : Colors.orange.withAlpha(25),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  commande.statutPaiement == 'REUSSI' ||
-                          commande.statutPaiement == 'PAYE'
-                      ? 'Réglé'
-                      : 'En attente',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: (commande.statutPaiement == 'PAYE' ||
-                            commande.statutPaiement == 'REUSSI')
-                        ? Colors.green
-                        : Colors.orange,
-                  ),
-                ),
+              Builder(
+                builder: (context) {
+                  final isPaye = commande.statutPaiement == 'PAYE' ||
+                      commande.statutPaiement == 'REUSSI';
+                  final isEchoue = commande.statutPaiement == 'ECHOUE' ||
+                      commande.statutPaiement == 'REJETE' ||
+                      commande.statutPaiement == 'ANNULE';
+
+                  final Color statusColor;
+                  final String label;
+
+                  if (isPaye) {
+                    statusColor = isDark ? AppColors.darkSuccess : AppColors.success;
+                    label = 'Réglé';
+                  } else if (isEchoue) {
+                    statusColor = isDark ? AppColors.darkDanger : AppColors.danger;
+                    label = commande.statutPaiement == 'REJETE' ? 'Rejeté' : 'Échoué';
+                  } else {
+                    statusColor = isDark ? AppColors.darkWarning : const Color(0xFFD97706);
+                    label = 'En attente';
+                  }
+
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: isDark ? 0.2 : 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: statusColor,
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),

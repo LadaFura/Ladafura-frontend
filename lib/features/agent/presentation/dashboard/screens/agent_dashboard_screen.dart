@@ -18,7 +18,7 @@ Color getStatusColor(String status) {
       return Colors.grey;
 
     case 'EN_ATTENTE':
-      return AppColors.info;
+      return AppColors.warning;
 
     case 'SOUMISE':
       return AppColors.primary;
@@ -512,7 +512,7 @@ class AgentDashboardScreen extends ConsumerWidget {
                                   0,
                           label: 'À compléter',
                           color:
-                              AppColors.info,
+                              AppColors.warning,
                           isDark: isDark,
                         ),
                       ),

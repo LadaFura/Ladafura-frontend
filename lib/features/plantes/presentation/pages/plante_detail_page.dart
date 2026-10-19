@@ -339,13 +339,13 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       decoration: BoxDecoration(
         color: isDark
-            ? AppColors.darkPrimaryContainer.withValues(alpha: 0.45)
-            : AppColors.primaryLight,
+            ? const Color(0xFF382A15)
+            : const Color(0xFFFEF3C7),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isDark
-              ? AppColors.darkPrimary.withValues(alpha: 0.35)
-              : AppColors.primary.withValues(alpha: 0.25),
+              ? AppColors.darkWarning.withValues(alpha: 0.45)
+              : AppColors.warning.withValues(alpha: 0.4),
           width: 0.9,
         ),
       ),
@@ -357,7 +357,7 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
             child: Icon(
               Icons.health_and_safety_outlined,
               size: 19,
-              color: isDark ? AppColors.darkPrimary : AppColors.primary,
+              color: isDark ? AppColors.darkWarning : const Color(0xFFD97706),
             ),
           ),
           const SizedBox(width: 10),
@@ -368,8 +368,8 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
                   fontSize: 12,
                   height: 1.45,
                   color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.primaryDark,
+                      ? const Color(0xFFFDE68A)
+                      : const Color(0xFF92400E),
                 ),
                 children: const [
                   TextSpan(
@@ -747,13 +747,13 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isDark
-                  ? AppColors.darkPrimaryContainer.withValues(alpha: 0.4)
-                  : AppColors.primaryLight,
+                  ? const Color(0xFF382A15)
+                  : const Color(0xFFFEF3C7),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isDark
-                    ? AppColors.darkPrimary.withValues(alpha: 0.35)
-                    : AppColors.primary.withValues(alpha: 0.25),
+                    ? AppColors.darkWarning.withValues(alpha: 0.45)
+                    : AppColors.warning.withValues(alpha: 0.4),
                 width: 1,
               ),
             ),
@@ -763,9 +763,9 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
                 Row(
                   children: [
                     Icon(
-                      Icons.info_outline_rounded,
+                      Icons.warning_amber_rounded,
                       size: 18,
-                      color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                      color: isDark ? AppColors.darkWarning : const Color(0xFFD97706),
                     ),
                     const SizedBox(width: 6),
                     Text(
@@ -774,8 +774,8 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
                         fontSize: 12.5,
                         fontWeight: FontWeight.w700,
                         color: isDark
-                            ? AppColors.darkPrimary
-                            : AppColors.primaryDark,
+                            ? AppColors.darkWarning
+                            : const Color(0xFFB45309),
                       ),
                     ),
                   ],
@@ -788,8 +788,8 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
                     fontSize: 13,
                     height: 1.45,
                     color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.primaryDark,
+                        ? const Color(0xFFFDE68A)
+                        : const Color(0xFF92400E),
                   ),
                 ),
               ],

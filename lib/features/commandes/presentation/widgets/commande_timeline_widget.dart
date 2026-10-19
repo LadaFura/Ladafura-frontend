@@ -20,30 +20,47 @@ class CommandeTimelineWidget extends StatelessWidget {
     final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
 
     final steps = _getTimelineSteps(statut, isLivraison);
-    final isAnnulee = statut.toUpperCase() == 'ANNULEE';
+    final sUpper = statut.toUpperCase();
+    final isCancelledOrRejected = sUpper == 'ANNULEE' || sUpper == 'REJETEE' || sUpper == 'REFUSEE';
 
-    if (isAnnulee) {
+    if (isCancelledOrRejected) {
+      final dangerColor = isDark ? AppColors.darkDanger : AppColors.danger;
+      final isRejet = sUpper == 'REJETEE' || sUpper == 'REFUSEE';
+      final message = isRejet
+          ? 'Cette commande a été rejetée par la pharmacopée.'
+          : 'Cette commande a été annulée. Les produits ont été réintégrés aux stocks de la pharmacopée.';
+
       return Container(
         padding: const EdgeInsets.all(AppDimensions.space12),
         decoration: BoxDecoration(
-          color: Colors.red.withAlpha(20),
+          color: dangerColor.withValues(alpha: isDark ? 0.2 : 0.12),
           borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-          border: Border.all(color: Colors.red.withAlpha(50)),
+          border: Border.all(color: dangerColor.withValues(alpha: 0.3)),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.cancel_rounded, color: Colors.redAccent, size: 24),
-            SizedBox(width: 10),
+            Icon(Icons.cancel_rounded, color: dangerColor, size: 24),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Cette commande a été annulée. Les produits ont été réintégrés aux stocks de la pharmacopée.',
-                style: TextStyle(color: Colors.redAccent, fontSize: 13),
+                message,
+                style: TextStyle(
+                  color: dangerColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],
         ),
       );
     }
+
+    final isEnAttente = statut.toUpperCase() == 'EN_ATTENTE';
+    final currentStepColor = isEnAttente
+        ? (isDark ? AppColors.darkWarning : const Color(0xFFD97706))
+        : primaryColor;
+    final successColor = isDark ? AppColors.darkSuccess : AppColors.success;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -84,14 +101,14 @@ class CommandeTimelineWidget extends StatelessWidget {
                   child: Container(
                     height: 3,
                     color: isPassed
-                        ? Colors.green
+                        ? successColor
                         : (isDark ? Colors.grey[800] : Colors.grey[300]),
                   ),
                 );
               } else {
                 // Pastille étape
                 final step = steps[index ~/ 2];
-                return _buildStepIcon(step, primaryColor, isDark);
+                return _buildStepIcon(step, currentStepColor, successColor, isDark);
               }
             }),
           ),
@@ -104,7 +121,7 @@ class CommandeTimelineWidget extends StatelessWidget {
                   .copyWith(
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
-                color: primaryColor,
+                color: currentStepColor,
               ),
               textAlign: TextAlign.center,
             ),
@@ -115,13 +132,13 @@ class CommandeTimelineWidget extends StatelessWidget {
   }
 
   Widget _buildStepIcon(
-      _TimelineStep step, Color primaryColor, bool isDark) {
+      _TimelineStep step, Color activeColor, Color successColor, bool isDark) {
     if (step.isCompleted) {
       return Container(
         width: 32,
         height: 32,
-        decoration: const BoxDecoration(
-          color: Colors.green,
+        decoration: BoxDecoration(
+          color: successColor,
           shape: BoxShape.circle,
         ),
         child: const Icon(Icons.check, color: Colors.white, size: 18),
@@ -131,11 +148,11 @@ class CommandeTimelineWidget extends StatelessWidget {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: primaryColor,
+          color: activeColor,
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: primaryColor.withAlpha(80),
+              color: activeColor.withAlpha(80),
               blurRadius: 8,
               spreadRadius: 2,
             ),

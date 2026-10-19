@@ -154,7 +154,7 @@ class _InfoRow extends StatelessWidget {
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: isPlaceholder
-                  ? Colors.orange
+                  ? (isDark ? AppColors.darkWarning : const Color(0xFFD97706))
                   : (isDark ? Colors.white : Colors.black87),
               fontStyle: isPlaceholder ? FontStyle.italic : FontStyle.normal,
             ),

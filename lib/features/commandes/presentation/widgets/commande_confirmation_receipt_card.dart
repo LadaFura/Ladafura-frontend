@@ -75,14 +75,18 @@ class CommandeConfirmationReceiptCard extends StatelessWidget {
           Divider(height: 16, thickness: 1, color: isDark ? AppColors.darkBorder : AppColors.border.withAlpha(120)),
           CommandeConfirmationInfoRow(
             label: 'Statut paiement',
-            value: paiement.statut == 'REUSSI'
+            value: (paiement.statut == 'REUSSI' || paiement.statut == 'PAYE')
                 ? 'Validé'
-                : (paiement.statut == 'EN_ATTENTE'
+                : ((paiement.statut == 'EN_ATTENTE' || paiement.statut == 'ATTENTE')
                     ? 'En attente'
-                    : paiement.statut),
-            valueColor: paiement.statut == 'REUSSI'
-                ? Colors.green
-                : Colors.orange,
+                    : ((paiement.statut == 'ECHOUE' || paiement.statut == 'ANNULE' || paiement.statut == 'REJETE')
+                        ? 'Échoué'
+                        : paiement.statut)),
+            valueColor: (paiement.statut == 'REUSSI' || paiement.statut == 'PAYE')
+                ? (isDark ? AppColors.darkSuccess : AppColors.success)
+                : ((paiement.statut == 'EN_ATTENTE' || paiement.statut == 'ATTENTE')
+                    ? (isDark ? AppColors.darkWarning : const Color(0xFFD97706))
+                    : (isDark ? AppColors.darkDanger : AppColors.danger)),
           ),
           Divider(height: 20, thickness: 1, color: isDark ? AppColors.darkBorder : AppColors.border.withAlpha(120)),
           Row(

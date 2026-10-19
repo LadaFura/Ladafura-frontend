@@ -111,29 +111,51 @@ class ProfilHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.green.withAlpha(20),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.check_circle_rounded,
-                        size: 13, color: Colors.green),
-                    const SizedBox(width: 4),
-                    Text(
-                      profil?.statut == 'ACTIF' ? 'Actif' : (profil?.statut ?? 'Actif'),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.green,
-                      ),
+              Builder(
+                builder: (context) {
+                  final rawStatut = profil?.statut.toUpperCase() ?? 'ACTIF';
+                  final Color badgeColor;
+                  final IconData badgeIcon;
+                  final String label;
+
+                  if (rawStatut == 'EN_ATTENTE' || rawStatut == 'ATTENTE' || rawStatut == 'PENDING') {
+                    badgeColor = isDark ? AppColors.darkWarning : const Color(0xFFD97706);
+                    badgeIcon = Icons.hourglass_top_rounded;
+                    label = 'En attente';
+                  } else if (rawStatut == 'REJETE' || rawStatut == 'SUSPENDU' || rawStatut == 'BLOQUE' || rawStatut == 'INACTIF') {
+                    badgeColor = isDark ? AppColors.darkDanger : AppColors.danger;
+                    badgeIcon = Icons.cancel_outlined;
+                    label = rawStatut == 'REJETE' ? 'Rejeté' : (rawStatut == 'SUSPENDU' ? 'Suspendu' : 'Inactif');
+                  } else {
+                    badgeColor = isDark ? AppColors.darkSuccess : AppColors.success;
+                    badgeIcon = Icons.check_circle_rounded;
+                    label = 'Actif';
+                  }
+
+                  return Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: badgeColor.withValues(alpha: isDark ? 0.2 : 0.12),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
-                ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(badgeIcon, size: 13, color: badgeColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: badgeColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           ),

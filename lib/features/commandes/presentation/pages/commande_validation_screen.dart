@@ -63,7 +63,7 @@ class _CommandeValidationScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez sélectionner un mode de mise à disposition.'),
-          backgroundColor: Colors.orange,
+          backgroundColor: AppColors.warning,
         ),
       );
       return;
@@ -207,20 +207,31 @@ class _CommandeValidationScreenState
                   Container(
                     padding: const EdgeInsets.all(AppDimensions.space16),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkSurface : Colors.amber.shade50,
+                      color: isDark ? const Color(0xFF382A15) : const Color(0xFFFEF3C7),
                       borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-                      border: Border.all(color: Colors.amber.shade300),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColors.darkWarning.withValues(alpha: 0.4)
+                            : AppColors.warning.withValues(alpha: 0.4),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.warning_amber_rounded,
-                            color: Colors.amber, size: 28),
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          color: isDark
+                              ? AppColors.darkWarning
+                              : const Color(0xFFD97706),
+                          size: 28,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             'Cette pharmacopée n\'a actuellement aucun mode de retrait ou livraison actif.',
                             style: TextStyle(
-                              color: isDark ? Colors.white : Colors.amber.shade900,
+                              color: isDark
+                                  ? const Color(0xFFFDE68A)
+                                  : const Color(0xFF92400E),
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
