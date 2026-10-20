@@ -194,6 +194,16 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
                       const SizedBox(height: 20),
                     ],
 
+                    // --- Posologie & Conseils d'utilisation ---
+                    _buildPosologieEtConseilsCard(
+                      posologieCustom: detailAsync.valueOrNull?.posologie ??
+                          detailAsync.valueOrNull?.compositionTexte ??
+                          widget.produitItem.posologie,
+                      forme: widget.produitItem.forme ?? detailAsync.valueOrNull?.forme,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: 20),
+
                     // --- Données détaillées (Plantes composantes & Maladies ciblées) ---
                     detailAsync.when(
                       loading: () => const Padding(
@@ -678,6 +688,413 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
               fontSize: 13.5,
               height: 1.55,
               color: isDark ? AppColors.darkTextSecondary : const Color(0xFF334155),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- Composant : Posologie & Conseils d'utilisation ---
+  Widget _buildPosologieEtConseilsCard({
+    String? posologieCustom,
+    String? forme,
+    required bool isDark,
+  }) {
+    final formeStr = (forme ?? '').toLowerCase();
+
+    // Déduction intelligente de la posologie et des conseils selon la forme galénique
+    final bool isExterne = formeStr.contains('pommade') ||
+        formeStr.contains('baume') ||
+        formeStr.contains('huile') ||
+        formeStr.contains('onguent') ||
+        formeStr.contains('crème') ||
+        formeStr.contains('creme') ||
+        formeStr.contains('savon') ||
+        formeStr.contains('lotion');
+
+    final bool isInfusion = formeStr.contains('infusion') ||
+        formeStr.contains('tisane') ||
+        formeStr.contains('thé') ||
+        formeStr.contains('the');
+
+    final bool isDecoction = formeStr.contains('décoction') ||
+        formeStr.contains('decoction') ||
+        formeStr.contains('écorce') ||
+        formeStr.contains('racine');
+
+    final bool isSirop = formeStr.contains('sirop') ||
+        formeStr.contains('goutte') ||
+        formeStr.contains('solution');
+
+    final bool isGelule = formeStr.contains('gélule') ||
+        formeStr.contains('gelule') ||
+        formeStr.contains('comprimé') ||
+        formeStr.contains('capsule');
+
+    final bool isPoudre = formeStr.contains('poudre') ||
+        formeStr.contains('sachet') ||
+        formeStr.contains('paquet');
+
+    final String posologieTexte;
+    final String frequenceBadge;
+    final String voieAdministration;
+    final String dureeRecommandee;
+    final List<String> conseilsPratiques;
+
+    if (posologieCustom != null && posologieCustom.trim().isNotEmpty) {
+      posologieTexte = posologieCustom.trim();
+      frequenceBadge = isExterne ? '2 à 3 fois / jour' : 'Matin & Soir';
+      voieAdministration = isExterne ? 'Usage cutané externe' : 'Voie orale';
+      dureeRecommandee = '7 à 14 jours';
+      conseilsPratiques = [
+        'Prendre de préférence après les repas avec de l\'eau tiède.',
+        'Conserver le remède à l\'abri de l\'humidité, de la chaleur et du soleil.',
+        'Bien refermer le contenant hermétiquement après chaque utilisation.',
+      ];
+    } else if (isInfusion) {
+      posologieTexte =
+          'Faire infuser 1 dose (ou 1 sachet) dans 250 ml d\'eau frémissante pendant 7 à 10 minutes. Boire chaud ou tiède après filtration.';
+      frequenceBadge = '2 à 3 tasses / jour';
+      voieAdministration = 'Voie orale (Infusion)';
+      dureeRecommandee = 'Cure de 10 à 14 jours';
+      conseilsPratiques = [
+        'Consommer de préférence tiède, le matin à jeun et le soir avant le coucher.',
+        'Possibilité d\'édulcorer avec une cuillère de miel pur si nécessaire.',
+        'Conserver le sachet de plantes dans un endroit sec et bien aéré.',
+      ];
+    } else if (isDecoction) {
+      posologieTexte =
+          'Faire bouillir une poignée de plantes dans 1 litre d\'eau pendant 10 à 15 minutes à feu doux. Laisser tiédir et filtrer soigneusement.';
+      frequenceBadge = '1 verre matin et soir';
+      voieAdministration = 'Voie orale (Décoction)';
+      dureeRecommandee = 'Cure de 7 à 10 jours';
+      conseilsPratiques = [
+        'Boire 1 verre à moutarde (environ 150 ml) matin et soir après les repas.',
+        'La décoction préparée se conserve au frais et doit être consommée sous 48 heures.',
+        'Ne pas réchauffer plusieurs fois la même portion.',
+      ];
+    } else if (isSirop) {
+      posologieTexte =
+          'Adulte : 1 cuillère à soupe 2 à 3 fois par jour. Enfant (à partir de 6 ans) : 1 cuillère à café matin et soir.';
+      frequenceBadge = '2 à 3 prises / jour';
+      voieAdministration = 'Voie orale (Sirop)';
+      dureeRecommandee = '5 à 7 jours';
+      conseilsPratiques = [
+        'Prendre de préférence à distance des repas avec un demi-verre d\'eau.',
+        'Bien agiter le flacon avant chaque utilisation.',
+        'Conserver au frais après ouverture et hors de portée des enfants.',
+      ];
+    } else if (isGelule) {
+      posologieTexte =
+          'Prendre 1 à 2 gélules matin et soir avec un grand verre d\'eau au milieu ou à la fin des repas.';
+      frequenceBadge = '2 gélules / jour';
+      voieAdministration = 'Voie orale (Gélules)';
+      dureeRecommandee = 'Cure de 15 jours';
+      conseilsPratiques = [
+        'Avaler sans croquer avec un verre d\'eau tempérée.',
+        'Respecter une hydratation suffisante tout au long de la journée.',
+        'Conserver le pilulier hermétiquement fermé à l\'abri de la lumière.',
+      ];
+    } else if (isExterne) {
+      posologieTexte =
+          'Appliquer une fine couche sur la zone propre et sèche 2 à 3 fois par jour. Masser délicatement en mouvements circulaires jusqu\'à pénétration complète.';
+      frequenceBadge = '2 à 3 fois / jour';
+      voieAdministration = 'Usage cutané externe';
+      dureeRecommandee = 'Jusqu\'à amélioration';
+      conseilsPratiques = [
+        'Nettoyer et sécher la peau avant toute application.',
+        'Ne pas appliquer sur une plaie ouverte, les muqueuses ou les yeux.',
+        'Se laver soigneusement les mains après l\'application.',
+      ];
+    } else if (isPoudre) {
+      posologieTexte =
+          'Diluer 1 cuillère à café rase de poudre (ou 1 sachet) dans un verre d\'eau tiède, du lait caillé ou une bouillie légère le matin et le soir.';
+      frequenceBadge = 'Matin & Soir';
+      voieAdministration = 'Voie orale (Poudre)';
+      dureeRecommandee = 'Cure de 10 à 14 jours';
+      conseilsPratiques = [
+        'Bien mélanger pour obtenir une suspension homogène avant d\'avaler.',
+        'Prendre de préférence 15 à 30 minutes après le repas.',
+        'Protéger la poudre contre l\'humidité pour éviter les grumeaux.',
+      ];
+    } else {
+      posologieTexte =
+          'Prendre 1 dose matin et soir selon les recommandations de la pharmacopée agréée, de préférence après les repas avec un verre d\'eau.';
+      frequenceBadge = 'Matin & Soir';
+      voieAdministration = 'Voie orale';
+      dureeRecommandee = 'Cure de 7 à 14 jours';
+      conseilsPratiques = [
+        'Respecter scrupuleusement le rythme des prises prescrit.',
+        'Conserver au sec, à température ambiante et à l\'abri du soleil direct.',
+        'Demander conseil au pharmacien ou tradithérapeute en cas de doute.',
+      ];
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withAlpha(8) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : const Color(0xFFE2E8F0),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // En-tête de la section
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.primary.withAlpha(35)
+                      : AppColors.primary.withAlpha(20),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.medication_liquid_rounded,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Posologie & Conseils d\'utilisation',
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // 1. Encadré Posologie principale
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFF132A1C)
+                  : const Color(0xFFF0FDF4),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark
+                    ? const Color(0xFF1B4D2E)
+                    : const Color(0xFFBBF7D0),
+                width: 1.1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.schedule_rounded,
+                          size: 15,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'POSOLOGIE RECOMMANDÉE',
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.6,
+                            color: isDark ? const Color(0xFF86EFAC) : AppColors.primaryDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF14532D) : const Color(0xFFDCFCE7),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        frequenceBadge,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : AppColors.primaryDark,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  posologieTexte,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.5,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? Colors.white : const Color(0xFF1F2937),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // 2. Grille des 2 repères clés (Voie & Durée)
+          Row(
+            children: [
+              Expanded(
+                child: _buildPosologieInfoTile(
+                  icon: isExterne ? Icons.touch_app_outlined : Icons.water_drop_outlined,
+                  label: 'Mode de prise',
+                  value: voieAdministration,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildPosologieInfoTile(
+                  icon: Icons.calendar_month_outlined,
+                  label: 'Durée indicative',
+                  value: dureeRecommandee,
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // 3. Conseils pratiques (Puces)
+          Text(
+            'Conseils de préparation & conservation',
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white70 : AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...conseilsPratiques.map((conseil) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(top: 4),
+                    child: Icon(
+                      Icons.check_circle_outline_rounded,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      conseil,
+                      style: TextStyle(
+                        fontSize: 12,
+                        height: 1.4,
+                        color: isDark ? AppColors.darkTextSecondary : const Color(0xFF475569),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          const SizedBox(height: 10),
+
+          // 4. Précautions d'emploi (Boîte Ambre sémantique)
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF382A15) : const Color(0xFFFEF3C7),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isDark
+                    ? AppColors.darkWarning.withValues(alpha: 0.4)
+                    : AppColors.warning.withValues(alpha: 0.4),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 18,
+                  color: isDark ? AppColors.darkWarning : const Color(0xFFD97706),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Ne pas dépasser la dose journalière indiquée. En cas d\'absence d\'amélioration après 3 jours ou en cas de grossesse, demandez l\'avis d\'un professionnel de santé ou de votre pharmacopée.',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      height: 1.4,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPosologieInfoTile({
+    required IconData icon,
+    required String label,
+    required String value,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withAlpha(6) : const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : const Color(0xFFE2E8F0),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: AppColors.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white54 : AppColors.textMuted,
+                  ),
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ],

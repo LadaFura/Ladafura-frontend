@@ -131,6 +131,7 @@ class ProduitDetailModel {
   final String? description;
   final String? forme;
   final String? compositionTexte;
+  final String? posologie;
   final double prixIndicatif;
   final String? photoUrl;
   final int? categorieId;
@@ -147,6 +148,7 @@ class ProduitDetailModel {
     this.description,
     this.forme,
     this.compositionTexte,
+    this.posologie,
     required this.prixIndicatif,
     this.photoUrl,
     this.categorieId,
@@ -174,6 +176,7 @@ class ProduitDetailModel {
       description: json['description']?.toString(),
       forme: json['forme']?.toString(),
       compositionTexte: json['compositionTexte']?.toString(),
+      posologie: json['posologie']?.toString() ?? json['compositionTexte']?.toString(),
       prixIndicatif: (json['prixIndicatif'] as num?)?.toDouble() ?? 0.0,
       photoUrl: ImageUtils.resolveImageUrl(json['photoUrl']?.toString()),
       categorieId: (json['categorieId'] as num?)?.toInt(),

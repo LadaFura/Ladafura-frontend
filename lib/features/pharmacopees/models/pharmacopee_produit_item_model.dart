@@ -9,6 +9,7 @@ class PharmacopeeProduitItemModel {
   final String nom;
   final String? description;
   final String? forme;
+  final String? posologie;
   final double prix;
   final String? photoUrl;
   final int? categorieId;
@@ -24,6 +25,7 @@ class PharmacopeeProduitItemModel {
     required this.nom,
     this.description,
     this.forme,
+    this.posologie,
     required this.prix,
     this.photoUrl,
     this.categorieId,
@@ -82,6 +84,7 @@ class PharmacopeeProduitItemModel {
       nom: json['nom']?.toString() ?? 'Remède Traditionnel',
       description: json['description']?.toString(),
       forme: json['forme']?.toString(),
+      posologie: json['posologie']?.toString(),
       prix: (json['prix'] as num?)?.toDouble() ??
           (json['prixIndicatif'] as num?)?.toDouble() ??
           0.0,
