@@ -1,4 +1,6 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -217,6 +219,12 @@ class _PharmacopeeDetailPageState extends ConsumerState<PharmacopeeDetailPage> {
                 ),
               ),
 
+              // Masque de barre d'état actif dès que l'en-tête principal est défilé
+              _StatusBarCoverSliver(
+                topSafeArea: MediaQuery.paddingOf(context).top,
+                color: isDark ? AppColors.darkBackground : AppColors.surface,
+              ),
+
               const SliverToBoxAdapter(
                 child: SizedBox(height: 8),
               ),
@@ -350,17 +358,34 @@ class _PharmacopeeDetailPageState extends ConsumerState<PharmacopeeDetailPage> {
               ),
 
               if (_selectedTabIndex == 0) ...[
-                // 3. Barre de recherche de produits contextuelle
-                SliverToBoxAdapter(
-                  child: PharmacopeeSearchBar(
-                    pharmacopeeNom: pharma.nom,
-                    searchQuery: controllerState.searchQuery,
-                    onSearchChanged: controller.setSearchQuery,
-                    categories: categories,
-                    selectedCategory: controllerState.selectedCategory,
-                    onCategorySelected: controller.selectCategory,
-                    isPinned: false,
-                  ),
+                // 3. Barre de recherche de produits, bouton retour et catégories fixés en haut au défilement
+                SliverLayoutBuilder(
+                  builder: (context, constraints) {
+                    final topSafeArea = MediaQuery.paddingOf(context).top;
+                    final yOnScreen = constraints.viewportMainAxisExtent -
+                        constraints.remainingPaintExtent;
+                    final isPinned =
+                        constraints.scrollOffset > 0 || yOnScreen <= topSafeArea;
+                    return _PinnedSearchBarSliver(
+                      topSafeArea: topSafeArea,
+                      child: PharmacopeeSearchBar(
+                        pharmacopeeNom: pharma.nom,
+                        searchQuery: controllerState.searchQuery,
+                        onSearchChanged: controller.setSearchQuery,
+                        categories: categories,
+                        selectedCategory: controllerState.selectedCategory,
+                        onCategorySelected: controller.selectCategory,
+                        isPinned: isPinned,
+                        onBack: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            Navigator.of(context).maybePop();
+                          }
+                        },
+                      ),
+                    );
+                  },
                 ),
 
                 const SliverToBoxAdapter(
@@ -562,5 +587,196 @@ class _PharmacopeeDetailPageState extends ConsumerState<PharmacopeeDetailPage> {
     );
   }
 }
+
+/// Sliver qui couvre uniquement la barre d'état (SafeArea supérieure) dès que
+/// l'en-tête principal a défilé, sans ajouter d'espace supplémentaire dans le flux.
+class _StatusBarCoverSliver extends LeafRenderObjectWidget {
+  final double topSafeArea;
+  final Color color;
+
+  const _StatusBarCoverSliver({
+    required this.topSafeArea,
+    required this.color,
+  });
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderStatusBarCoverSliver(
+      topSafeArea: topSafeArea,
+      color: color,
+    );
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderStatusBarCoverSliver renderObject,
+  ) {
+    renderObject
+      ..topSafeArea = topSafeArea
+      ..color = color;
+  }
+}
+
+class _RenderStatusBarCoverSliver extends RenderSliver {
+  double _topSafeArea;
+  Color _color;
+
+  _RenderStatusBarCoverSliver({
+    required double topSafeArea,
+    required Color color,
+  })  : _topSafeArea = topSafeArea,
+        _color = color;
+
+  set topSafeArea(double value) {
+    if (_topSafeArea == value) return;
+    _topSafeArea = value;
+    markNeedsLayout();
+  }
+
+  set color(Color value) {
+    if (_color == value) return;
+    _color = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void performLayout() {
+    if (constraints.scrollOffset <= 0 || _topSafeArea <= 0) {
+      geometry = SliverGeometry.zero;
+      return;
+    }
+    final double paintExtent =
+        _topSafeArea.clamp(0.0, constraints.remainingPaintExtent);
+    geometry = SliverGeometry(
+      scrollExtent: 0.0,
+      paintOrigin: 0.0,
+      paintExtent: paintExtent,
+      layoutExtent: 0.0,
+      maxPaintExtent: _topSafeArea,
+      hitTestExtent: 0.0,
+      visible: paintExtent > 0.0,
+      hasVisualOverflow: false,
+    );
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (geometry == null || !geometry!.visible) return;
+    final Paint paint = Paint()..color = _color;
+    context.canvas.drawRect(
+      offset & Size(constraints.crossAxisExtent, geometry!.paintExtent),
+      paint,
+    );
+  }
+}
+
+/// Sliver qui affiche la barre de recherche, le bouton retour et les catégories
+/// dans le flux normal sans espace superflu, puis les fixe en haut de l'écran
+/// (sous la barre d'état) lors du défilement vers le haut.
+class _PinnedSearchBarSliver extends SingleChildRenderObjectWidget {
+  final double topSafeArea;
+
+  const _PinnedSearchBarSliver({
+    required this.topSafeArea,
+    required super.child,
+  });
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderPinnedSearchBarSliver(topSafeArea: topSafeArea);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderPinnedSearchBarSliver renderObject,
+  ) {
+    renderObject.topSafeArea = topSafeArea;
+  }
+}
+
+class _RenderPinnedSearchBarSliver extends RenderSliverSingleBoxAdapter {
+  double _topSafeArea;
+
+  _RenderPinnedSearchBarSliver({required double topSafeArea})
+      : _topSafeArea = topSafeArea;
+
+  set topSafeArea(double value) {
+    if (_topSafeArea == value) return;
+    _topSafeArea = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    if (child == null) {
+      geometry = SliverGeometry.zero;
+      return;
+    }
+
+    final SliverConstraints constraints = this.constraints;
+    child!.layout(constraints.asBoxConstraints(), parentUsesSize: true);
+    final double childExtent = child!.size.height;
+
+    final double yOnScreen =
+        constraints.viewportMainAxisExtent - constraints.remainingPaintExtent;
+    final bool isPinned =
+        constraints.scrollOffset > 0 || yOnScreen <= _topSafeArea;
+
+    final double scrollExtent = isPinned
+        ? math.max(0.0, childExtent - _topSafeArea)
+        : childExtent;
+
+    if (!isPinned) {
+      final double paintedChildSize =
+          calculatePaintOffset(constraints, from: 0.0, to: scrollExtent);
+      final double cacheExtent =
+          calculateCacheOffset(constraints, from: 0.0, to: scrollExtent);
+
+      geometry = SliverGeometry(
+        scrollExtent: scrollExtent,
+        paintExtent: paintedChildSize,
+        cacheExtent: cacheExtent,
+        maxPaintExtent: scrollExtent,
+        hitTestExtent: paintedChildSize,
+        hasVisualOverflow: childExtent > constraints.remainingPaintExtent ||
+            constraints.scrollOffset > 0.0,
+      );
+      setChildParentData(child!, constraints, geometry!);
+      return;
+    }
+
+    final double paintOrigin = constraints.scrollOffset > 0
+        ? 0.0
+        : -yOnScreen.clamp(0.0, _topSafeArea);
+    final double paintExtent =
+        childExtent.clamp(0.0, constraints.remainingPaintExtent);
+    final double layoutExtent =
+        (scrollExtent - constraints.scrollOffset).clamp(0.0, paintExtent);
+    final double cacheExtent =
+        calculateCacheOffset(constraints, from: 0.0, to: scrollExtent);
+
+    geometry = SliverGeometry(
+      scrollExtent: scrollExtent,
+      paintOrigin: paintOrigin,
+      paintExtent: paintExtent,
+      layoutExtent: layoutExtent,
+      maxPaintExtent: math.max(childExtent, paintExtent),
+      maxScrollObstructionExtent: childExtent,
+      cacheExtent: math.max(cacheExtent, layoutExtent),
+      hitTestExtent: paintExtent,
+      hasVisualOverflow: false,
+    );
+
+    final SliverPhysicalParentData childParentData =
+        child!.parentData! as SliverPhysicalParentData;
+    childParentData.paintOffset = Offset.zero;
+  }
+
+  @override
+  double childMainAxisPosition(RenderBox child) => 0.0;
+}
+
 
 

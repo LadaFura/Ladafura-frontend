@@ -60,41 +60,38 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final topSafeArea = MediaQuery.paddingOf(context).top;
     final bgColor = widget.isPinned
         ? (isDark ? AppColors.darkBackground : AppColors.surface)
         : Colors.transparent;
-    final topPadding = widget.isPinned
-        ? (MediaQuery.paddingOf(context).top + AppDimensions.space8)
-        : 0.0;
+    final topPadding = (widget.isPinned ? topSafeArea : 0.0) + 6.0;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOutCubic,
+    return Container(
       decoration: BoxDecoration(
         color: bgColor,
         boxShadow: widget.isPinned
             ? [
                 BoxShadow(
-                  color: Colors.black.withAlpha(isDark ? 55 : 20),
+                  color: Colors.black.withAlpha(isDark ? 60 : 22),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
               ]
             : null,
-        border: widget.isPinned
-            ? Border(
-                bottom: BorderSide(
-                  color: isDark ? AppColors.darkBorder : AppColors.border.withAlpha(120),
-                  width: 0.8,
-                ),
-              )
-            : null,
+        border: Border(
+          bottom: BorderSide(
+            color: widget.isPinned
+                ? (isDark ? AppColors.darkBorder : AppColors.border.withAlpha(120))
+                : Colors.transparent,
+            width: 1.0,
+          ),
+        ),
       ),
       padding: EdgeInsets.only(
         left: AppDimensions.space16,
         right: AppDimensions.space16,
         top: topPadding,
-        bottom: AppDimensions.space4,
+        bottom: 8.0,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,23 +100,35 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
           Row(
             children: [
               if (widget.isPinned && widget.onBack != null) ...[
-                IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-                  icon: Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    size: 20,
-                    color: isDark ? Colors.white : AppColors.textPrimary,
+                Material(
+                  color: isDark ? AppColors.darkSurface : Colors.white,
+                  shape: const CircleBorder(),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: widget.onBack,
+                    customBorder: const CircleBorder(),
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark ? AppColors.darkBorder : AppColors.border,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 18,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
+                      ),
+                    ),
                   ),
-                  onPressed: widget.onBack,
-                  tooltip: 'Retour',
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
               ],
               // Champ de recherche contextualisé
               Expanded(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
+                child: Container(
                   decoration: BoxDecoration(
                     color: isDark ? AppColors.darkSurface : Colors.white,
                     borderRadius: BorderRadius.circular(
@@ -129,7 +138,7 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
                       color: widget.isPinned
                           ? (isDark ? AppColors.darkPrimary.withAlpha(100) : AppColors.primary.withAlpha(100))
                           : (isDark ? AppColors.darkBorder : AppColors.border),
-                      width: widget.isPinned ? 1.2 : 1.0,
+                      width: 1.0,
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -188,40 +197,38 @@ class _PharmacopeeSearchBarState extends State<PharmacopeeSearchBar> {
             ],
           ),
 
-          // Chips horizontales de catégories de produits si disponibles
-          if (widget.categories.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 34,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                clipBehavior: Clip.none,
-                children: [
-                  _buildCategoryChip(
-                    label: 'Tous',
-                    isSelected: widget.selectedCategory == null,
-                    isDark: isDark,
-                    onTap: () => widget.onCategorySelected(null),
-                  ),
-                  const SizedBox(width: 8),
-                  ...widget.categories.map((cat) {
-                    final isSelected = widget.selectedCategory != null &&
-                        widget.selectedCategory!.trim().toLowerCase() ==
-                            cat.trim().toLowerCase();
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: _buildCategoryChip(
-                        label: cat,
-                        isSelected: isSelected,
-                        isDark: isDark,
-                        onTap: () => widget.onCategorySelected(cat),
-                      ),
-                    );
-                  }),
-                ],
-              ),
+          // Chips horizontales de catégories de produits (toujours affichées pour filtrage rapide)
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 34,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              children: [
+                _buildCategoryChip(
+                  label: 'Tous',
+                  isSelected: widget.selectedCategory == null,
+                  isDark: isDark,
+                  onTap: () => widget.onCategorySelected(null),
+                ),
+                const SizedBox(width: 8),
+                ...widget.categories.map((cat) {
+                  final isSelected = widget.selectedCategory != null &&
+                      widget.selectedCategory!.trim().toLowerCase() ==
+                          cat.trim().toLowerCase();
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _buildCategoryChip(
+                      label: cat,
+                      isSelected: isSelected,
+                      isDark: isDark,
+                      onTap: () => widget.onCategorySelected(cat),
+                    ),
+                  );
+                }),
+              ],
             ),
-          ],
+          ),
         ],
       ),
     );
