@@ -182,7 +182,7 @@ class SearchIdleSuggestions extends StatelessWidget {
           Row(
             children: [
               Icon(
-                Icons.favorite_rounded,
+                Icons.heart_broken_rounded,
                 size: 18,
                 color: isDark ? AppColors.darkTextPrimary : const Color(0xFF1E2822),
               ),

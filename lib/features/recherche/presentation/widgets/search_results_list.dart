@@ -71,7 +71,6 @@ class SearchResultsList extends StatelessWidget {
           SearchSectionTitle(
             title: 'Pharmacopées traditionnelles',
             count: results.pharmacopees.length,
-            isPriority: true,
             isDark: isDark,
           ),
           const SizedBox(height: AppDimensions.space8),
