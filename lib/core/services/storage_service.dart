@@ -175,12 +175,14 @@ class StorageService {
     required String email,
     required String role,
     String? userId,
+    String? name,
   }) =>
       saveUserSession(
         token: token,
         role: UserRole.fromString(role) ?? UserRole.population,
         email: email,
         userId: userId,
+        name: name,
       );
   Future<void> clearSession() => clearAuth();
   bool hasCompletedOnboarding() => isOnboardingCompleted();

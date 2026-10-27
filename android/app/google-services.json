@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "455380277288-s04u8ivpgt41jjusdcskluhcgrukdc9q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ladafura_frontend_flutter",
+            "certificate_hash": "a228dbd0dd15ea67751289dd4f49ff0a9c8918c3"
+          }
+        },
+        {
           "client_id": "455380277288-pd4rcjgmpa176cg2rtqm3nh9cavf9usa.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +37,13 @@
             {
               "client_id": "455380277288-pd4rcjgmpa176cg2rtqm3nh9cavf9usa.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "455380277288-87ga23g0ol64def9as6uekspqdkrq88p.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ladafuraFrontendFlutter"
+              }
             }
           ]
         }

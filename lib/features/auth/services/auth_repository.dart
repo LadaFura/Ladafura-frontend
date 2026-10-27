@@ -270,7 +270,10 @@ class AuthRepository {
     // Si l'utilisateur n'existe pas encore en base, création/synchronisation citoyen
     if (user == null) {
       try {
-        user = await _syncPopulationUser(firebaseResult.email);
+        user = await _syncPopulationUser(
+          firebaseResult.email,
+          displayName: googleCreds.displayName,
+        );
       } catch (_) {
         final effectiveRole = role ?? UserRole.population;
         try {
@@ -295,6 +298,7 @@ class AuthRepository {
       email: user.email,
       role: user.role.backendValue,
       userId: user.id.toString(),
+      name: googleCreds.displayName?.trim(),
     );
 
     return user;
@@ -349,15 +353,30 @@ class AuthRepository {
   }
 
   /// Synchronise un compte Firebase direct avec MySQL pour la population.
-  Future<UtilisateurModel> _syncPopulationUser(String email) async {
+  Future<UtilisateurModel> _syncPopulationUser(
+    String email, {
+    String? displayName,
+  }) async {
     final token = _storageService.getToken();
     if (token != null) {
       _apiClient.setAuthToken(token);
     }
 
+    String? prenom;
+    String? nom;
+    if (displayName != null && displayName.trim().isNotEmpty) {
+      final parts = displayName.trim().split(RegExp(r'\s+'));
+      prenom = parts.first;
+      nom = parts.length > 1 ? parts.sublist(1).join(' ') : parts.first;
+    }
+
     final response = await _apiClient.post<Map<String, dynamic>>(
       ApiEndpoints.populationSync,
-      data: {'email': email},
+      data: {
+        'email': email,
+        if (prenom != null) 'prenom': prenom,
+        if (nom != null) 'nom': nom,
+      },
       options: token != null
           ? Options(headers: {'Authorization': 'Bearer $token'})
           : null,

@@ -53,9 +53,16 @@ class GoogleAuthService {
   Future<void> _ensureInitialized() async {
     if (_isInitialized || _mockMode) return;
     try {
+      // Sur Android, l'application est identifiée par son package_name et son SHA-1 ;
+      // seul serverClientId (Web Client ID) doit être fourni.
+      final effectiveClientId =
+          (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
+              ? null
+              : _clientId;
+
       await _googleSignIn.initialize(
         serverClientId: _serverClientId,
-        clientId: _clientId,
+        clientId: effectiveClientId,
       );
       _isInitialized = true;
     } catch (e) {
@@ -79,7 +86,27 @@ class GoogleAuthService {
 
     try {
       await _ensureInitialized();
-      final GoogleSignInAccount account = await _googleSignIn.authenticate();
+      GoogleSignInAccount? account;
+
+      try {
+        account = await _googleSignIn.authenticate();
+      } on GoogleSignInException catch (e) {
+        if (e.code == GoogleSignInExceptionCode.canceled ||
+            e.code == GoogleSignInExceptionCode.interrupted) {
+          return null;
+        }
+        // Fallback sur le flux One-Tap / CredentialManager léger sur certains appareils Android
+        debugPrint(
+            'Fallback attemptLightweightAuthentication suite à ${e.code}: ${e.description}');
+        account = await _googleSignIn.attemptLightweightAuthentication(
+          reportAllExceptions: true,
+        );
+      }
+
+      if (account == null) {
+        return null;
+      }
+
       final idToken = account.authentication.idToken;
 
       if (idToken == null || idToken.isEmpty) {
@@ -94,12 +121,25 @@ class GoogleAuthService {
         photoUrl: account.photoUrl,
       );
     } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled) {
+      if (e.code == GoogleSignInExceptionCode.canceled ||
+          e.code == GoogleSignInExceptionCode.interrupted) {
         // L'utilisateur a annulé la connexion
         return null;
       }
-      debugPrint('Erreur Google Sign-In : $e');
-      rethrow;
+      debugPrint('Erreur Google Sign-In (${e.code}) : ${e.description}');
+      final desc = e.description ?? '';
+      if (desc.contains('No credential available') ||
+          desc.contains('noCredential')) {
+        throw Exception(
+            'Aucun compte Google n\'est configuré sur cet appareil Android. Veuillez ajouter un compte Google dans les Paramètres du téléphone.');
+      }
+      if (e.code == GoogleSignInExceptionCode.clientConfigurationError ||
+          e.code == GoogleSignInExceptionCode.providerConfigurationError) {
+        throw Exception(
+            'Erreur de configuration Google Sign-In (${e.code.name}). Vérifiez les services Google Play sur l\'appareil.');
+      }
+      throw Exception(
+          'Impossible de se connecter avec Google : ${e.description ?? e.code.name}');
     } catch (e) {
       debugPrint('Erreur Google Sign-In générique : $e');
       rethrow;
