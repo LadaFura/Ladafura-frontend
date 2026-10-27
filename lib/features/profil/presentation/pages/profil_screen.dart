@@ -7,6 +7,7 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routing/route_names.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../auth/providers/auth_state_provider.dart';
+import '../../../favoris/providers/favori_provider.dart';
 import '../../../notifications/providers/notification_provider.dart';
 import '../../providers/profil_provider.dart';
 import '../widgets/modern_profile_user_card.dart';
@@ -251,8 +252,11 @@ class ProfilScreen extends ConsumerWidget {
     }
 
     final profil = profilState.profil;
+    final favorisState = ref.watch(favorisProvider);
     final totalCommandes = profil?.nombreTotalCommandes ?? 0;
-    final totalFavoris = profil?.nombreTotalFavoris ?? 0;
+    final totalFavoris = favorisState.counts.total > 0 || favorisState.items.isNotEmpty
+        ? favorisState.counts.total
+        : (profil?.nombreTotalFavoris ?? 0);
     final unreadNotifs = ref.watch(unreadNotificationCountProvider).valueOrNull ??
         profilState.unreadNotificationsCount;
 
@@ -272,6 +276,7 @@ class ProfilScreen extends ConsumerWidget {
         onRefresh: () async {
           await Future.wait([
             ref.read(profilProvider.notifier).chargerProfil(),
+            ref.read(favorisProvider.notifier).chargerFavoris(),
             ref.refresh(unreadNotificationCountProvider.future),
           ]);
         },

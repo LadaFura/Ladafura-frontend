@@ -29,6 +29,7 @@ import '../../features/commandes/presentation/pages/commande_detail_page.dart';
 import '../../features/commandes/models/commande_model.dart';
 import '../../features/commandes/models/paiement_model.dart';
 import '../../features/pharmacopees/presentation/pages/pharmacopee_detail_page.dart';
+import '../../features/favoris/presentation/pages/favoris_screen.dart';
 import '../../features/notifications/presentation/pages/citizen_notifications_page.dart';
 import '../../shared/enums/user_role.dart';
 import '../../shared/widgets/navigation/app_shell.dart';
@@ -363,10 +364,7 @@ GoRouter appRouter(AppRouterRef ref) {
         name: RouteNames.citizenFavoris,
         pageBuilder: (context, state) => CupertinoPage(
           key: state.pageKey,
-          child: const _RoutePlaceholder(
-            title: 'Plantes Favorites',
-            isSecondary: true,
-          ),
+          child: const FavorisScreen(),
         ),
       ),
       GoRoute(
@@ -524,8 +522,6 @@ GoRouter appRouter(AppRouterRef ref) {
 }
 
 /// Widget écran placeholder pour les routes avant intégration des écrans features.
-typedef _RoutePlaceholder = RoutePlaceholderScreen;
-
 class RoutePlaceholderScreen extends ConsumerWidget {
   final String title;
   final bool isSecondary;

@@ -213,9 +213,15 @@ class ApiEndpoints {
 
   // --- Favoris (Bookmarks personnels) ---
   static const String populationFavoris = '/population/favoris';
+  static const String populationFavorisToggle = '/population/favoris/toggle';
   static const String populationFavorisPlantes = '/population/favoris/plantes';
+  static const String populationFavorisProduits = '/population/favoris/produits';
+  static const String populationFavorisPharmacopees =
+      '/population/favoris/pharmacopees';
   static String populationFavoriPlanteToggle(String planteId) =>
       '/population/favoris/plantes/$planteId';
+  static String populationFavoriDelete(int favoriId) =>
+      '/population/favoris/$favoriId';
   static const String populationFavorisCheck = '/population/favoris/check';
   static const String populationFavorisCount = '/population/favoris/count';
 

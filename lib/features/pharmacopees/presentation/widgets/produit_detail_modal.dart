@@ -7,6 +7,8 @@ import '../../../../core/utils/image_utils.dart';
 import '../../../../shared/widgets/feedback/app_loading_indicator.dart';
 import '../../../auth/providers/auth_state_provider.dart';
 import '../../../commandes/providers/commande_provider.dart';
+import '../../../favoris/models/favori_model.dart';
+import '../../../favoris/providers/favori_provider.dart';
 import '../../../panier/providers/panier_provider.dart';
 import '../../../plantes/models/produit_detail_model.dart';
 import '../../../plantes/providers/plante_provider.dart';
@@ -77,6 +79,11 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
     final detailAsync =
         ref.watch(produitDetailProvider(widget.produitItem.produitId));
     final detail = detailAsync.valueOrNull;
+    final isFavorite = ref.watch(
+      favorisProvider.select(
+        (s) => s.isFavorite(TypeFavori.produit, widget.produitItem.produitId),
+      ),
+    );
 
     // Offre sélectionnée dynamiquement si présente dans le détail
     final selectedOffre = detail != null && detail.offresPharmacopees.isNotEmpty
@@ -169,12 +176,52 @@ class _ProduitDetailModalState extends ConsumerState<ProduitDetailModal> {
           ),
           child: Column(
             children: [
-              // 1. En-tête avec barre de glissement & bouton de fermeture rapide
+              // 1. En-tête avec barre de glissement, bouton favori & bouton de fermeture rapide
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 12, 4),
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
                 child: Row(
                   children: [
-                    const SizedBox(width: 32),
+                    IconButton(
+                      icon: Icon(
+                        isFavorite
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        color: isFavorite
+                            ? AppColors.danger
+                            : (isDark ? Colors.white60 : Colors.grey.shade600),
+                        size: 22,
+                      ),
+                      tooltip: 'Favori',
+                      onPressed: () async {
+                        final authState = ref.read(authStateProvider);
+                        if (!authState.isAuthenticated) {
+                          ConnexionRequiseDialog.show(
+                            context,
+                            title: 'Connexion requise',
+                            description:
+                                'Connectez-vous à votre compte citoyen pour ajouter ce remède à vos favoris.',
+                          );
+                          return;
+                        }
+                        final res =
+                            await ref.read(favorisProvider.notifier).toggleFavori(
+                                  type: TypeFavori.produit,
+                                  cibleId: widget.produitItem.produitId,
+                                );
+                        if (!context.mounted || res == null) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              res.favori
+                                  ? '$effectiveNom ajouté à vos favoris'
+                                  : '$effectiveNom retiré de vos favoris',
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    ),
                     Expanded(
                       child: Center(
                         child: Container(

@@ -7,9 +7,13 @@ import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/services/services_providers.dart';
 import '../../../../core/utils/image_utils.dart';
+import '../../../auth/providers/auth_state_provider.dart';
+import '../../../favoris/models/favori_model.dart';
+import '../../../favoris/providers/favori_provider.dart';
 import '../../models/pharmacopee_detail_model.dart';
 import '../../../../core/routing/route_names.dart';
 import '../../../../shared/widgets/navigation/navigation_provider.dart';
+import 'connexion_requise_dialog.dart';
 
 /// En-tête moderne et immersif pour la fiche d'une pharmacopée agréée.
 /// - Grande image avec overlay en dégradé
@@ -31,6 +35,11 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final userPositionAsync = ref.watch(userLocationProvider);
+    final isFavorite = ref.watch(
+      favorisProvider.select(
+        (s) => s.isFavorite(TypeFavori.pharmacopee, pharmacopee.id),
+      ),
+    );
 
     // Calcul de la distance réelle si disponible
     final distanceText = userPositionAsync.maybeWhen(
@@ -95,39 +104,90 @@ class PharmacopeeDetailHeader extends ConsumerWidget {
               ),
             ),
 
-            // Badge officiel "Pharmacopée agréée" en haut à droite
+            // Badge officiel "Pharmacopée agréée" + bouton favori en haut à droite
             Positioned(
-              top: MediaQuery.paddingOf(context).top + 14,
+              top: MediaQuery.paddingOf(context).top + 8,
               right: AppDimensions.space16,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(40),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(40),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.verified_rounded, size: 14, color: Colors.white),
-                    SizedBox(width: 4),
-                    Text(
-                      'Agréée LADAFURA',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.verified_rounded,
+                            size: 14, color: Colors.white),
+                        SizedBox(width: 4),
+                        Text(
+                          'Agréée LADAFURA',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Material(
+                    color: Colors.black.withAlpha(100),
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    child: IconButton(
+                      icon: Icon(
+                        isFavorite
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        color: isFavorite ? AppColors.danger : Colors.white,
+                        size: 20,
                       ),
+                      tooltip: 'Favori',
+                      onPressed: () async {
+                        final authState = ref.read(authStateProvider);
+                        if (!authState.isAuthenticated) {
+                          ConnexionRequiseDialog.show(
+                            context,
+                            title: 'Connexion requise',
+                            description:
+                                'Connectez-vous à votre compte citoyen pour enregistrer cette pharmacopée dans vos favoris.',
+                          );
+                          return;
+                        }
+                        final res =
+                            await ref.read(favorisProvider.notifier).toggleFavori(
+                                  type: TypeFavori.pharmacopee,
+                                  cibleId: pharmacopee.id,
+                                );
+                        if (!context.mounted || res == null) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              res.favori
+                                  ? '${pharmacopee.nom} ajoutée à vos favoris'
+                                  : '${pharmacopee.nom} retirée de vos favoris',
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],

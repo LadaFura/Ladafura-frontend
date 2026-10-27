@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../auth/providers/auth_state_provider.dart';
+import '../../../favoris/models/favori_model.dart';
+import '../../../favoris/providers/favori_provider.dart';
 import '../../../pharmacopees/models/pharmacopee_model.dart';
+import '../../../pharmacopees/presentation/widgets/connexion_requise_dialog.dart';
 
 /// Carte inférieure rétractable affichant les détails de la pharmacopée sélectionnée sur la carte.
 /// Utilise rigoureusement le Design System, les constantes et les composants partagés LADAFURA.
-class CartePharmacopeeDetailCard extends StatelessWidget {
+class CartePharmacopeeDetailCard extends ConsumerWidget {
   final PharmacopeeModel pharmacopee;
   final GeoCoordinates? userCoordinates;
   final VoidCallback onViewDetail;
@@ -23,9 +28,14 @@ class CartePharmacopeeDetailCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final distanceStr = pharmacopee.distanceFormatee(userCoordinates);
+    final isFavorite = ref.watch(
+      favorisProvider.select(
+        (s) => s.isFavorite(TypeFavori.pharmacopee, pharmacopee.id),
+      ),
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -144,17 +154,42 @@ class CartePharmacopeeDetailCard extends StatelessWidget {
                   // Bouton favori
                   IconButton(
                     icon: Icon(
-                      Icons.favorite_border_rounded,
-                      color: isDark
-                          ? AppColors.darkTextMuted
-                          : AppColors.textMuted,
+                      isFavorite
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
+                      color: isFavorite
+                          ? AppColors.danger
+                          : (isDark
+                              ? AppColors.darkTextMuted
+                              : AppColors.textMuted),
                       size: 24,
                     ),
-                    onPressed: () {
+                    onPressed: () async {
+                      final authState = ref.read(authStateProvider);
+                      if (!authState.isAuthenticated) {
+                        ConnexionRequiseDialog.show(
+                          context,
+                          title: 'Connexion requise',
+                          description:
+                              'Connectez-vous à votre compte citoyen pour enregistrer cette pharmacopée dans vos favoris.',
+                        );
+                        return;
+                      }
+                      final res =
+                          await ref.read(favorisProvider.notifier).toggleFavori(
+                                type: TypeFavori.pharmacopee,
+                                cibleId: pharmacopee.id,
+                              );
+                      if (!context.mounted || res == null) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('${pharmacopee.nom} ajoutée aux favoris'),
-                          duration: const Duration(seconds: 1),
+                          content: Text(
+                            res.favori
+                                ? '${pharmacopee.nom} ajoutée aux favoris'
+                                : '${pharmacopee.nom} retirée des favoris',
+                          ),
+                          duration: const Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
                         ),
                       );
                     },

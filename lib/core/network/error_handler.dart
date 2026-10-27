@@ -74,6 +74,19 @@ class ConflictException extends AppException {
   });
 }
 
+/// Erreur 429 : Trop de requêtes (Rate Limit atteint : max 5 requêtes / 5 minutes).
+class RateLimitException extends AppException {
+  final int? retryAfterSeconds;
+
+  const RateLimitException({
+    super.message =
+        'Limite de requêtes atteinte (maximum 5 requêtes toutes les 5 minutes). Veuillez patienter avant de réessayer.',
+    super.statusCode = 429,
+    this.retryAfterSeconds,
+    super.originalError,
+  });
+}
+
 /// Erreur 500 / 502 / 503 / 504 : Panne ou maintenance serveur.
 class ServerException extends AppException {
   const ServerException({
@@ -244,6 +257,20 @@ class ErrorHandler {
           message: serverMessage ??
               'Un conflit est survenu avec une ressource déjà existante.',
           statusCode: statusCode,
+          originalError: originalError,
+        );
+
+      case 429:
+        final retryAfter = responseData is Map<String, dynamic>
+            ? (responseData['retryAfterSeconds'] as num?)?.toInt()
+            : int.tryParse(response?.headers.value(' retry-after') ??
+                response?.headers.value('retry-after') ??
+                '');
+        return RateLimitException(
+          message: serverMessage ??
+              'Limite de requêtes atteinte (maximum 5 requêtes toutes les 5 minutes). Veuillez patienter avant de réessayer.',
+          statusCode: statusCode,
+          retryAfterSeconds: retryAfter,
           originalError: originalError,
         );
 

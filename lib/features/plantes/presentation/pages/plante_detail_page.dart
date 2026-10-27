@@ -9,7 +9,11 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/routing/route_names.dart';
 import '../../../../shared/widgets/feedback/app_loading_indicator.dart';
 import '../../../../shared/widgets/formatted_html_text.dart';
+import '../../../auth/providers/auth_state_provider.dart';
+import '../../../favoris/models/favori_model.dart';
+import '../../../favoris/providers/favori_provider.dart';
 import '../../../panier/providers/panier_provider.dart';
+import '../../../pharmacopees/presentation/widgets/connexion_requise_dialog.dart';
 import '../../models/plante_model.dart';
 import '../../providers/plante_provider.dart';
 import '../widgets/plante_audio_player_card.dart';
@@ -41,7 +45,6 @@ class PlanteDetailPage extends ConsumerStatefulWidget {
 }
 
 class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
-  bool _isFavorite = false;
   int _selectedOption = 0; // 0: Traditionnelle, 1: Scientifique
 
   void _handleBack() {
@@ -52,14 +55,30 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
     }
   }
 
-  void _toggleFavorite() {
-    setState(() => _isFavorite = !_isFavorite);
+  Future<void> _toggleFavorite() async {
+    final authState = ref.read(authStateProvider);
+    if (!authState.isAuthenticated) {
+      ConnexionRequiseDialog.show(
+        context,
+        title: 'Connexion requise',
+        description:
+            'Connectez-vous à votre compte citoyen pour enregistrer cette plante dans vos favoris.',
+      );
+      return;
+    }
+
+    final result = await ref.read(favorisProvider.notifier).toggleFavori(
+          type: TypeFavori.plante,
+          cibleId: widget.planteId,
+        );
+    if (!mounted || result == null) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          _isFavorite
-              ? 'Plante ajoutée à votre herbier personnel'
-              : 'Plante retirée de votre herbier',
+          result.favori
+              ? 'Plante ajoutée à vos favoris'
+              : 'Plante retirée de vos favoris',
         ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
@@ -154,6 +173,12 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
     PopulationPlanteDetailModel plante,
     bool isDark,
   ) {
+    final isFavorite = ref.watch(
+      favorisProvider.select(
+        (s) => s.isFavorite(TypeFavori.plante, widget.planteId),
+      ),
+    );
+
     // Détection de l'audio : soit dans les médias (AUDIO_TERRAIN / AUDIO), soit dans les noms vernaculaires
     final audioMedia = plante.medias.cast<PopulationPlanteMediaModel?>().firstWhere(
           (m) =>
@@ -223,7 +248,7 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
                       onBack: _handleBack,
                       onShare: () => _handleShare(plante),
                       onFavorite: _toggleFavorite,
-                      isFavorite: _isFavorite,
+                      isFavorite: isFavorite,
                       showDescription: false,
                     ),
 
@@ -316,10 +341,10 @@ class _PlanteDetailPageState extends ConsumerState<PlanteDetailPage> {
                   ),
                   const SizedBox(width: 8),
                   _buildFloatingTopButton(
-                    icon: _isFavorite
+                    icon: isFavorite
                         ? Icons.favorite_rounded
                         : Icons.favorite_border_rounded,
-                    iconColor: _isFavorite ? AppColors.danger : null,
+                    iconColor: isFavorite ? AppColors.danger : null,
                     isDark: isDark,
                     onTap: _toggleFavorite,
                     tooltip: 'Favori',
