@@ -366,3 +366,9 @@ fabric.properties
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/flutter,dart,macos,windows,visualstudiocode,xcode,androidstudio
+# Instructions et outils des assistants IA (Claude, skills, règles) : locaux, jamais versionnés
+CLAUDE.md
+.claude/
+.agents/
+AGENTS.md
+skills-lock.json
