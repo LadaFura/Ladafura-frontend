@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "flutter pub get",
+  "buildCommand": "flutter build web --release --dart-define=API_URL=https://ladafura-bakcend.onrender.com/api/v1",
+  "outputDirectory": "build/web",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
