@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 /// Résultat d'une authentification réussie auprès de Firebase Auth.
 class FirebaseAuthResult {
@@ -169,33 +170,45 @@ class FirebaseAuthService {
     }
   }
 
-  /// Décodage des messages d'erreurs standard Firebase vers des messages en français.
+  static const String _messageServiceIndisponible =
+      'Le service de connexion est momentanément indisponible. Veuillez réessayer dans quelques instants.';
+
+  /// Traduit une erreur Firebase en message français compréhensible.
+  ///
+  /// Aucun code technique (`OPERATION_NOT_ALLOWED`, « Firebase »…) ne doit atteindre
+  /// l'écran : un code inconnu donne un message générique, le détail part dans les logs.
   String _extractFirebaseErrorMessage(DioException e) {
-    if (e.response?.data is Map) {
-      final data = e.response!.data as Map<String, dynamic>;
-      final error = data['error'];
-      if (error is Map && error['message'] != null) {
-        final code = error['message'].toString();
-        if (code.contains('EMAIL_NOT_FOUND') ||
-            code.contains('INVALID_PASSWORD') ||
-            code.contains('INVALID_LOGIN_CREDENTIALS')) {
-          return 'Adresse email ou mot de passe incorrect.';
-        }
-        if (code.contains('EMAIL_EXISTS')) {
-          return 'Un compte existe déjà avec cette adresse email.';
-        }
-        if (code.contains('USER_DISABLED')) {
-          return 'Ce compte utilisateur a été désactivé.';
-        }
-        if (code.contains('TOO_MANY_ATTEMPTS_TRY_LATER')) {
-          return 'Trop de tentatives échouées. Veuillez réessayer plus tard.';
-        }
-        if (code.contains('WEAK_PASSWORD')) {
-          return 'Le mot de passe doit comporter au moins 6 caractères.';
-        }
-        return 'Erreur Firebase : $code';
-      }
+    final data = e.response?.data;
+    final error = data is Map ? data['error'] : null;
+    final code = error is Map ? error['message']?.toString() : null;
+
+    if (code == null) {
+      return 'Impossible de joindre le service de connexion. Vérifiez votre connexion Internet puis réessayez.';
     }
-    return 'Impossible de joindre le service d\'authentification Firebase.';
+    if (code.contains('EMAIL_NOT_FOUND') ||
+        code.contains('INVALID_PASSWORD') ||
+        code.contains('INVALID_LOGIN_CREDENTIALS')) {
+      return 'Adresse e-mail ou mot de passe incorrect.';
+    }
+    if (code.contains('EMAIL_EXISTS')) {
+      return 'Un compte existe déjà avec cette adresse e-mail.';
+    }
+    if (code.contains('INVALID_EMAIL')) {
+      return 'L\'adresse e-mail saisie n\'est pas valide.';
+    }
+    if (code.contains('MISSING_PASSWORD')) {
+      return 'Saisissez votre mot de passe.';
+    }
+    if (code.contains('USER_DISABLED')) {
+      return 'Ce compte a été désactivé. Contactez un administrateur LADAFURA.';
+    }
+    if (code.contains('TOO_MANY_ATTEMPTS_TRY_LATER')) {
+      return 'Trop de tentatives de connexion. Patientez quelques minutes avant de réessayer.';
+    }
+    if (code.contains('WEAK_PASSWORD')) {
+      return 'Le mot de passe doit comporter au moins 6 caractères.';
+    }
+    debugPrint('Erreur Firebase Auth non traduite : $code');
+    return _messageServiceIndisponible;
   }
 }

@@ -1,4 +1,7 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ladafura_frontend_flutter/core/network/error_handler.dart';
 import 'package:ladafura_frontend_flutter/core/network/network_providers.dart';
 import 'package:ladafura_frontend_flutter/core/routing/app_router.dart';
 import 'package:ladafura_frontend_flutter/core/services/services_providers.dart';
@@ -9,6 +12,25 @@ import '../services/auth_repository.dart';
 import '../services/firebase_auth_service.dart';
 import '../services/google_auth_service.dart';
 import '../../../core/config/firebase_options.dart';
+
+const String _prefixeException = 'Exception: ';
+
+/// Message affichable à l'utilisateur pour une erreur d'authentification.
+///
+/// Les exceptions métier portent déjà un texte français ; toute autre erreur
+/// technique (erreur Dart, plugin natif) est remplacée par un message générique
+/// pour ne jamais afficher de trace technique à l'écran.
+String _messageErreurAuth(Object erreur) {
+  if (erreur is AppException || erreur is DioException) {
+    return ErrorHandler.getUserMessage(erreur);
+  }
+  final texte = erreur.toString();
+  if (erreur is Exception && texte.startsWith(_prefixeException)) {
+    return texte.substring(_prefixeException.length);
+  }
+  debugPrint('Erreur d\'authentification inattendue : $erreur');
+  return 'Une erreur inattendue est survenue. Veuillez réessayer dans quelques instants.';
+}
 
 /// Statut de l'état d'authentification de l'utilisateur.
 enum AuthStatus {
@@ -208,7 +230,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           );
       return true;
     } catch (e) {
-      final cleanMsg = e.toString().replaceFirst('Exception: ', '');
+      final cleanMsg = _messageErreurAuth(e);
       state = AuthState.error(cleanMsg);
       _ref.read(authRoutingStateProvider).update(
             isAuthenticated: false,
@@ -233,7 +255,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           );
       return true;
     } catch (e) {
-      final cleanMsg = e.toString().replaceFirst('Exception: ', '');
+      final cleanMsg = _messageErreurAuth(e);
       state = AuthState.error(cleanMsg);
       _ref.read(authRoutingStateProvider).update(
             isAuthenticated: false,
@@ -264,7 +286,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           );
       return true;
     } catch (e) {
-      final cleanMsg = e.toString().replaceFirst('Exception: ', '');
+      final cleanMsg = _messageErreurAuth(e);
       state = AuthState.error(cleanMsg);
       _ref.read(authRoutingStateProvider).update(
             isAuthenticated: false,
@@ -282,7 +304,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (_) {
       // Ignorer
     } finally {
-      state = const AuthState.error('Votre session a expiré. Veuillez vous reconnecter.');
+      state = const AuthState.error(
+          'Votre session a expiré. Veuillez vous reconnecter.');
       _ref.read(authRoutingStateProvider).update(
             isAuthenticated: false,
             role: null,
